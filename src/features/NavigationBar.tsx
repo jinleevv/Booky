@@ -1,10 +1,10 @@
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
 
 export default function NavigationBar() {
-  const navigate = useNavigate();   
+  const navigate = useNavigate();
   return (
     <nav className="flex items-center justify-between w-full px-8 py-4 bg-white">
       <div className="flex items-center gap-2">
@@ -20,7 +20,7 @@ export default function NavigationBar() {
         <Input
           type="text"
           placeholder="Search for a course or a professor"
-          className="w-full px-4 py-2 text-gray-700 placeholder-gray-500 border-none focus:outline-none text-right"
+          className="w-full px-4 py-2 text-gray-700 placeholder-gray-500 border-none focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-right"
         />
       </div>
       <div className="flex items-center gap-2">
@@ -30,10 +30,7 @@ export default function NavigationBar() {
         >
           Sign In
         </Button>
-        <Button
-          onClick={() => navigate("/login")}
-          className="bg-black hover:bg-zinc-800 border-none text-white rounded-xl"
-        >
+        <Button onClick={() => navigate("/login")} className="rounded-xl">
           Get Started
         </Button>
       </div>
