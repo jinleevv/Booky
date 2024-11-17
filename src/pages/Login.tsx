@@ -1,6 +1,3 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase";
-import NavigationBar from "../features/NavigationBar";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { HiOutlineArrowNarrowLeft } from "react-icons/hi";
