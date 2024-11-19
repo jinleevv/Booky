@@ -8,17 +8,33 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function NavigationBar() {
   const navigate = useNavigate();
   const [courseSearch, setCourseSearch] = useState<string>("");
-  const courses = [{ course: "COMP 307", label: "Web Development" }];
+  const courses = [
+    { course: "COMP307", label: "Web Development" },
+    { course: "COMP250", label: "Introduction to Computer Science" },
+    { course: "MATH223", label: "Linear Algebra" },
+    // Add more courses as needed
+  ];
+
+  const filteredResults = useMemo(() => {
+    const searchTerm = courseSearch.toLowerCase().split(" ").join("");
+    if (!searchTerm) return [];
+
+    return courses.filter(
+      (course) =>
+        course.course.toLowerCase().includes(searchTerm) ||
+        course.label.toLowerCase().includes(searchTerm)
+    );
+  }, [courseSearch, courses]);
 
   const handleSearch = () => {
     const courseCode = courseSearch.split(" ").join("");
     if (courseSearch.trim()) {
-      navigate(`/search/${encodeURIComponent(courseCode)}`);
+      navigate(`/search/${encodeURIComponent(courseCode.toUpperCase())}`);
     }
   };
 
@@ -47,22 +63,26 @@ export default function NavigationBar() {
               <div></div>
             ) : (
               <>
-                <CommandEmpty>No courses or professors found.</CommandEmpty>
-                <CommandGroup heading="Courses or Professors">
-                  {courses.map((course) => (
-                    <CommandItem
-                      key={course.course}
-                      value={course.course}
-                      onSelect={(value) => {
-                        setCourseSearch(value);
-                      }}
-                    >
-                      <span>
-                        {course.label} ({course.course})
-                      </span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                {filteredResults.length === 0 ? (
+                  <CommandEmpty>No courses or professors found.</CommandEmpty>
+                ) : (
+                  <CommandGroup heading="Courses or Professors">
+                    {filteredResults.map((course) => (
+                      <CommandItem
+                        key={course.course}
+                        value={course.course}
+                        onSelect={(value) => {
+                          setCourseSearch(value);
+                          handleSearch(); // Automatically search when item is selected
+                        }}
+                      >
+                        <span>
+                          {course.label} ({course.course})
+                        </span>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
               </>
             )}
           </CommandList>
