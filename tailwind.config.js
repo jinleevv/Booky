@@ -7,6 +7,12 @@ export default {
     "./components/**/*.{ts,tsx}",
   ],
   theme: {
+	container: {
+		screens: {
+		  "xl": "1440px",
+		  "2xl": "1920px",
+		},
+	  },
   	extend: {
   		borderRadius: {
   			lg: 'var(--radius)',

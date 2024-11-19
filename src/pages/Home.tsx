@@ -19,7 +19,7 @@ export default function Home() {
         </div>
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2"></div>
         <div className="flex w-full h-4/6 items-center justify-center m-auto">
-          <div className="absolute w-[1150px] h-[580px] bg-black blur-[2px] z-0 mt-16 rounded-lg"></div>
+          <div className="absolute w-[1150px] xl:w-[1400px] 2xl:w-[1620px] h-[580px] xl:h-[680px] 2xl:h-[700px] bg-black blur-[2px] z-0 mt-16 rounded-lg"></div>
 
           <div className="flex flex-col-2 w-3/5 h-full z-30 gap-10">
             <video

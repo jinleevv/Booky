@@ -109,7 +109,7 @@ export default function LoginForm() {
                   }}
                 />
               </FormControl>
-              <div className="text-sm mt-2 space-y-1">
+              <div className="text-xs mt-2 space-y-1">
                 {Object.entries(requirements).map(([key, requirement]) => (
                   <div key={key} className="flex items-center gap-2">
                     <span

@@ -1,10 +1,27 @@
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { useState } from "react";
 
 export default function NavigationBar() {
   const navigate = useNavigate();
+  const [courseSearch, setCourseSearch] = useState<string>("");
+  const courses = [{ course: "COMP 307", label: "Web Development" }];
+
+  const handleSearch = () => {
+    const courseCode = courseSearch.split(" ").join("");
+    if (courseSearch.trim()) {
+      navigate(`/search/${encodeURIComponent(courseCode)}`);
+    }
+  };
+
   return (
     <nav className="flex items-center justify-between w-full px-8 py-4 bg-white">
       <div className="flex items-center gap-2">
@@ -12,16 +29,44 @@ export default function NavigationBar() {
         <div className="text-sm font-bold text-black -ml-4 -mt-1.5">Booky</div>
       </div>
 
-      <div className="flex items-center w-[700px] border-2 border-red-700 rounded-full overflow-hidden">
-        <div className="flex items-center px-3 py-3 bg-white border-r-2 border-red-700">
-          <Search className="ml-2 text-gray-600" size={16} />
-        </div>
-
-        <Input
-          type="text"
-          placeholder="Search for a course or a professor"
-          className="w-full px-4 py-2 text-gray-700 placeholder-gray-500 border-none focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-right"
-        />
+      <div className="relative w-[700px] h-11 border-2 border-red-700 rounded-full">
+        <Command className="rounded-full w-full">
+          <CommandInput
+            placeholder="Search for a course or a professor"
+            value={courseSearch}
+            onValueChange={(value) => setCourseSearch(value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+            className="text-gray-700 placeholder-gray-500 border-none focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+          <CommandList className="absolute w-full left-0 right-0 top-[40px] bg-white rounded-lg shadow-lg z-[100] border-none">
+            {courseSearch === "" ? (
+              <div></div>
+            ) : (
+              <>
+                <CommandEmpty>No courses or professors found.</CommandEmpty>
+                <CommandGroup heading="Courses or Professors">
+                  {courses.map((course) => (
+                    <CommandItem
+                      key={course.course}
+                      value={course.course}
+                      onSelect={(value) => {
+                        setCourseSearch(value);
+                      }}
+                    >
+                      <span>
+                        {course.label} ({course.course})
+                      </span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </>
+            )}
+          </CommandList>
+        </Command>
       </div>
       <div className="flex items-center gap-2">
         <Button
