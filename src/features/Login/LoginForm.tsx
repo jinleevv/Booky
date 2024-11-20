@@ -74,6 +74,26 @@ export default function LoginForm() {
       values.password
     );
     console.log(response);
+    const uid = response.user.uid;
+    console.log("Firebase UID", uid);
+   
+    await saveUserToDatabase(uid);
+  }
+
+  async function saveUserToDatabase(uid: string) {
+    console.log("Sending UID to backend:", uid);
+    const response = await fetch("http://localhost:5001/api/users/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uid }), 
+    });
+
+    console.log("Response from backend:", response);
+    if (!response.ok) {
+      console.error("Failed to save user to database");
+    }
   }
 
   return (
