@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { auth } from "../../../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { toast } from "sonner";
 
 interface PasswordRequirement {
   match: boolean;
@@ -74,31 +75,48 @@ export default function SignUpForm() {
       values.email,
       values.password
     );
+
+    if (!response.user) {
+      toast("Failed to Create User");
+      return -1;
+    }
+
     // Update the user's profile with their name
     await updateProfile(response.user, {
       displayName: values.name,
     });
-    console.log(response);
-    const uid = response.user.uid;
-    console.log("Firebase UID", uid);
 
-    // await saveUserToDatabase(uid);
+    const uid = response.user.uid;
+
+    const db_response = await saveUserToDatabase(
+      uid,
+      values.email,
+      values.name
+    );
+
+    if (db_response !== 0) {
+      toast("Faild to store the information on MongoDB");
+    }
   }
 
-  async function saveUserToDatabase(uid: string) {
-    console.log("Sending UID to backend:", uid);
+  async function saveUserToDatabase(uid: string, email: string, name: string) {
     const response = await fetch("http://localhost:5001/api/users/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ uid }),
+      body: JSON.stringify({
+        uid: uid,
+        email: email,
+        name: name,
+      }),
     });
 
-    console.log("Response from backend:", response);
     if (!response.ok) {
       console.error("Failed to save user to database");
+      return -1;
     }
+    return 0;
   }
 
   return (
