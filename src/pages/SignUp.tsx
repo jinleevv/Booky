@@ -2,9 +2,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { HiOutlineArrowNarrowLeft } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
-import LoginForm from "@/features/Login/LoginForm";
+import SignUpForm from "@/features/Login/SignUpForm";
 
-export default function Login() {
+export default function SignUp() {
   const navigate = useNavigate();
 
   return (
@@ -35,13 +35,11 @@ export default function Login() {
                 Free for individuals. Team plans for collaborative features.
               </Label>
             </div>
-            <LoginForm />
+            <SignUpForm />
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center h-full w-1/2">
-          <div>
-            <h1 className="text-4xl font-bold">Sign In</h1>
-          </div>
+        <div className="flex flex-col items-center justify-center h-full w-1/2 border rounded-lg">
+          <img src="/register_img.png" />
         </div>
       </div>
     </section>

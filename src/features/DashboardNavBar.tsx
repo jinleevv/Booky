@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function NavigationBar() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <nav className="flex flex-col h-screen w-1/6 py-4 bg-zinc-50 border-r border-gray-200">
@@ -14,15 +15,25 @@ export default function NavigationBar() {
       <div className="flex flex-col items-center gap-2 px-3 mt-5">
         <Button
           variant="ghost"
-          className="flex hover:text-red-700 w-full h-8 justify-start"
+          className={`flex w-full h-8 justify-start ${
+            location.pathname === "/dashboard"
+              ? "text-red-700 hover:text-red-700"
+              : "hover:text-red-700"
+          }`}
+          onClick={() => navigate("/dashboard")}
         >
-          Teams
+          Meetings
         </Button>
         <Button
           variant="ghost"
-          className="flex hover:text-red-700 w-full h-8 justify-start"
+          className={`flex w-full h-8 justify-start ${
+            location.pathname === "/dashboard/teams"
+              ? "text-red-700 hover:text-red-700"
+              : "hover:text-red-700"
+          }`}
+          onClick={() => navigate("/dashboard/teams")}
         >
-          Meetings
+          Teams
         </Button>
       </div>
     </nav>

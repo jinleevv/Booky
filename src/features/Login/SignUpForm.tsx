@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { auth } from "../../../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 interface PasswordRequirement {
   match: boolean;
@@ -27,6 +27,7 @@ interface PasswordRequirements {
 }
 
 const formSchema = z.object({
+  name: z.string().min(1),
   email: z.string().min(1),
   password: z
     .string()
@@ -38,7 +39,7 @@ const formSchema = z.object({
     ),
 });
 
-export default function LoginForm() {
+export default function SignUpForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -73,11 +74,15 @@ export default function LoginForm() {
       values.email,
       values.password
     );
+    // Update the user's profile with their name
+    await updateProfile(response.user, {
+      displayName: values.name,
+    });
     console.log(response);
     const uid = response.user.uid;
     console.log("Firebase UID", uid);
-   
-    await saveUserToDatabase(uid);
+
+    // await saveUserToDatabase(uid);
   }
 
   async function saveUserToDatabase(uid: string) {
@@ -87,7 +92,7 @@ export default function LoginForm() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ uid }), 
+      body: JSON.stringify({ uid }),
     });
 
     console.log("Response from backend:", response);
@@ -99,6 +104,19 @@ export default function LoginForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl className="w-3/4">
+                <Input placeholder="Booky" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="email"
@@ -154,7 +172,7 @@ export default function LoginForm() {
           )}
         />
         <div className="flex justify-end w-3/4">
-          <Button type="submit">Submit</Button>
+          <Button type="submit">Register</Button>
         </div>
       </form>
     </Form>

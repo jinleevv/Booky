@@ -17,8 +17,8 @@ export default function Search() {
   const navigate = useNavigate();
   const { searchCode } = useParams();
 
-  const handleRegisterTeam = (id: string) => {
-    navigate(`/team/${encodeURIComponent(id)}`);
+  const handleSchedule = (id: string) => {
+    navigate(`/schedule/${encodeURIComponent(id)}`);
   };
 
   return (
@@ -50,7 +50,7 @@ export default function Search() {
               <CardFooter className="flex justify-end">
                 <Button
                   variant="ghost"
-                  onClick={() => handleRegisterTeam("COMP307")}
+                  onClick={() => handleSchedule("COMP307-F24-Vybihal")}
                 >
                   <IoIosAdd />
                   Add to My Schedule
@@ -76,7 +76,7 @@ export default function Search() {
               <CardFooter className="flex justify-end">
                 <Button
                   variant="ghost"
-                  onClick={() => handleRegisterTeam("COMP 307")}
+                  onClick={() => handleSchedule("COMP307-F24-Vybihal")}
                 >
                   <IoIosAdd />
                   Add to My Schedule
@@ -102,7 +102,7 @@ export default function Search() {
               <CardFooter className="flex justify-end">
                 <Button
                   variant="ghost"
-                  onClick={() => handleRegisterTeam("COMP 307")}
+                  onClick={() => handleSchedule("COMP307-F24-Vybihal")}
                 >
                   <IoIosAdd />
                   Add to My Schedule

@@ -11,10 +11,19 @@ export default function DashBoard() {
         <div className="w-full px-3 py-4 relative z-20">
           <Label className="text-2xl font-bold text-black">Meetings</Label>
           <div className="w-full h-5/6 mt-3 space-y-3">
-            <div className="flex gap-5">
-              <Label className="text-red-700">Upcoming</Label>
-              <Label>Recurring</Label>
-              <Label>Past</Label>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                className="text-red-700 hover:text-red-700 w-20"
+              >
+                Upcoming
+              </Button>
+              <Button variant="ghost" className="w-20">
+                Recurring
+              </Button>
+              <Button variant="ghost" className="w-12">
+                Past
+              </Button>
             </div>
             <div className="flex border p-4 rounded-md justify-between">
               <div className="flex gap-2 my-auto">
