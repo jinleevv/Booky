@@ -12,8 +12,13 @@ import DashboardNavBar from "@/features/DashboardNavBar";
 import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
-import { Copy } from "lucide-react";
 import { availableTime } from "@/features/time";
+
+interface MemoizedSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  availableTime: string[];
+}
 
 const days = [
   "Sunday",
@@ -26,6 +31,7 @@ const days = [
 ];
 
 export default function CreateTeam() {
+  const [teamName, setTeamName] = useState<string>("");
   const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
   const [schedule, setSchedule] = useState(
     days.map((day) => ({
@@ -41,6 +47,25 @@ export default function CreateTeam() {
     </SelectItem>
   ));
 
+  const MemoizedSelect = memo(
+    ({ value, onChange, availableTime }: MemoizedSelectProps) => {
+      return (
+        <Select value={value} onValueChange={onChange}>
+          <SelectTrigger className="w-28">
+            <SelectValue placeholder="Select Time" />
+          </SelectTrigger>
+          <SelectContent className="w-28">
+            {availableTime.map((t) => (
+              <SelectItem key={t} value={t}>
+                {t}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+  );
+
   const handleDuration = (time: string) => {
     setSelectedDurations(
       (prev) =>
@@ -51,9 +76,18 @@ export default function CreateTeam() {
   };
 
   const handleSwitchChange = (dayIndex: number) => {
-    const updatedSchedule = [...schedule];
-    updatedSchedule[dayIndex].enabled = !updatedSchedule[dayIndex].enabled;
-    setSchedule(updatedSchedule);
+    // const updatedSchedule = [...schedule];
+    // updatedSchedule[dayIndex].enabled = !updatedSchedule[dayIndex].enabled;
+    // setSchedule(updatedSchedule);
+    setSchedule((prevSchedule) => {
+      const updatedDay = {
+        ...prevSchedule[dayIndex],
+        enabled: !prevSchedule[dayIndex].enabled,
+      };
+      return prevSchedule.map((day, idx) =>
+        idx === dayIndex ? updatedDay : day
+      );
+    });
   };
 
   const handleTimeChange = (
@@ -62,21 +96,30 @@ export default function CreateTeam() {
     field: "start" | "end",
     value: string
   ) => {
-    const updatedSchedule = [...schedule];
-    updatedSchedule[dayIndex].times[timeIndex][field] = value;
+    // const updatedSchedule = [...schedule];
+    // updatedSchedule[dayIndex].times[timeIndex][field] = value;
 
-    // Ensure there is at least one time slot if enabled
-    if (
-      updatedSchedule[dayIndex].enabled &&
-      updatedSchedule[dayIndex].times.length === 0
-    ) {
-      updatedSchedule[dayIndex].times.push({
-        start: "09:00 AM",
-        end: "05:00 PM",
-      });
-    }
+    // // Ensure there is at least one time slot if enabled
+    // if (
+    //   updatedSchedule[dayIndex].enabled &&
+    //   updatedSchedule[dayIndex].times.length === 0
+    // ) {
+    //   updatedSchedule[dayIndex].times.push({
+    //     start: "09:00 AM",
+    //     end: "05:00 PM",
+    //   });
+    // }
 
-    setSchedule(updatedSchedule);
+    // setSchedule(updatedSchedule);
+    setSchedule((prevSchedule) => {
+      const updatedTimes = prevSchedule[dayIndex].times.map((time, idx) =>
+        idx === timeIndex ? { ...time, [field]: value } : time
+      );
+      const updatedDay = { ...prevSchedule[dayIndex], times: updatedTimes };
+      return prevSchedule.map((day, idx) =>
+        idx === dayIndex ? updatedDay : day
+      );
+    });
   };
 
   const addTimeSlot = (dayIndex: number) => {
@@ -96,6 +139,26 @@ export default function CreateTeam() {
     }
   };
 
+  async function handleCreateTeam() {
+    const response = await fetch("http://localhost:5001/api/teams/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: teamName,
+        durations: selectedDurations,
+        availableTime: availableTime,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to save team to database");
+      return -1;
+    }
+    return 0;
+  }
+
   return (
     <section className="h-screen w-screen bg-white">
       <div className="absolute w-3/6 h-2/6 bg-red-200 blur-[600px] top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4"></div>
@@ -114,7 +177,10 @@ export default function CreateTeam() {
                 <Label>Team Name:</Label>
               </div>
               <div className="mt-auto mb-auto">
-                <Input />
+                <Input
+                  value={teamName}
+                  onChange={(e) => setTeamName(e.target.value)}
+                />
               </div>
             </div>
             <div className="border rounded-lg p-4">
@@ -141,9 +207,9 @@ export default function CreateTeam() {
                             key={timeIndex}
                             className="flex items-center space-x-2"
                           >
-                            <Select
+                            <MemoizedSelect
                               value={time.start}
-                              onValueChange={(value) =>
+                              onChange={(value) =>
                                 handleTimeChange(
                                   dayIndex,
                                   timeIndex,
@@ -151,20 +217,12 @@ export default function CreateTeam() {
                                   value
                                 )
                               }
-                            >
-                              <SelectTrigger className="w-28">
-                                <SelectValue placeholder="Select Time" />
-                              </SelectTrigger>
-                              <SelectContent className="w-28">
-                                {availableTime.map((t) => (
-                                  <MemoizedSelectItem key={t} value={t} />
-                                ))}
-                              </SelectContent>
-                            </Select>
+                              availableTime={availableTime}
+                            />
                             <span className="text-gray-500">-</span>
-                            <Select
+                            <MemoizedSelect
                               value={time.end}
-                              onValueChange={(value) =>
+                              onChange={(value) =>
                                 handleTimeChange(
                                   dayIndex,
                                   timeIndex,
@@ -172,16 +230,8 @@ export default function CreateTeam() {
                                   value
                                 )
                               }
-                            >
-                              <SelectTrigger className="w-28">
-                                <SelectValue placeholder="Select Time" />
-                              </SelectTrigger>
-                              <SelectContent className="w-28">
-                                {availableTime.map((t) => (
-                                  <MemoizedSelectItem key={t} value={t} />
-                                ))}
-                              </SelectContent>
-                            </Select>
+                              availableTime={availableTime}
+                            />
                             <Button
                               variant="ghost"
                               size="icon"
@@ -230,6 +280,7 @@ export default function CreateTeam() {
                 ))}
               </div>
             </div>
+            <Button onClick={handleCreateTeam}>Create</Button>
           </div>
         </div>
       </div>
