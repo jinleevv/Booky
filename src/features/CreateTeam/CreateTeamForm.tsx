@@ -64,8 +64,24 @@ export default function CreateTeamForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const response = await fetch("http://localhost:5001/api/teams/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: values.teamName,
+        durations: values.durations,
+        availableTime: values.schedule,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to save team to database");
+      return -1;
+    }
+    return 0;
   }
   return (
     <section className="grid mt-10 bg-white">
