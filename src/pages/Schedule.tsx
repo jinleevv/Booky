@@ -8,13 +8,39 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 export default function Schedule() {
-  const { teamId } = useParams();
+  const { code: teamId } = useParams();
+  const [teamName, setTeamName] = useState<string>("Loading...");
+  const [adminName, setAdminName] = useState<string>("Loading...");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+
+  useEffect(() => {
+    // Fetch the team and admin details
+    const fetchTeamDetails = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/teams/${teamId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          setTeamName(data.name);
+          setAdminName(data.adminName);
+        } else {
+          setTeamName("Not Found");
+          setAdminName("Not Found");
+          setTeamName("Error");
+        }
+      } catch (error) {
+        console.error("Error fetching team details:", error);
+        setAdminName("Error");
+      }
+    };
+
+    fetchTeamDetails();
+  }, [teamId]);
 
   const disablePastDates = (date: Date) => {
     const today = new Date();
@@ -37,10 +63,9 @@ export default function Schedule() {
       <div className="flex relative w-4/5 h-5/6 m-auto">
         <Card className="flex w-full h-4/6 m-auto shadow-sm">
           <CardHeader className="w-1/6 border-r-[1px] border-gray-200">
-            <CardTitle>Course: {teamId}</CardTitle>
+            <CardTitle>Course: {teamName}</CardTitle>
             <CardDescription>
-              Professor: Joseph Vybihal <br />
-              Semester: Fall 2024
+              Professor: {adminName}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex w-3/6 py-2 border-r-[1px] border-gray-200">

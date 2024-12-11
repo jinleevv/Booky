@@ -102,7 +102,7 @@ export default function Search() {
               <CardFooter className="flex justify-end">
                 <Button
                   variant="ghost"
-                  onClick={() => handleSchedule("COMP307-F24-Vybihal")}
+                  onClick={() => handleSchedule("team-4eacdaed-2524-46dd-b3ac-d9b47d693ed1")}
                 >
                   <IoIosAdd />
                   Add to My Schedule
