@@ -15,8 +15,9 @@ interface ITeam extends Document {
   name: string;
   durations: string[];
   availableTime: ISchedule[];
+  appointments: ISchedule[];
   //   members: string[];
-  //   admin: string;
+  admin: string;
   //   coadmin: string[];
   createdAt: Date;
 }
@@ -40,17 +41,17 @@ const TeamSchema: Schema = new Schema<ITeam>({
   },
   durations: [{ type: String, required: true }],
   availableTime: [ScheduleSchema],
+  appointments: [ScheduleSchema],
   //   members: [
   //     {
   //       type: String,
   //       ref: "User",
   //     },
   //   ],
-  //   admin: {
-  //     type: String,
-  //     ref: "User",
-  //     required: true,
-  //   },
+  admin: {
+    type: String,
+    required: true,
+  },
   //   coadmin: [
   //     {
   //       type: String,

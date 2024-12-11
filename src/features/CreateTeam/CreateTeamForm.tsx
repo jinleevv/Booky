@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { auth } from "../../../firebase";
 
 import {
   Form,
@@ -65,6 +66,14 @@ export default function CreateTeamForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.error("No user is logged in");
+      return;
+    }
+
     const response = await fetch("http://localhost:5001/api/teams/register", {
       method: "POST",
       headers: {
@@ -74,6 +83,7 @@ export default function CreateTeamForm() {
         name: values.teamName,
         durations: values.durations,
         availableTime: values.schedule,
+        admin: user.email
       }),
     });
 

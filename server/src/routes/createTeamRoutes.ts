@@ -9,15 +9,15 @@ const createTeamHandler: RequestHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { name, durations, availableTime } = req.body;
+  const { name, durations, availableTime, admin } = req.body;
 
   try {
-    if (!name || !durations || !availableTime) {
+    if (!name || !durations || !availableTime || !admin) {
       res
         .status(400)
         .json({
           message:
-            "Missing required fields: name, durations, or availableTime.",
+            "Missing required fields: name, durations, availableTime, or admin.",
         });
       return;
     }
@@ -26,10 +26,12 @@ const createTeamHandler: RequestHandler = async (
 
     // Create new user instance with UID only
     const newTeam = new Team({
-      _id: teamId,
+      _id: teamId,  
       name: name,
       durations: durations,
       availableTime: availableTime,
+      appointments: [],
+      admin: admin
     });
 
     await newTeam.save();
