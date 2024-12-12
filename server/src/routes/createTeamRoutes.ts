@@ -71,6 +71,7 @@ const getTeamDetailsHandler: RequestHandler = async (
       name: team.name,
       durations: team.durations,
       availableTime: team.availableTime,
+      appointments: team.appointments,
       adminName: adminUser.name,
     });
   } catch (error) {
@@ -79,8 +80,43 @@ const getTeamDetailsHandler: RequestHandler = async (
   }
 };
 
+// Update team appointments handler
+const updateAppointmentsHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { teamId } = req.params;
+  const { appointments } = req.body;
+
+  try {
+    if (!appointments || !Array.isArray(appointments)) {
+      res.status(400).json({ message: "Invalid or missing appointments data" });
+      return;
+    }
+
+    // Find the team by ID and update the appointments field
+    const team = await Team.findById(teamId);
+    if (!team) {
+      res.status(404).json({ message: "Team not found" });
+      return;
+    }
+
+    // Update only the appointments field
+    team.appointments = appointments;
+
+    // Save the updated team
+    await team.save();
+
+    res.status(200).json({ message: "Appointments updated successfully", team });
+  } catch (error) {
+    console.error("Error updating appointments:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Register the route and use the handler
 router.post("/register", createTeamHandler);
 router.get("/:teamId", getTeamDetailsHandler);
+router.put("/:teamId/appointments", updateAppointmentsHandler); // New route for updating appointments
 
 export default router;

@@ -11,12 +11,19 @@ import { Calendar } from "@/components/ui/calendar";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
+import ScheduleForm from "@/features/CreateAppointment/ScheduleForm";
 
 export default function Schedule() {
   const { code: teamId } = useParams();
   const [teamName, setTeamName] = useState<string>("Loading...");
   const [adminName, setAdminName] = useState<string>("Loading...");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [enabledDays, setEnabledDays] = useState<Set<number>>(new Set());
+  const [availableTime, setAvailableTime] = useState<any[]>([]);
+  const [duration, setDuration] = useState<number>(5); // Default to 5 minutes
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null); // Track selected time slot
+  const [existingAppointments, setExistingAppointments] = useState<any[]>([]); // State to store existing appointments
 
   useEffect(() => {
     // Fetch the team and admin details
@@ -28,14 +35,33 @@ export default function Schedule() {
         if (response.ok) {
           setTeamName(data.name);
           setAdminName(data.adminName);
+          setAvailableTime(data.availableTime);
+          setDuration(parseInt(data.durations[0], 10));
+          setExistingAppointments(data.appointments); // Set the existing appointments
+
+          const dayMap: { [key: string]: number } = {
+            Sunday: 0,
+            Monday: 1,
+            Tuesday: 2,
+            Wednesday: 3,
+            Thursday: 4,
+            Friday: 5,
+            Saturday: 6,
+          };
+          
+          const enabled = data.availableTime.reduce((acc: number[], day: any) => {
+            if (day.enabled && dayMap[day.day] !== undefined) {
+              acc.push(dayMap[day.day]);
+            }
+            return acc;
+          }, []);
+          setEnabledDays(new Set(enabled));
         } else {
           setTeamName("Not Found");
           setAdminName("Not Found");
-          setTeamName("Error");
         }
       } catch (error) {
         console.error("Error fetching team details:", error);
-        setAdminName("Error");
       }
     };
 
@@ -50,9 +76,79 @@ export default function Schedule() {
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + 7);
 
-    // Disable if date is before today or after maxDate
-    return date < today || date > maxDate;
+    // Disable past dates, dates beyond 7 days, and dates not in enabledDays
+    const dayIndex = date.getDay();
+    return (date < today || date > maxDate || !enabledDays.has(dayIndex));
   };
+
+  // Generate time slots dynamically when the selected date changes
+  useEffect(() => {
+    if (!selectedDate || availableTime.length === 0) return;
+
+    const dayOfWeek = selectedDate.toLocaleDateString("en-US", { weekday: "long" });
+    const dayAvailability = availableTime.find((day) => day.day === dayOfWeek);
+
+    if (dayAvailability?.enabled) {
+      const startTime = dayAvailability.times[0]?.start; // e.g., "09:00 AM"
+      const endTime = dayAvailability.times[0]?.end; // e.g., "05:00 PM"
+
+      if (startTime && endTime) {
+        setTimeSlots(generateTimeSlots(startTime, endTime, duration));
+      }
+    } else {
+      setTimeSlots([]); // No slots if not available
+    }
+  }, [selectedDate, availableTime, duration, existingAppointments]);
+
+  // Utility function to generate time slots
+  const generateTimeSlots = (start: string, end: string, interval: number) => {
+    const slots: string[] = [];
+    const startTime = new Date(`1970-01-01T${convertTo24Hour(start)}`);
+    const endTime = new Date(`1970-01-01T${convertTo24Hour(end)}`);
+
+    const bookedTimes = new Set(existingAppointments
+      .filter((appointment) => appointment.day === selectedDay)  // Only filter for the selected day
+      .map((appointment) => appointment.time)  // Extract the time from the appointment
+    );
+
+    while (startTime < endTime) {
+      const timeSlot = startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+      
+      // Only add the slot if it's not already booked
+      if (!bookedTimes.has(timeSlot)) {
+        slots.push(timeSlot);
+      }
+      
+      startTime.setMinutes(startTime.getMinutes() + interval);
+    }
+    return slots;
+  };
+
+  // Utility to convert 12-hour time to 24-hour time format
+  const convertTo24Hour = (time: string) => {
+    const [hours, minutes, period] = time.match(/(\d+):(\d+) (\w+)/)!.slice(1);
+    let hours24 = parseInt(hours, 10);
+    if (period === "PM" && hours24 !== 12) hours24 += 12;
+    if (period === "AM" && hours24 === 12) hours24 = 0;
+    return `${hours24.toString().padStart(2, "0")}:${minutes}`;
+  };
+
+  const handleTimeSlotClick = (time: string) => {
+    setSelectedTimeSlot(time); // Set the selected time slot
+  };
+
+  const selectedDay = selectedDate
+    ? selectedDate.toLocaleDateString("en-US", { weekday: "long" })
+    : undefined;
+
+  const handleNewAppointment = (newAppointment: { day: string; time: string; email: string }) => {
+    console.log("New appointment received:", newAppointment); // Ensure newAppointment has the right shape
+    setExistingAppointments((prevAppointments) => {
+      const updatedAppointments = [...prevAppointments, newAppointment];
+      return updatedAppointments;
+    });
+  };
+    
 
   return (
     <section className="h-screen w-screen bg-white">
@@ -104,26 +200,32 @@ export default function Schedule() {
           <div className="w-2/6 h-full">
             <CardContent className="h-1/2 w-full py-2 border-b-[1px] border-gray-200 overflow-auto">
               <div className="grid gap-2">
-                {Array.from({ length: 13 }, (_, i) => {
-                  const hour = 13 + Math.floor((i * 5) / 60);
-                  const minutes = (i * 5) % 60;
-                  const timeString = `${hour}:${minutes
-                    .toString()
-                    .padStart(2, "0")}`;
-                  const displayTime = `${timeString}`;
-
-                  return (
-                    <Button
-                      key={timeString}
+                {timeSlots.length > 0 ? (
+                    timeSlots.map((time) => (
+                      <Button
+                      key={time}
                       variant="outline"
-                      className="p-4 text-center rounded-lg"
+                      className={cn(
+                        "p-4 text-center rounded-lg",
+                        selectedTimeSlot === time ? "bg-black text-white" : "bg-white"
+                      )}
+                      onClick={() => handleTimeSlotClick(time)}
                     >
-                      {displayTime}
+                      {time}
                     </Button>
-                  );
-                })}
+                    ))
+                  ) : (
+                    <p>No available slots</p>
+                  )}
               </div>
             </CardContent>
+            <ScheduleForm 
+              selectedDay={selectedDay}
+              selectedTime={selectedTimeSlot}
+              teamId={teamId!}
+              existingAppointments={existingAppointments}
+              handleNewAppointment={handleNewAppointment}
+            />
           </div>
         </Card>
       </div>

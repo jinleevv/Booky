@@ -10,12 +10,18 @@ interface ISchedule {
   times: ITimeRange[];
 }
 
+interface IAppointment {
+  day: string; // Store as Date type
+  time: string;
+  email: string;
+}
+
 interface ITeam extends Document {
   _id: string;
   name: string;
   durations: string[];
   availableTime: ISchedule[];
-  appointments: ISchedule[];
+  appointments: IAppointment[];
   //   members: string[];
   admin: string;
   //   coadmin: string[];
@@ -33,6 +39,13 @@ const TimeRangeSchema: Schema = new Schema<ITimeRange>({
     times: [TimeRangeSchema], // Use the TimeRange sub-schema
   });
 
+  // Define Appointment Schema
+const AppointmentSchema: Schema = new Schema<IAppointment>({
+  day: { type: String, required: true }, // Store date as Date type
+  time: { type: String, required: true }, // Store time as string
+  email: { type: String, required: true }, // Store email as string
+});
+
 const TeamSchema: Schema = new Schema<ITeam>({
   _id: { type: String, required: true },
   name: {
@@ -41,7 +54,7 @@ const TeamSchema: Schema = new Schema<ITeam>({
   },
   durations: [{ type: String, required: true }],
   availableTime: [ScheduleSchema],
-  appointments: [ScheduleSchema],
+  appointments: [AppointmentSchema],
   //   members: [
   //     {
   //       type: String,
