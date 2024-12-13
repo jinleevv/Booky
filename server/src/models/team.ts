@@ -13,6 +13,7 @@ interface ISchedule {
 interface IAppointment {
   day: string; // Store as Date type
   time: string;
+  name: string,
   email: string;
 }
 
@@ -43,6 +44,7 @@ const TimeRangeSchema: Schema = new Schema<ITimeRange>({
 const AppointmentSchema: Schema = new Schema<IAppointment>({
   day: { type: String, required: true }, // Store date as Date type
   time: { type: String, required: true }, // Store time as string
+  name: { type: String, required: false },
   email: { type: String, required: true }, // Store email as string
 });
 

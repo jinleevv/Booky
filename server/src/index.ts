@@ -2,8 +2,10 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import userRoutes from "./routes/userRoutes";
-import createTeamRoutes from "./routes/createTeamRoutes";
+import userRoutes from "./routes/user/userRoutes";
+import createTeamRoutes from "./routes/team/createTeamRoute";
+import getTeamRoutes from "./routes/team/getTeamRoute";
+import updateAppointmentRoutes from "./routes/team/updateAppointmentRoute"
 
 dotenv.config();
 
@@ -14,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 app.use(
   cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT"],
+    methods: ["GET", "POST", "PATCH"],
   })
 );
 app.use(express.json());
@@ -22,6 +24,8 @@ app.use(express.json());
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/teams", createTeamRoutes);
+app.use("/api/teams", getTeamRoutes);
+app.use("/api/teams", updateAppointmentRoutes);
 
 // MongoDB connection
 mongoose

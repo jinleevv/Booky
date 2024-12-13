@@ -1,5 +1,5 @@
 import express, { Request, Response, RequestHandler } from "express";
-import User from "../models/user";
+import User from "../../models/user";
 
 const router = express.Router();
 
@@ -36,7 +36,6 @@ const registerUserHandler: RequestHandler = async (
   }
 };
 
-// Register the route and use the handler
 router.post("/register", registerUserHandler);
 
 export default router;

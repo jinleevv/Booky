@@ -29,7 +29,13 @@ interface PasswordRequirements {
 
 const formSchema = z.object({
   name: z.string().min(1),
-  email: z.string().min(1),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .regex(
+      /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/,
+      "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
+    ),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
