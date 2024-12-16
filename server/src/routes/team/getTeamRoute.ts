@@ -30,6 +30,7 @@ export const getTeamDetailsHandler: RequestHandler = async (
       availableTime: team.availableTime,
       appointments: team.appointments,
       adminName: adminUser.name,
+      adminEmail: team.admin,
     });
   } catch (error) {
     console.error("Error fetching team details:", error);

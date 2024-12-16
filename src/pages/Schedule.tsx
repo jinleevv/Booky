@@ -31,6 +31,7 @@ export default function Schedule() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [teamMembers, setTeamMembers] = useState<string[]>([]);  // Store team members here
   const [userEmail, setUserEmail] = useState<string>("");  // Store the user's email
+  const [adminEmail, setAdminEmail] = useState<string>("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -44,11 +45,6 @@ export default function Schedule() {
   
     return () => unsubscribe(); // Clean up the listener
   }, []);
-
-  useEffect(() => {
-    // Initial fetch information - the team and admin details
-    fetchTeamDetails();
-  }, [teamId]);
 
   // Generate time slots dynamically when the selected date changes
   useEffect(() => {
@@ -83,6 +79,11 @@ export default function Schedule() {
     }
   }, [selectedDate, availableTime, duration, existingAppointments]);
 
+  useEffect(() => {
+    // Initial fetch information - the team and admin details
+    fetchTeamDetails();
+  }, [teamId]);
+
   async function fetchTeamDetails() {
     try {
       const response = await fetch(`http://localhost:5001/api/teams/${teamId}`);
@@ -91,11 +92,12 @@ export default function Schedule() {
       if (response.ok) {
         setTeamName(data.name);
         setAdminName(data.adminName);
+        setAdminEmail(data.adminEmail);  // Assuming you fetch the admin email as well
         setAvailableTime(data.availableTime);
         setDuration(parseInt(data.durations[0], 10));
         setExistingAppointments(data.appointments); // Set the existing appointments
         setTeamMembers(data.members || []); // Store the team members
-
+        
         const dayMap: { [key: string]: number } = {
           Sunday: 0,
           Monday: 1,
@@ -197,6 +199,7 @@ export default function Schedule() {
   };
 
   const isUserMember = teamMembers.includes(userEmail);
+  const isUserAdmin = userEmail === adminEmail;
 
   const handleJoinTeam = async () => {
     try {
@@ -241,7 +244,7 @@ export default function Schedule() {
                   <CardDescription>Professor: {adminName}</CardDescription>
                 </div>
                 <div className="mt-auto">
-                  {!isUserMember && (
+                  {!isUserAdmin && !isUserMember && (
                     <Button
                       className="w-full"
                       onClick={handleJoinTeam}
