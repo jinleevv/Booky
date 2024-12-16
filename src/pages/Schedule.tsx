@@ -12,6 +12,8 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import ScheduleForm from "@/features/CreateAppointment/ScheduleForm";
+import { auth } from "../../firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function Schedule() {
   const { code: teamId } = useParams();
@@ -26,6 +28,22 @@ export default function Schedule() {
   const [existingAppointments, setExistingAppointments] = useState<any[]>([]); // State to store existing appointments
 
   const [userSelectedDate, setUserSelectedDate] = useState<string>("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<string[]>([]);  // Store team members here
+  const [userEmail, setUserEmail] = useState<string>("");  // Store the user's email
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsLoggedIn(true); // User is logged in
+        setUserEmail(user.email); // Store the user's email
+      } else {
+        setIsLoggedIn(false); // User is not logged in
+      }
+    });
+  
+    return () => unsubscribe(); // Clean up the listener
+  }, []);
 
   useEffect(() => {
     // Initial fetch information - the team and admin details
@@ -76,6 +94,7 @@ export default function Schedule() {
         setAvailableTime(data.availableTime);
         setDuration(parseInt(data.durations[0], 10));
         setExistingAppointments(data.appointments); // Set the existing appointments
+        setTeamMembers(data.members || []); // Store the team members
 
         const dayMap: { [key: string]: number } = {
           Sunday: 0,
@@ -177,6 +196,31 @@ export default function Schedule() {
     });
   };
 
+  const isUserMember = teamMembers.includes(userEmail);
+
+  const handleJoinTeam = async () => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/teams/${teamId}/members`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ members: userEmail }),
+      });
+
+      if (response.ok) {
+        alert("Successfully joined the team!");
+        setTeamMembers([...teamMembers, userEmail]); // Update local team members
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || "Failed to join the team");
+      }
+    } catch (error) {
+      console.error("Error joining team:", error);
+      alert("An error occurred while trying to join the team.");
+    }
+  };
+
   return (
     <section className="h-screen w-screen bg-white">
       <NavigationBar />
@@ -191,9 +235,27 @@ export default function Schedule() {
         ) : (
           <>
             <Card className="flex w-full h-4/6 m-auto shadow-sm">
-              <CardHeader className="w-1/6 border-r-[1px] border-gray-200">
-                <CardTitle>Course: {teamName}</CardTitle>
-                <CardDescription>Professor: {adminName}</CardDescription>
+              <CardHeader className="w-1/6 border-r-[1px] border-gray-200 flex flex-col justify-between h-full">
+                <div>
+                  <CardTitle>Course: {teamName}</CardTitle>
+                  <CardDescription>Professor: {adminName}</CardDescription>
+                </div>
+                <div className="mt-auto">
+                  {!isUserMember && (
+                    <Button
+                      className="w-full"
+                      onClick={handleJoinTeam}
+                      disabled={!isLoggedIn}
+                    >
+                      Join Team
+                    </Button>
+                  )}
+                  {!isLoggedIn && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Log in to join a team.
+                    </p>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="flex w-3/6 py-2 border-r-[1px] border-gray-200">
                 <Calendar

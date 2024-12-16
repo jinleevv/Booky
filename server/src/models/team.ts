@@ -4,6 +4,7 @@ interface ITimeRange {
   start: string;
   end: string;
 }
+
 interface ISchedule {
   day: string;
   enabled: boolean;
@@ -23,24 +24,25 @@ interface ITeam extends Document {
   durations: string[];
   availableTime: ISchedule[];
   appointments: IAppointment[];
-  //   members: string[];
+  members: string[];
   admin: string;
   //   coadmin: string[];
   createdAt: Date;
 }
+
 const TimeRangeSchema: Schema = new Schema<ITimeRange>({
     start: { type: String, required: true },
     end: { type: String, required: true },
   });
   
-  // Define Schedule Sub-Schema
-  const ScheduleSchema: Schema = new Schema<ISchedule>({
-    day: { type: String, required: true },
-    enabled: { type: Boolean, required: true },
-    times: [TimeRangeSchema], // Use the TimeRange sub-schema
-  });
+// Define Schedule Sub-Schema
+const ScheduleSchema: Schema = new Schema<ISchedule>({
+  day: { type: String, required: true },
+  enabled: { type: Boolean, required: true },
+  times: [TimeRangeSchema], // Use the TimeRange sub-schema
+});
 
-  // Define Appointment Schema
+// Define Appointment Schema
 const AppointmentSchema: Schema = new Schema<IAppointment>({
   day: { type: String, required: true }, // Store date as Date type
   time: { type: String, required: true }, // Store time as string
@@ -57,12 +59,7 @@ const TeamSchema: Schema = new Schema<ITeam>({
   durations: [{ type: String, required: true }],
   availableTime: [ScheduleSchema],
   appointments: [AppointmentSchema],
-  //   members: [
-  //     {
-  //       type: String,
-  //       ref: "User",
-  //     },
-  //   ],
+  members: [{ type: String, required: true }],
   admin: {
     type: String,
     required: true,
