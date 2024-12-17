@@ -45,7 +45,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
       if (error) {
         console.error("Email sending failed:", error);
       } else {
-        console.log("Email sent: " + info.response);
+        console.log("Email sent: " + appointments[0].email + " | " + info.response);
       }
     });
 

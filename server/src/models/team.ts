@@ -21,12 +21,13 @@ interface IAppointment {
 interface ITeam extends Document {
   _id: string;
   name: string;
-  durations: string[];
+  admin: string;
+  members: string[];
   availableTime: ISchedule[];
   appointments: IAppointment[];
-  members: string[];
-  admin: string;
+  durations: string[];
   //   coadmin: string[];
+  cancelledDays: string[];
   createdAt: Date;
 }
 
@@ -56,14 +57,15 @@ const TeamSchema: Schema = new Schema<ITeam>({
     type: String,
     required: true,
   },
-  durations: [{ type: String, required: true }],
-  availableTime: [ScheduleSchema],
-  appointments: [AppointmentSchema],
-  members: [{ type: String, required: true }],
   admin: {
     type: String,
     required: true,
   },
+  members: [{ type: String, required: true }],
+  availableTime: [ScheduleSchema],
+  appointments: [AppointmentSchema],
+  durations: [{ type: String, required: true }],
+  cancelledDays: [{ type: String, required: false }], // New field for cancelled days
   //   coadmin: [
   //     {
   //       type: String,

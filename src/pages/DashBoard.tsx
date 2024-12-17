@@ -6,9 +6,9 @@ import { auth } from "../../firebase";
 import { useEffect, useState } from "react";
 
 export default function DashBoard() {
-  const [upcomingOfficeHours, setUpcomingOfficeHours] = useState<
-    { nextDate: string; timeRange: string; day: string; teamName: string; appointments: { time: string; email: string; name: string }[] }[]
-  >([]);
+  const [upcomingOfficeHours, setUpcomingOfficeHours] = useState<any[]>([]);
+  const [pastOfficeHours, setPastOfficeHours] = useState<any[]>([]);
+  const [showUpcoming, setShowUpcoming] = useState(true); // Toggle between views
 
   useEffect(() => {
     const fetchOfficeHours = async () => {
@@ -20,32 +20,45 @@ export default function DashBoard() {
         if (!response.ok) throw new Error("Failed to fetch teams");
 
         const teams = await response.json();
-        const officeHours = [];
-        
+        const today = new Date();
+
+        const upcoming = [];
+        const past = [];
 
         teams.forEach((team: any) => {
           team.availableTime.forEach((timeSlot: any) => {
             if (timeSlot.enabled) {
               const closestDate = getClosestDate(timeSlot.day);
-              // Filter the appointments for this time slot based on matching day and time
+              const slotDate = new Date(closestDate);
+
+              // Filter appointments for this time slot
               const appointmentsForThisTimeSlot = team.appointments.filter(
                 (appointment: any) =>
                   getDayNameFromDate(appointment.day) === timeSlot.day &&
                   parseTimeString(appointment.time) >= parseTimeString(timeSlot.times[0].start) &&
                   parseTimeString(appointment.time) <= parseTimeString(timeSlot.times[0].end)
               );
-              officeHours.push({
+
+              const officeHour = {
                 nextDate: closestDate,
                 timeRange: `${timeSlot.times[0].start} - ${timeSlot.times[0].end}`,
                 day: timeSlot.day,
                 teamName: team.name,
                 appointments: appointmentsForThisTimeSlot,
-              });
+              };
+
+              // Categorize as past or upcoming
+              if (slotDate >= today) {
+                upcoming.push(officeHour);
+              } else if (slotDate >= getDaysAgo(today, 7)) {
+                past.push(officeHour);
+              }
             }
           });
         });
 
-        setUpcomingOfficeHours(officeHours);
+        setUpcomingOfficeHours(upcoming);
+        setPastOfficeHours(past);
       } catch (error) {
         console.error("Error fetching office hours:", error);
       }
@@ -59,15 +72,21 @@ export default function DashBoard() {
     const today = new Date();
     const todayIndex = today.getDay();
     const targetIndex = daysOfWeek.indexOf(day);
-
+  
     let daysToAdd = targetIndex - todayIndex;
     if (daysToAdd < 0) daysToAdd += 7;
-
+  
     const nextDate = new Date();
     nextDate.setDate(today.getDate() + daysToAdd);
-
-    return nextDate.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+  
+    // Format the date as MM-DD-YYYY
+    const month = String(nextDate.getMonth() + 1).padStart(2, "0"); // Month is zero-based
+    const date = String(nextDate.getDate()).padStart(2, "0");
+    const year = nextDate.getFullYear();
+  
+    return `${month}-${date}-${year}`;
   };
+  
 
   const getDayNameFromDate = (dateStr: string) => {
     const date = new Date(Date.parse(dateStr));
@@ -75,20 +94,22 @@ export default function DashBoard() {
     return daysOfWeek[date.getDay()];
   };
 
+  const getDaysAgo = (date: Date, days: number) => {
+    const pastDate = new Date(date);
+    pastDate.setDate(date.getDate() - days);
+    return pastDate;
+  };
+
   const parseTimeString = (timeStr: string) => {
-    // Normalize to uppercase "AM" or "PM" for consistency
     const normalizedTimeStr = timeStr.replace("p.m.", "PM").replace("a.m.", " AM");
 
     const [time, modifier] = normalizedTimeStr.split(" ");
-    let [hours, minutes] = time.split(":").map((str) => parseInt(str));  // Convert both hours and minutes to numbers
+    let [hours, minutes] = time.split(":").map((str) => parseInt(str));
 
-    if (modifier === "PM" && hours !== 12) {
-      hours += 12;
-    } else if (modifier === "AM" && hours === 12) {
-      hours = 0;
-    }
-  
-    return new Date(1970, 0, 1, hours, minutes, 0); // Return as Date object
+    if (modifier === "PM" && hours !== 12) hours += 12;
+    else if (modifier === "AM" && hours === 12) hours = 0;
+
+    return new Date(1970, 0, 1, hours, minutes, 0);
   };
 
   return (
@@ -101,28 +122,29 @@ export default function DashBoard() {
           <div className="w-full h-5/6 mt-3 space-y-3">
             <div className="flex gap-1">
               <Button
-                variant="ghost"
-                className="text-red-700 hover:text-red-700 w-20"
+                variant={showUpcoming ? "default" : "ghost"}
+                onClick={() => setShowUpcoming(true)}
+                className="w-20"
               >
                 Upcoming
               </Button>
-              <Button variant="ghost" className="w-20">
-                Recurring
-              </Button>
-              <Button variant="ghost" className="w-12">
+              <Button
+                variant={!showUpcoming ? "default" : "ghost"}
+                onClick={() => setShowUpcoming(false)}
+                className="w-12"
+              >
                 Past
               </Button>
             </div>
             <div className="border rounded-md p-4">
               <Accordion type="multiple">
-                {upcomingOfficeHours.length > 0 ? (
-                  upcomingOfficeHours.map((appointment, index) => (
+                {(showUpcoming ? upcomingOfficeHours : pastOfficeHours).length > 0 ? (
+                  (showUpcoming ? upcomingOfficeHours : pastOfficeHours).map((appointment, index) => (
                     <AccordionItem key={index} value={`item-${index}`}>
                       <AccordionTrigger>
-                        {appointment.teamName} {appointment.nextDate} - {appointment.timeRange} 
+                        {appointment.teamName} {appointment.nextDate} - {appointment.timeRange}
                       </AccordionTrigger>
-                      <AccordionContent>                        
-                        {/* Appointment Listings */}
+                      <AccordionContent>
                         <div className="mt-3 space-y-2">
                           {appointment.appointments.length > 0 ? (
                             appointment.appointments.map((subAppointment, subIndex) => (
@@ -138,7 +160,9 @@ export default function DashBoard() {
                     </AccordionItem>
                   ))
                 ) : (
-                  <Label className="text-gray-500">No upcoming office hours.</Label>
+                  <Label className="text-gray-500">
+                    No {showUpcoming ? "upcoming" : "past"} office hours.
+                  </Label>
                 )}
               </Accordion>
             </div>

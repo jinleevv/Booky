@@ -31,6 +31,7 @@ export const getTeamDetailsHandler: RequestHandler = async (
       appointments: team.appointments,
       adminName: adminUser.name,
       adminEmail: team.admin,
+      cancelledDays: team.cancelledDays,
     });
   } catch (error) {
     console.error("Error fetching team details:", error);

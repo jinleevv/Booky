@@ -9,6 +9,7 @@ import updateAppointmentRoutes from "./routes/team/updateAppointmentRoute"
 import queryTeamRoutes from "./routes/team/queryTeamRoute";
 import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
 import queryUserTeamsRoutes from "./routes/team/queryUserTeamsRoute";
+import updateCancellationRoutes from "./routes/team/updateCancellationRoute";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use("/api/teams", createTeamRoutes);
 app.use("/api/teams", updateAppointmentRoutes);
 app.use("/api/teams", queryTeamRoutes);
 app.use("/api/teams", updateTeamMembersRoute);
+app.use("/api/teams", updateCancellationRoutes);
 app.use("/api/teams", getTeamRoutes);
 
 // MongoDB connection

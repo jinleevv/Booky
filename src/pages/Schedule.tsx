@@ -32,6 +32,7 @@ export default function Schedule() {
   const [teamMembers, setTeamMembers] = useState<string[]>([]);  // Store team members here
   const [userEmail, setUserEmail] = useState<string>("");  // Store the user's email
   const [adminEmail, setAdminEmail] = useState<string>("");
+  const [cancelledDays, setCancelledDays] = useState<string[]>([]);  // Store cancelled days
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -97,6 +98,7 @@ export default function Schedule() {
         setDuration(parseInt(data.durations[0], 10));
         setExistingAppointments(data.appointments); // Set the existing appointments
         setTeamMembers(data.members || []); // Store the team members
+        setCancelledDays(data.cancelledDays || []);  // Assuming you fetch the cancelled days array
         
         const dayMap: { [key: string]: number } = {
           Sunday: 0,
@@ -129,15 +131,62 @@ export default function Schedule() {
   const disablePastDates = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    // Calculate date 7 days from today
+  
+    // Calculate the maximum allowed date (7 days from today)
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + 7);
+  
+    // Format the current date into MM-DD-YYYY format
+    const formatDate = (date: Date) => {
+      const month = (date.getMonth() + 1).toString().padStart(2, "0"); // months are 0-based
+      const day = date.getDate().toString().padStart(2, "0");
+      const year = date.getFullYear().toString();
+      return `${month}-${day}-${year}`;
+    };
 
-    // Disable past dates, dates beyond 7 days, and dates not in enabledDays
+    // Check if the formatted date is in the cancelledDays array
+    const formattedDate = formatDate(date);
+    if (cancelledDays.includes(formattedDate)) {
+      return true; // Disable the date if it's in the cancelledDays array
+    }
+
     const dayIndex = date.getDay();
-    return date < today || date > maxDate || !enabledDays.has(dayIndex);
+  
+    // Check if the date is beyond the range or not in enabledDays
+    if (date < today || date > maxDate || !enabledDays.has(dayIndex)) {
+      return true;
+    }
+  
+    // If the date is today, check if there are any remaining slots
+    if (date.toDateString() === today.toDateString()) {
+      const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
+      const dayAvailability = availableTime.find((day) => day.day === dayOfWeek);
+  
+      if (dayAvailability?.enabled) {
+        const currentTime = new Date(); // Get the current time
+        const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+  
+        // Check if any slots are still available today
+        return !dayAvailability.times.some((timeSlot: any) => {
+          const slotStartInMinutes = convertTimeToMinutes(timeSlot.start);
+          return slotStartInMinutes > currentTimeInMinutes;
+        });
+      }
+      return true; // If no availability for today
+    }
+  
+    return false; // Allow selection otherwise
   };
+  
+  // Helper function: Convert time (e.g., "10:00 AM") to total minutes since midnight
+  const convertTimeToMinutes = (time: string) => {
+    const [hours, minutes, period] = time.match(/(\d+):(\d+) (\w+)/)!.slice(1);
+    let hours24 = parseInt(hours, 10);
+    if (period === "PM" && hours24 !== 12) hours24 += 12;
+    if (period === "AM" && hours24 === 12) hours24 = 0;
+    return hours24 * 60 + parseInt(minutes, 10);
+  };
+  
 
   // Utility function to generate time slots
   const generateTimeSlots = (
