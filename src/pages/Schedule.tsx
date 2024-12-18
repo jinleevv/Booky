@@ -14,6 +14,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import ScheduleForm from "@/features/CreateAppointment/ScheduleForm";
 import { AuthContext } from "@/features/AuthContext";
 import { useHook } from "@/hooks";
+import { Label } from "@/components/ui/label";
 
 export default function Schedule() {
   const { code: teamId } = useParams();
@@ -277,7 +278,9 @@ export default function Schedule() {
       <div className="flex relative w-4/5 h-5/6 m-auto">
         {teamName === "Not Found" ? (
           <>
-            <h1>Team Not Found</h1>
+            <div className="w-full h-full m-auto text-center">
+              <Label>Not Found: {teamId}</Label>
+            </div>
           </>
         ) : (
           <>
