@@ -1,4 +1,9 @@
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
@@ -16,7 +21,9 @@ export default function DashBoard() {
       if (!user) return;
 
       try {
-        const response = await fetch(`http://localhost:5001/api/teams?admin=${user.email}`);
+        const response = await fetch(
+          `http://localhost:5001/api/teams?admin=${user.email}`
+        );
         if (!response.ok) throw new Error("Failed to fetch teams");
 
         const teams = await response.json();
@@ -35,8 +42,10 @@ export default function DashBoard() {
               const appointmentsForThisTimeSlot = team.appointments.filter(
                 (appointment: any) =>
                   getDayNameFromDate(appointment.day) === timeSlot.day &&
-                  parseTimeString(appointment.time) >= parseTimeString(timeSlot.times[0].start) &&
-                  parseTimeString(appointment.time) <= parseTimeString(timeSlot.times[0].end)
+                  parseTimeString(appointment.time) >=
+                    parseTimeString(timeSlot.times[0].start) &&
+                  parseTimeString(appointment.time) <=
+                    parseTimeString(timeSlot.times[0].end)
               );
 
               const officeHour = {
@@ -44,6 +53,7 @@ export default function DashBoard() {
                 timeRange: `${timeSlot.times[0].start} - ${timeSlot.times[0].end}`,
                 day: timeSlot.day,
                 teamName: team.name,
+                teamId: team._id,
                 appointments: appointmentsForThisTimeSlot,
               };
 
@@ -68,29 +78,44 @@ export default function DashBoard() {
   }, []);
 
   const getClosestDate = (day: string) => {
-    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const daysOfWeek = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
     const today = new Date();
     const todayIndex = today.getDay();
     const targetIndex = daysOfWeek.indexOf(day);
-  
+
     let daysToAdd = targetIndex - todayIndex;
     if (daysToAdd < 0) daysToAdd += 7;
-  
+
     const nextDate = new Date();
     nextDate.setDate(today.getDate() + daysToAdd);
-  
+
     // Format the date as MM-DD-YYYY
     const month = String(nextDate.getMonth() + 1).padStart(2, "0"); // Month is zero-based
     const date = String(nextDate.getDate()).padStart(2, "0");
     const year = nextDate.getFullYear();
-  
+
     return `${month}-${date}-${year}`;
   };
-  
 
   const getDayNameFromDate = (dateStr: string) => {
     const date = new Date(Date.parse(dateStr));
-    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const daysOfWeek = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
     return daysOfWeek[date.getDay()];
   };
 
@@ -101,7 +126,9 @@ export default function DashBoard() {
   };
 
   const parseTimeString = (timeStr: string) => {
-    const normalizedTimeStr = timeStr.replace("p.m.", "PM").replace("a.m.", " AM");
+    const normalizedTimeStr = timeStr
+      .replace("p.m.", "PM")
+      .replace("a.m.", " AM");
 
     const [time, modifier] = normalizedTimeStr.split(" ");
     let [hours, minutes] = time.split(":").map((str) => parseInt(str));
@@ -110,6 +137,33 @@ export default function DashBoard() {
     else if (modifier === "AM" && hours === 12) hours = 0;
 
     return new Date(1970, 0, 1, hours, minutes, 0);
+  };
+
+  const handleCancel = async (cancelledDate: string, teamId: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5001/api/teams/${teamId}/cancel`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cancelledDate: cancelledDate }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to cancel office hour");
+
+      alert(`Successfully cancelled office hour for ${cancelledDate}`);
+
+      // Remove cancelled office hour from state
+      setUpcomingOfficeHours((prev) =>
+        prev.filter((item) => item.nextDate !== cancelledDate)
+      );
+    } catch (error) {
+      console.error("Error cancelling office hour:", error);
+      alert("Failed to cancel office hour.");
+    }
   };
 
   return (
@@ -138,27 +192,53 @@ export default function DashBoard() {
             </div>
             <div className="border rounded-md p-4">
               <Accordion type="multiple">
-                {(showUpcoming ? upcomingOfficeHours : pastOfficeHours).length > 0 ? (
-                  (showUpcoming ? upcomingOfficeHours : pastOfficeHours).map((appointment, index) => (
-                    <AccordionItem key={index} value={`item-${index}`}>
-                      <AccordionTrigger>
-                        {appointment.teamName} {appointment.nextDate} - {appointment.timeRange}
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="mt-3 space-y-2">
-                          {appointment.appointments.length > 0 ? (
-                            appointment.appointments.map((subAppointment, subIndex) => (
-                              <Label key={subIndex} className="block text-sm text-gray-600">
-                                ({subAppointment.time}) - {subAppointment.email}
-                              </Label>
-                            ))
-                          ) : (
-                            <Label className="text-gray-500">No appointments for this time slot.</Label>
-                          )}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))
+                {(showUpcoming ? upcomingOfficeHours : pastOfficeHours).length >
+                0 ? (
+                  (showUpcoming ? upcomingOfficeHours : pastOfficeHours).map(
+                    (appointment, index) => (
+                      <AccordionItem key={index} value={`item-${index}`}>
+                        <AccordionTrigger>
+                          {appointment.teamName} {appointment.nextDate} -{" "}
+                          {appointment.timeRange}
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="flex justify-between items-center mt-3">
+                            <div className="space-y-2">
+                              {appointment.appointments.length > 0 ? (
+                                appointment.appointments.map(
+                                  (subAppointment, subIndex) => (
+                                    <Label
+                                      key={subIndex}
+                                      className="block text-sm text-gray-600"
+                                    >
+                                      ({subAppointment.time}) -{" "}
+                                      {subAppointment.email}
+                                    </Label>
+                                  )
+                                )
+                              ) : (
+                                <Label className="text-gray-500">
+                                  No appointments for this time slot.
+                                </Label>
+                              )}
+                            </div>
+                            <Button
+                              variant="destructive"
+                              className="ml-4"
+                              onClick={() =>
+                                handleCancel(
+                                  appointment.nextDate,
+                                  appointment.teamId
+                                )
+                              }
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    )
+                  )
                 ) : (
                   <Label className="text-gray-500">
                     No {showUpcoming ? "upcoming" : "past"} office hours.

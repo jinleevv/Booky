@@ -8,44 +8,34 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import ScheduleForm from "@/features/CreateAppointment/ScheduleForm";
-import { auth } from "../../firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { AuthContext } from "@/features/AuthContext";
+import { useHook } from "@/hooks";
 
 export default function Schedule() {
   const { code: teamId } = useParams();
+  // Check user status
+  const { currentUser } = useContext(AuthContext);
+  const { userEmail } = useHook();
+
   const [teamName, setTeamName] = useState<string>("Loading...");
   const [adminName, setAdminName] = useState<string>("Loading...");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [enabledDays, setEnabledDays] = useState<Set<number>>(new Set());
-  const [availableTime, setAvailableTime] = useState<any[]>([]);
-  const [duration, setDuration] = useState<number>(5); // Default to 5 minutes
-  const [timeSlots, setTimeSlots] = useState<string[]>([]);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null); // Track selected time slot
-  const [existingAppointments, setExistingAppointments] = useState<any[]>([]); // State to store existing appointments
-
-  const [userSelectedDate, setUserSelectedDate] = useState<string>("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [teamMembers, setTeamMembers] = useState<string[]>([]);  // Store team members here
-  const [userEmail, setUserEmail] = useState<string>("");  // Store the user's email
   const [adminEmail, setAdminEmail] = useState<string>("");
-  const [cancelledDays, setCancelledDays] = useState<string[]>([]);  // Store cancelled days
+  const [teamMembers, setTeamMembers] = useState<string[]>([]);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsLoggedIn(true); // User is logged in
-        setUserEmail(user.email); // Store the user's email
-      } else {
-        setIsLoggedIn(false); // User is not logged in
-      }
-    });
-  
-    return () => unsubscribe(); // Clean up the listener
-  }, []);
+  const [cancelledDays, setCancelledDays] = useState<string[]>([]);
+  const [enabledDays, setEnabledDays] = useState<Set<number>>(new Set());
+  const [duration, setDuration] = useState<number>(5);
+  const [existingAppointments, setExistingAppointments] = useState<any[]>([]);
+  const [availableTime, setAvailableTime] = useState<any[]>([]);
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
+
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [userSelectedDate, setUserSelectedDate] = useState<string>(""); //Kind of redundent
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
   // Generate time slots dynamically when the selected date changes
   useEffect(() => {
@@ -93,13 +83,13 @@ export default function Schedule() {
       if (response.ok) {
         setTeamName(data.name);
         setAdminName(data.adminName);
-        setAdminEmail(data.adminEmail);  // Assuming you fetch the admin email as well
+        setAdminEmail(data.adminEmail); // Assuming you fetch the admin email as well
         setAvailableTime(data.availableTime);
         setDuration(parseInt(data.durations[0], 10));
         setExistingAppointments(data.appointments); // Set the existing appointments
         setTeamMembers(data.members || []); // Store the team members
-        setCancelledDays(data.cancelledDays || []);  // Assuming you fetch the cancelled days array
-        
+        setCancelledDays(data.cancelledDays || []); // Assuming you fetch the cancelled days array
+
         const dayMap: { [key: string]: number } = {
           Sunday: 0,
           Monday: 1,
@@ -131,11 +121,11 @@ export default function Schedule() {
   const disablePastDates = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-  
+
     // Calculate the maximum allowed date (7 days from today)
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + 7);
-  
+
     // Format the current date into MM-DD-YYYY format
     const formatDate = (date: Date) => {
       const month = (date.getMonth() + 1).toString().padStart(2, "0"); // months are 0-based
@@ -151,21 +141,24 @@ export default function Schedule() {
     }
 
     const dayIndex = date.getDay();
-  
+
     // Check if the date is beyond the range or not in enabledDays
     if (date < today || date > maxDate || !enabledDays.has(dayIndex)) {
       return true;
     }
-  
+
     // If the date is today, check if there are any remaining slots
     if (date.toDateString() === today.toDateString()) {
       const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
-      const dayAvailability = availableTime.find((day) => day.day === dayOfWeek);
-  
+      const dayAvailability = availableTime.find(
+        (day) => day.day === dayOfWeek
+      );
+
       if (dayAvailability?.enabled) {
         const currentTime = new Date(); // Get the current time
-        const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-  
+        const currentTimeInMinutes =
+          currentTime.getHours() * 60 + currentTime.getMinutes();
+
         // Check if any slots are still available today
         return !dayAvailability.times.some((timeSlot: any) => {
           const slotStartInMinutes = convertTimeToMinutes(timeSlot.start);
@@ -174,10 +167,10 @@ export default function Schedule() {
       }
       return true; // If no availability for today
     }
-  
+
     return false; // Allow selection otherwise
   };
-  
+
   // Helper function: Convert time (e.g., "10:00 AM") to total minutes since midnight
   const convertTimeToMinutes = (time: string) => {
     const [hours, minutes, period] = time.match(/(\d+):(\d+) (\w+)/)!.slice(1);
@@ -186,7 +179,6 @@ export default function Schedule() {
     if (period === "AM" && hours24 === 12) hours24 = 0;
     return hours24 * 60 + parseInt(minutes, 10);
   };
-  
 
   // Utility function to generate time slots
   const generateTimeSlots = (
@@ -252,13 +244,16 @@ export default function Schedule() {
 
   const handleJoinTeam = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/teams/${teamId}/members`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ members: userEmail }),
-      });
+      const response = await fetch(
+        `http://localhost:5001/api/teams/${teamId}/members`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ members: userEmail }),
+        }
+      );
 
       if (response.ok) {
         alert("Successfully joined the team!");
@@ -297,12 +292,12 @@ export default function Schedule() {
                     <Button
                       className="w-full"
                       onClick={handleJoinTeam}
-                      disabled={!isLoggedIn}
+                      disabled={!currentUser}
                     >
                       Join Team
                     </Button>
                   )}
-                  {!isLoggedIn && (
+                  {!currentUser && (
                     <p className="text-xs text-gray-500 mt-1">
                       Log in to join a team.
                     </p>

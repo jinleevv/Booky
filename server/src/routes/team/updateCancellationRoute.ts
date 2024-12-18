@@ -1,4 +1,5 @@
 import express, { Request, Response, RequestHandler } from "express";
+import nodemailer from "nodemailer";
 import Team from "../../models/team";
 
 const router = express.Router();
@@ -32,12 +33,33 @@ export const cancelOfficeHourHandler: RequestHandler = async (
     team.cancelledDays = [...team.cancelledDays, cancelledDate];
     await team.save();
 
-    res
-      .status(200)
-      .json({
-        message: "Office hour cancelled successfully",
-        cancelledDays: team.cancelledDays,
-      });
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: `Booky <${process.env.EMAIL}>`,
+      to: [...team.members, team.admin].join(","),
+      subject: "Booky Cancel Announcement",
+      text: "Booky Cancel",
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Email sending failed:", error);
+      } else {
+        console.log("Email sent for: " + team.name + " | " + info.response);
+      }
+    });
+
+    res.status(200).json({
+      message: "Office hour cancelled successfully",
+      cancelledDays: team.cancelledDays,
+    });
   } catch (error) {
     console.error("Error cancelling office hour:", error);
     res.status(500).json({ message: "Server error" });

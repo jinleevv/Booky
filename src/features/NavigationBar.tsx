@@ -9,50 +9,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { IoPersonCircle } from "react-icons/io5";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useState } from "react";
 import { auth } from "../../firebase";
 import { Label } from "@/components/ui/label";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { LayoutPanelLeft, LogOut, UserPen } from "lucide-react";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { Input } from "@/components/ui/input";
 import { IoSearchOutline } from "react-icons/io5";
+import { useHook } from "@/hooks";
+import { AuthContext } from "./AuthContext";
 
 export default function NavigationBar() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { currentUser } = useContext(AuthContext);
+  const { userName } = useHook();
   const [courseSearch, setCourseSearch] = useState<string>("");
-  // const courses = [
-  //   { course: "COMP307", label: "Web Development" },
-  //   { course: "COMP250", label: "Introduction to Computer Science" },
-  //   { course: "MATH223", label: "Linear Algebra" },
-  //   // Add more courses as needed
-  // ];
-
-  useEffect(() => {
-    const checkUser = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    return () => checkUser();
-  }, []);
-
-  // const filteredResults = useMemo(() => {
-  //   const searchTerm = courseSearch.toLowerCase().split(" ").join("");
-  //   if (!searchTerm) return [];
-
-  //   return courses.filter(
-  //     (course) =>
-  //       course.course.toLowerCase().includes(searchTerm) ||
-  //       course.label.toLowerCase().includes(searchTerm)
-  //   );
-  // }, [courseSearch, courses]);
 
   const handleSearch = () => {
-    // const courseCode = courseSearch.split(" ").join("");
-    // if (courseSearch.trim()) {
-    //   navigate(`/search/${encodeURIComponent(courseCode.toUpperCase())}`);
-    // }
     if (courseSearch === "") {
       navigate(`/schedule/none`);
       return -1;
@@ -92,7 +66,7 @@ export default function NavigationBar() {
         </Button>
       </div>
       <div className="flex items-center gap-2">
-        {user ? (
+        {currentUser ? (
           <>
             <div className="mt-auto mb-auto">
               <DropdownMenu>
@@ -102,9 +76,7 @@ export default function NavigationBar() {
                 >
                   <div className="flex gap-1">
                     <IoPersonCircle size={25} className="m-auto" />
-                    <Label className="font-bold m-auto">
-                      {user.displayName}
-                    </Label>
+                    <Label className="font-bold m-auto">{userName}</Label>
                     <RiArrowDropDownLine className="m-auto" />
                   </div>
                 </DropdownMenuTrigger>
