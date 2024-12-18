@@ -6,16 +6,22 @@ import { useHook } from "@/hooks";
 export const AuthContext = createContext(null);
 
 export const AuthContextProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const { setUserName, setUserEmail } = useHook();
+  const [loading, setLoading] = useState(true);
+  const { setLoggedInUser, setUserName, setUserEmail } = useHook();
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
       if (user) {
+        setLoggedInUser(true);
         setUserName(user.displayName);
         setUserEmail(user.email);
+        setLoading(false);
+      } else {
+        setLoggedInUser(false);
+        setUserName("");
+        setUserEmail("");
       }
+      setLoading(false);
     });
 
     return () => {
@@ -24,8 +30,6 @@ export const AuthContextProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ currentUser }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={{ loading }}>{children}</AuthContext.Provider>
   );
 };

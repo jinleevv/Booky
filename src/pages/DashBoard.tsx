@@ -7,30 +7,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
-import { auth } from "../../firebase";
 import { useEffect, useState } from "react";
+import { useHook } from "@/hooks";
+import { toast } from "sonner";
 
 export default function DashBoard() {
+  const { userEmail } = useHook();
+
   const [upcomingOfficeHours, setUpcomingOfficeHours] = useState<any[]>([]);
   const [pastOfficeHours, setPastOfficeHours] = useState<any[]>([]);
   const [showUpcoming, setShowUpcoming] = useState(true); // Toggle between views
 
   useEffect(() => {
     const fetchOfficeHours = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
       try {
         const response = await fetch(
-          `http://localhost:5001/api/teams?admin=${user.email}`
+          `http://localhost:5001/api/teams?admin=${userEmail}`
         );
-        if (!response.ok) throw new Error("Failed to fetch teams");
+        if (!response.ok) toast("Unable to fetch user information");
 
         const teams = await response.json();
         const today = new Date();
 
         const upcoming = [];
         const past = [];
+        // console.log(teams);
 
         teams.forEach((team: any) => {
           team.availableTime.forEach((timeSlot: any) => {
