@@ -5,7 +5,7 @@ import cors from "cors";
 import userRoutes from "./routes/user/userRoutes";
 import createTeamRoutes from "./routes/team/createTeamRoute";
 import getTeamRoutes from "./routes/team/getTeamRoute";
-import updateAppointmentRoutes from "./routes/team/updateAppointmentRoute"
+import updateAppointmentRoutes from "./routes/team/updateAppointmentRoute";
 import queryTeamRoutes from "./routes/team/queryTeamRoute";
 import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
 import queryUserTeamsRoutes from "./routes/team/queryUserTeamsRoute";
@@ -30,7 +30,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/teams", queryUserTeamsRoutes);
 app.use("/api/teams", createTeamRoutes);
 app.use("/api/teams", updateAppointmentRoutes);
-app.use("/api/teams", queryTeamRoutes);
+app.use("/api/teams/get-user-teams", queryTeamRoutes);
 app.use("/api/teams", updateTeamMembersRoute);
 app.use("/api/teams", updateCancellationRoutes);
 app.use("/api/teams", getTeamRoutes);

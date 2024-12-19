@@ -22,125 +22,360 @@ export default function DashBoard() {
     const fetchOfficeHours = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5001/api/teams?admin=${userEmail}`
+          `http://localhost:5001/api/teams/get-user-teams?userEmail=${userEmail}`
         );
-        if (!response.ok) toast("Unable to fetch user information");
+
+        if (!response.ok) {
+          toast("Unable to fetch user information");
+          return;
+        }
 
         const teams = await response.json();
+
         const today = new Date();
+        const month = today.getMonth() + 1;
+        const date = today.getDate();
+        const year = today.getFullYear();
+        const hour = today.getHours();
+        const todayConverted = month + "-" + date + "-" + year;
 
         const upcoming = [];
         const past = [];
-        // console.log(teams);
 
-        teams.forEach((team: any) => {
-          team.availableTime.forEach((timeSlot: any) => {
-            if (timeSlot.enabled) {
-              const closestDate = getClosestDate(timeSlot.day);
-              const slotDate = new Date(closestDate);
+        teams.forEach((team) => {
+          const teamName = team.name;
+          const teamId = team._id;
+          const teamAvailableTime = team.availableTime;
+          team.appointments.forEach((appointment) => {
+            const daysOfWeek = [
+              "Sunday",
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+            ];
 
-              // Filter appointments for this time slot
-              const appointmentsForThisTimeSlot = team.appointments.filter(
-                (appointment: any) =>
-                  getDayNameFromDate(appointment.day) === timeSlot.day &&
-                  parseTimeString(appointment.time) >=
-                    parseTimeString(timeSlot.times[0].start) &&
-                  parseTimeString(appointment.time) <=
-                    parseTimeString(timeSlot.times[0].end)
-              );
+            const todayDate = new Date(todayConverted);
+            const appointmentDate = new Date(appointment.day);
+            const appointmentDay =
+              daysOfWeek[new Date(appointment.day).getDay()];
+            const dateDifference = Math.abs(
+              todayDate.getDate() - appointmentDate.getDate()
+            );
+            const appointmentAvailbleSlot = teamAvailableTime.find(
+              (item) => item.day === appointmentDay
+            );
 
-              const officeHour = {
-                nextDate: closestDate,
-                timeRange: `${timeSlot.times[0].start} - ${timeSlot.times[0].end}`,
-                day: timeSlot.day,
-                teamName: team.name,
-                teamId: team._id,
-                appointments: appointmentsForThisTimeSlot,
-              };
+            if (todayDate < appointmentDate) {
+              if (dateDifference <= 7) {
+                let validStartTime;
+                let validEndTime;
 
-              // Categorize as past or upcoming
-              if (slotDate >= today) {
-                upcoming.push(officeHour);
-              } else if (slotDate >= getDaysAgo(today, 7)) {
-                past.push(officeHour);
+                appointmentAvailbleSlot.times.forEach((item) => {
+                  const startTime = item.start;
+                  const endTime = item.end;
+                  const checkRange = isTimeWithinRange(
+                    appointment.time,
+                    startTime,
+                    endTime
+                  );
+                  if (checkRange) {
+                    validStartTime = startTime;
+                    validEndTime = endTime;
+                    return;
+                  }
+                });
+
+                const checkDateEntry = upcoming.find(
+                  (item) =>
+                    item.date === appointment.day &&
+                    item.start === validStartTime &&
+                    item.end === validEndTime
+                );
+
+                if (!checkDateEntry) {
+                  upcoming.push({
+                    teamId: teamId,
+                    date: appointment.day,
+                    day: appointmentDay,
+                    start: validStartTime,
+                    end: validEndTime,
+                    team: teamName,
+                    appointments: [],
+                  });
+                }
+
+                const existingDateEntry = upcoming.find(
+                  (item) =>
+                    item.date === appointment.day &&
+                    item.start === validStartTime &&
+                    item.end === validEndTime
+                );
+
+                existingDateEntry.appointments.push({
+                  time: appointment.time,
+                  email: appointment.email,
+                });
+              }
+            } else if (todayDate > appointmentDate) {
+              if (dateDifference <= 7) {
+                let validStartTime;
+                let validEndTime;
+
+                appointmentAvailbleSlot.times.forEach((item) => {
+                  const startTime = item.start;
+                  const endTime = item.end;
+                  const checkRange = isTimeWithinRange(
+                    appointment.time,
+                    startTime,
+                    endTime
+                  );
+                  if (checkRange) {
+                    validStartTime = startTime;
+                    validEndTime = endTime;
+                    return;
+                  }
+                });
+
+                const checkDateEntry = past.find(
+                  (item) =>
+                    item.date === appointment.day &&
+                    item.start === validStartTime &&
+                    item.end === validEndTime
+                );
+
+                if (!checkDateEntry) {
+                  past.push({
+                    teamId: teamId,
+                    date: appointment.day,
+                    day: appointmentDay,
+                    start: validStartTime,
+                    end: validEndTime,
+                    team: teamName,
+                    appointments: [],
+                  });
+                }
+
+                const existingDateEntry = past.find(
+                  (item) =>
+                    item.date === appointment.day &&
+                    item.start === validStartTime &&
+                    item.end === validEndTime
+                );
+
+                existingDateEntry.appointments.push({
+                  time: appointment.time,
+                  email: appointment.email,
+                });
+              }
+            } else {
+              const [_, hours, minutes, period] = appointment.time.match(
+                /(\d{2}):(\d{2}) (AM|PM)/
+              )!;
+              let convertHours = parseInt(hours);
+              if (period == "PM") {
+                convertHours += 12;
+              }
+              if (hour <= convertHours) {
+                let validStartTime;
+                let validEndTime;
+
+                appointmentAvailbleSlot.times.forEach((item) => {
+                  const startTime = item.start;
+                  const endTime = item.end;
+                  const checkRange = isTimeWithinRange(
+                    appointment.time,
+                    startTime,
+                    endTime
+                  );
+                  if (checkRange) {
+                    validStartTime = startTime;
+                    validEndTime = endTime;
+                    return;
+                  }
+                });
+
+                const checkDateEntry = upcoming.find(
+                  (item) =>
+                    item.date === appointment.day &&
+                    item.start === validStartTime &&
+                    item.end === validEndTime
+                );
+
+                if (!checkDateEntry) {
+                  upcoming.push({
+                    teamId: teamId,
+                    date: appointment.day,
+                    day: appointmentDay,
+                    start: validStartTime,
+                    end: validEndTime,
+                    team: teamName,
+                    appointments: [],
+                  });
+                }
+
+                const existingDateEntry = upcoming.find(
+                  (item) =>
+                    item.date === appointment.day &&
+                    item.start === validStartTime &&
+                    item.end === validEndTime
+                );
+
+                existingDateEntry.appointments.push({
+                  time: appointment.time,
+                  email: appointment.email,
+                });
+              } else {
+                let validStartTime;
+                let validEndTime;
+
+                appointmentAvailbleSlot.times.forEach((item) => {
+                  const startTime = item.start;
+                  const endTime = item.end;
+                  const checkRange = isTimeWithinRange(
+                    appointment.time,
+                    startTime,
+                    endTime
+                  );
+                  if (checkRange) {
+                    validStartTime = startTime;
+                    validEndTime = endTime;
+                    return;
+                  }
+                });
+
+                const checkDateEntry = past.find(
+                  (item) =>
+                    item.date === appointment.day &&
+                    item.start === validStartTime &&
+                    item.end === validEndTime
+                );
+
+                if (!checkDateEntry) {
+                  past.push({
+                    teamId: teamId,
+                    date: appointment.day,
+                    day: appointmentDay,
+                    start: validStartTime,
+                    end: validEndTime,
+                    team: teamName,
+                    appointments: [],
+                  });
+                }
+
+                const existingDateEntry = past.find(
+                  (item) =>
+                    item.date === appointment.day &&
+                    item.start === validStartTime &&
+                    item.end === validEndTime
+                );
+
+                existingDateEntry.appointments.push({
+                  time: appointment.time,
+                  email: appointment.email,
+                });
               }
             }
           });
         });
 
-        setUpcomingOfficeHours(upcoming);
+        let filteredUpcoming = upcoming;
+        teams.forEach((team) => {
+          team.cancelledMeetings.forEach((cancelledMeeting) => {
+            filteredUpcoming = filteredUpcoming.filter((item) => {
+              const isCancelled =
+                item.date === cancelledMeeting.day &&
+                item.start === cancelledMeeting.meeting.start &&
+                item.end === cancelledMeeting.meeting.end;
+
+              return !isCancelled;
+            });
+          });
+        });
+
+        const timeToMinutes = (time: string): number => {
+          const [_, hours, minutes, period] = time.match(
+            /(\d{2}):(\d{2}) (AM|PM)/
+          )!;
+          let militaryHours = parseInt(hours);
+          if (period === "PM" && militaryHours !== 12) militaryHours += 12;
+          if (period === "AM" && militaryHours === 12) militaryHours = 0;
+          return militaryHours * 60 + parseInt(minutes);
+        };
+
+        filteredUpcoming.sort((a, b) => {
+          // Compare by date first
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+
+          if (dateA.getTime() !== dateB.getTime()) {
+            return dateA.getTime() - dateB.getTime(); // Sort by date
+          }
+
+          // If dates are equal, compare by start time
+          const startMinutesA = timeToMinutes(a.start);
+          const startMinutesB = timeToMinutes(b.start);
+
+          return startMinutesA - startMinutesB; // Sort by start time
+        });
+
+        past.sort((a, b) => {
+          // Compare by date first
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+
+          if (dateA.getTime() !== dateB.getTime()) {
+            return dateA.getTime() - dateB.getTime(); // Sort by date
+          }
+
+          // If dates are equal, compare by start time
+          const startMinutesA = timeToMinutes(a.start);
+          const startMinutesB = timeToMinutes(b.start);
+
+          return startMinutesA - startMinutesB; // Sort by start time
+        });
+
+        setUpcomingOfficeHours(filteredUpcoming);
         setPastOfficeHours(past);
       } catch (error) {
-        console.error("Error fetching office hours:", error);
+        toast("Unable to fetch the meeting information");
       }
     };
 
     fetchOfficeHours();
-  }, []);
+  }, [userEmail]);
 
-  const getClosestDate = (day: string) => {
-    const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    const today = new Date();
-    const todayIndex = today.getDay();
-    const targetIndex = daysOfWeek.indexOf(day);
+  function isTimeWithinRange(
+    time: string,
+    start: string,
+    end: string
+  ): boolean {
+    const toMilitaryTime = (timeStr: string): number => {
+      const [_, hours, minutes, period] = timeStr.match(
+        /(\d{2}):(\d{2}) (AM|PM)/
+      )!;
+      let militaryHours = parseInt(hours);
+      if (period === "PM") {
+        militaryHours += 12;
+      }
+      return militaryHours * 60 + parseInt(minutes);
+    };
 
-    let daysToAdd = targetIndex - todayIndex;
-    if (daysToAdd < 0) daysToAdd += 7;
+    const timeInMinutes = toMilitaryTime(time);
+    const startInMinutes = toMilitaryTime(start);
+    const endInMinutes = toMilitaryTime(end);
 
-    const nextDate = new Date();
-    nextDate.setDate(today.getDate() + daysToAdd);
+    return timeInMinutes >= startInMinutes && timeInMinutes <= endInMinutes;
+  }
 
-    // Format the date as MM-DD-YYYY
-    const month = String(nextDate.getMonth() + 1).padStart(2, "0"); // Month is zero-based
-    const date = String(nextDate.getDate()).padStart(2, "0");
-    const year = nextDate.getFullYear();
-
-    return `${month}-${date}-${year}`;
-  };
-
-  const getDayNameFromDate = (dateStr: string) => {
-    const date = new Date(Date.parse(dateStr));
-    const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    return daysOfWeek[date.getDay()];
-  };
-
-  const getDaysAgo = (date: Date, days: number) => {
-    const pastDate = new Date(date);
-    pastDate.setDate(date.getDate() - days);
-    return pastDate;
-  };
-
-  const parseTimeString = (timeStr: string) => {
-    const normalizedTimeStr = timeStr
-      .replace("p.m.", "PM")
-      .replace("a.m.", " AM");
-
-    const [time, modifier] = normalizedTimeStr.split(" ");
-    let [hours, minutes] = time.split(":").map((str) => parseInt(str));
-
-    if (modifier === "PM" && hours !== 12) hours += 12;
-    else if (modifier === "AM" && hours === 12) hours = 0;
-
-    return new Date(1970, 0, 1, hours, minutes, 0);
-  };
-
-  const handleCancel = async (cancelledDate: string, teamId: string) => {
+  const handleCancel = async (
+    cancelledDate: string,
+    teamId: string,
+    start: string,
+    end: string
+  ) => {
     try {
       const response = await fetch(
         `http://localhost:5001/api/teams/${teamId}/cancel`,
@@ -149,21 +384,30 @@ export default function DashBoard() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ cancelledDate: cancelledDate }),
+          body: JSON.stringify({
+            cancelledDate: cancelledDate,
+            start: start,
+            end: end,
+          }),
         }
       );
 
-      if (!response.ok) throw new Error("Failed to cancel office hour");
+      if (!response.ok) throw toast("Failed to cancel office hour");
 
-      alert(`Successfully cancelled office hour for ${cancelledDate}`);
+      toast(`Successfully cancelled office hour for ${cancelledDate}`);
 
       // Remove cancelled office hour from state
-      setUpcomingOfficeHours((prev) =>
-        prev.filter((item) => item.nextDate !== cancelledDate)
-      );
+      const filteredUpcoming = upcomingOfficeHours.filter((item) => {
+        const isCancelled =
+          item.date === cancelledDate &&
+          item.start === start &&
+          item.end === end;
+
+        return !isCancelled; // Keep items that are not cancelled
+      });
+      setUpcomingOfficeHours(filteredUpcoming);
     } catch (error) {
-      console.error("Error cancelling office hour:", error);
-      alert("Failed to cancel office hour.");
+      toast("Failed to cancel office hour.");
     }
   };
 
@@ -191,59 +435,138 @@ export default function DashBoard() {
                 Past
               </Button>
             </div>
-            <div className="border rounded-md p-4">
-              <Accordion type="multiple">
-                {(showUpcoming ? upcomingOfficeHours : pastOfficeHours).length >
-                0 ? (
-                  (showUpcoming ? upcomingOfficeHours : pastOfficeHours).map(
-                    (appointment, index) => (
-                      <AccordionItem key={index} value={`item-${index}`}>
-                        <AccordionTrigger>
-                          {appointment.teamName} {appointment.nextDate} -{" "}
-                          {appointment.timeRange}
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="flex justify-between items-center mt-3">
-                            <div className="space-y-2">
-                              {appointment.appointments.length > 0 ? (
-                                appointment.appointments.map(
-                                  (subAppointment, subIndex) => (
-                                    <Label
-                                      key={subIndex}
-                                      className="block text-sm text-gray-600"
-                                    >
-                                      ({subAppointment.time}) -{" "}
-                                      {subAppointment.email}
-                                    </Label>
-                                  )
-                                )
-                              ) : (
-                                <Label className="text-gray-500">
-                                  No appointments for this time slot.
+            <div className="border border-dashed rounded-md p-4">
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full border-b-0"
+              >
+                {showUpcoming ? (
+                  <>
+                    {upcomingOfficeHours.length === 0 ? (
+                      <>
+                        <div className="w-full text-center">
+                          <Label>No Meetings</Label>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {upcomingOfficeHours.map((meeting, index) => (
+                          <AccordionItem key={index} value={`item-${index}`}>
+                            <AccordionTrigger>
+                              <div className="flex w-full justify-between">
+                                <Label className="font-bold">
+                                  {meeting.date}, {meeting.team}
                                 </Label>
-                              )}
-                            </div>
-                            <Button
-                              variant="destructive"
-                              className="ml-4"
-                              onClick={() =>
-                                handleCancel(
-                                  appointment.nextDate,
-                                  appointment.teamId
-                                )
-                              }
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    )
-                  )
+                                <Label className="mr-2">
+                                  {meeting.start} - {meeting.end}
+                                </Label>
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <div className="flex w-full justify-between items-center mt-3">
+                                <div className="w-full space-y-2">
+                                  {meeting.appointments.map(
+                                    (appointment, subIndex) => (
+                                      <div className="flex w-full justify-between text-sm">
+                                        <div>
+                                          <Label className="text-black font-bold">
+                                            Time:{" "}
+                                          </Label>
+                                          <Label className="text-gray-600">
+                                            {appointment.time}
+                                          </Label>
+                                        </div>
+                                        <div>
+                                          <Label className="font-bold text-black">
+                                            Email:{" "}
+                                          </Label>{" "}
+                                          <Label className="text-gray-600">
+                                            {appointment.email}
+                                          </Label>
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex w-full justify-end mt-5">
+                                <Button
+                                  variant="outline"
+                                  className="ml-4"
+                                  onClick={() => {
+                                    handleCancel(
+                                      meeting.date,
+                                      meeting.teamId,
+                                      meeting.start,
+                                      meeting.end
+                                    );
+                                  }}
+                                >
+                                  Cancel the Meeting
+                                </Button>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </>
+                    )}
+                  </>
                 ) : (
-                  <Label className="text-gray-500">
-                    No {showUpcoming ? "upcoming" : "past"} office hours.
-                  </Label>
+                  <>
+                    {pastOfficeHours.length === 0 ? (
+                      <>
+                        <div className="w-full text-center">
+                          <Label>No Meetings</Label>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {pastOfficeHours.map((meeting, index) => (
+                          <AccordionItem key={index} value={`item-${index}`}>
+                            <AccordionTrigger>
+                              <div className="flex w-full justify-between">
+                                <Label className="font-bold">
+                                  {meeting.date}, {meeting.team}
+                                </Label>
+                                <Label className="mr-2">
+                                  {meeting.start} - {meeting.end}
+                                </Label>
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <div className="flex w-full justify-between items-center mt-3">
+                                <div className="w-full space-y-2">
+                                  {meeting.appointments.map(
+                                    (appointment, subIndex) => (
+                                      <div className="flex w-full justify-between text-sm">
+                                        <div>
+                                          <Label className="text-black font-bold">
+                                            Time:{" "}
+                                          </Label>
+                                          <Label className="text-gray-600">
+                                            {appointment.time}
+                                          </Label>
+                                        </div>
+                                        <div>
+                                          <Label className="font-bold text-black">
+                                            Email:{" "}
+                                          </Label>{" "}
+                                          <Label className="text-gray-600">
+                                            {appointment.email}
+                                          </Label>
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </>
+                    )}
+                  </>
                 )}
               </Accordion>
             </div>

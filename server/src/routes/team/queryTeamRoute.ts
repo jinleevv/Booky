@@ -8,16 +8,16 @@ export const queryTeamsByAdminHandler: RequestHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { admin } = req.query; // Expecting query parameter 'admin'
+  const { userEmail } = req.query; // Expecting query parameter 'admin'
 
-  if (!admin || typeof admin !== "string") {
+  if (!userEmail || typeof userEmail !== "string") {
     res.status(400).json({ message: "Invalid or missing admin email" });
     return;
   }
 
   try {
     // Find teams where the 'admin' field matches the provided email
-    const teams = await Team.find({ admin: admin }).exec();
+    const teams = await Team.find({ admin: userEmail }).exec();
 
     if (teams.length === 0) {
       res.status(404).json({ message: "No teams found for this admin" });

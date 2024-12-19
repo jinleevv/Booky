@@ -10,10 +10,10 @@ export const cancelOfficeHourHandler: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const { teamId } = req.params;
-  const { cancelledDate } = req.body;
+  const { cancelledDate, start, end } = req.body;
 
   try {
-    if (!cancelledDate || typeof cancelledDate !== "string") {
+    if (!cancelledDate || !start || !end) {
       res.status(400).json({ message: "Invalid or missing cancelled date" });
       return;
     }
@@ -25,12 +25,23 @@ export const cancelOfficeHourHandler: RequestHandler = async (
     }
 
     // Avoid adding duplicate cancelled dates
-    if (team.cancelledDays.includes(cancelledDate)) {
+    if (
+      team.cancelledMeetings.includes({
+        day: cancelledDate,
+        meeting: { start: start, end: end },
+      })
+    ) {
       res.status(400).json({ message: "Date already cancelled" });
       return;
     }
 
-    team.cancelledDays = [...team.cancelledDays, cancelledDate];
+    team.cancelledMeetings = [
+      ...team.cancelledMeetings,
+      {
+        day: cancelledDate,
+        meeting: { start: start, end: end },
+      },
+    ];
     await team.save();
 
     const transporter = nodemailer.createTransport({
@@ -58,7 +69,7 @@ export const cancelOfficeHourHandler: RequestHandler = async (
 
     res.status(200).json({
       message: "Office hour cancelled successfully",
-      cancelledDays: team.cancelledDays,
+      cancelledDays: team.cancelledMeetings,
     });
   } catch (error) {
     console.error("Error cancelling office hour:", error);
