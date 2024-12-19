@@ -281,13 +281,31 @@ export default function Schedule() {
           </>
         ) : (
           <>
-            <Card className="flex w-full h-4/6 m-auto shadow-sm">
-              <CardHeader className="w-1/6 border-r-[1px] border-gray-200 flex flex-col justify-between h-full">
-                <div>
-                  <CardTitle>Course: {teamName}</CardTitle>
-                  <CardDescription>Professor: {adminName}</CardDescription>
+            <Card className="flex flex-col md:flex-row w-full h-auto md:h-4/6 m-auto shadow-sm overflow-hidden">
+              <CardHeader className="w-full border-b-[1px] md:w-1/6 md:border-r-[1px] border-gray-200 flex flex-col justify-between h-full">
+                <div className="flex justify-between">
+                  <div>
+                    <CardTitle>Course: {teamName}</CardTitle>
+                    <CardDescription>Professor: {adminName}</CardDescription>
+                  </div>
+                  <div className="md:hidden flex flex-col justify-start items-end">
+                    {!isUserAdmin && !isUserMember && (
+                      <Button
+                        className="w-full"
+                        onClick={handleJoinTeam}
+                        disabled={!currentUser}
+                      >
+                        Join Team
+                      </Button>
+                    )}
+                    {!currentUser && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Log in to join a team.
+                    </p>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-auto">
+                <div className="mt-auto max-md:hidden">
                   {!isUserAdmin && !isUserMember && (
                     <Button
                       className="w-full"
@@ -304,14 +322,14 @@ export default function Schedule() {
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="flex w-3/6 py-2 border-r-[1px] border-gray-200">
+              <CardContent className="flex w-full border-b-[1px] md:w-3/6 md:border-r-[1px] py-2 border-gray-200">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   disabled={disablePastDates}
                   showOutsideDays={false}
-                  className="flex h-[461px] overflow-y-auto mt-3 p-0"
+                  className="flex-1 max-h-[461px] overflow-y-auto mt-3 p-0"
                   classNames={{
                     months:
                       "flex w-full flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 flex-1",
@@ -337,8 +355,8 @@ export default function Schedule() {
                   }}
                 />
               </CardContent>
-              <div className="w-2/6 h-full">
-                <CardContent className="h-1/2 w-full py-2 border-b-[1px] border-gray-200 overflow-auto">
+              <div className="w-full md:w-2/6 h-full overflow-y-auto flex flex-col">
+                <CardContent className="max-md:max-h-[27vh] h-1/2 w-full flex-1 py-2 border-b-[1px] border-gray-200 overflow-auto">
                   <div className="grid grid-cols-2 gap-2">
                     {timeSlots.length > 0 ? (
                       timeSlots.map((time) => (
