@@ -8,24 +8,33 @@ import { AuthContext } from "./features/AuthContext.tsx";
 import { useContext } from "react";
 import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
-import Search from "./pages/Search";
-import RegisterTeam from "./pages/RegisterTeam";
 import DashBoard from "./pages/DashBoard";
 import Schedule from "./pages/Schedule";
 import DashBoardTeams from "./pages/DashBoardTeams";
 import SignIn from "./pages/SignIn";
 import { Toaster } from "@/components/ui/sonner";
 import CreateTeam from "./pages/CreateTeam";
+import { useHook } from "./hooks.ts";
 
 function App() {
-  const { currentUser } = useContext(AuthContext);
+  const { loading } = useContext(AuthContext);
+  const { loggedInUser } = useHook();
 
   const ProtectedRoute = ({ children }) => {
-    if (!currentUser) {
+    if (!loggedInUser) {
       return <Navigate to="/" />;
     }
     return children;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-xl font-semibold">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <Router>
       <Routes>

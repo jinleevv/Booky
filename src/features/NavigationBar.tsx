@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { IoPersonCircle } from "react-icons/io5";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { auth } from "../../firebase";
 import { Label } from "@/components/ui/label";
 import { signOut } from "firebase/auth";
@@ -18,11 +18,9 @@ import { RiArrowDropDownLine } from "react-icons/ri";
 import { Input } from "@/components/ui/input";
 import { IoSearchOutline } from "react-icons/io5";
 import { useHook } from "@/hooks";
-import { AuthContext } from "./AuthContext";
 
 export default function NavigationBar() {
   const navigate = useNavigate();
-  const { currentUser } = useContext(AuthContext);
   const { userName } = useHook();
   const [courseSearch, setCourseSearch] = useState<string>("");
 
@@ -66,7 +64,7 @@ export default function NavigationBar() {
         </Button>
       </div>
       <div className="flex items-center gap-2">
-        {currentUser ? (
+        {userName ? (
           <>
             <div className="mt-auto mb-auto">
               <DropdownMenu>

@@ -14,8 +14,13 @@ interface ISchedule {
 interface IAppointment {
   day: string; // Store as Date type
   time: string;
-  name: string,
+  name: string;
   email: string;
+}
+
+interface ICancelMeeting {
+  day: string;
+  meeting: ITimeRange;
 }
 
 interface ITeam extends Document {
@@ -27,15 +32,15 @@ interface ITeam extends Document {
   appointments: IAppointment[];
   durations: string[];
   //   coadmin: string[];
-  cancelledDays: string[];
+  cancelledMeetings: ICancelMeeting[];
   createdAt: Date;
 }
 
 const TimeRangeSchema: Schema = new Schema<ITimeRange>({
-    start: { type: String, required: true },
-    end: { type: String, required: true },
-  });
-  
+  start: { type: String, required: true },
+  end: { type: String, required: true },
+});
+
 // Define Schedule Sub-Schema
 const ScheduleSchema: Schema = new Schema<ISchedule>({
   day: { type: String, required: true },
@@ -49,6 +54,11 @@ const AppointmentSchema: Schema = new Schema<IAppointment>({
   time: { type: String, required: true }, // Store time as string
   name: { type: String, required: false },
   email: { type: String, required: true }, // Store email as string
+});
+
+const CancelMeetingSchema: Schema = new Schema<ICancelMeeting>({
+  day: { type: String, required: true },
+  meeting: TimeRangeSchema,
 });
 
 const TeamSchema: Schema = new Schema<ITeam>({
@@ -65,13 +75,7 @@ const TeamSchema: Schema = new Schema<ITeam>({
   availableTime: [ScheduleSchema],
   appointments: [AppointmentSchema],
   durations: [{ type: String, required: true }],
-  cancelledDays: [{ type: String, required: false }], // New field for cancelled days
-  //   coadmin: [
-  //     {
-  //       type: String,
-  //       ref: "User",
-  //     },
-  //   ],
+  cancelledMeetings: [CancelMeetingSchema],
   createdAt: {
     type: Date,
     default: Date.now,
