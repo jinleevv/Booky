@@ -34,7 +34,7 @@ export default function NavigationBar() {
   };
 
   return (
-    <nav className="flex items-center justify-between w-full px-8 py-4 bg-white">
+    <nav className="flex items-center justify-between w-full px-8 py-4 bg-white gap-x-4">
       <div
         className="flex items-center gap-2 cursor-pointer"
         onClick={() => navigate("/")}
@@ -43,9 +43,9 @@ export default function NavigationBar() {
         <div className="text-sm font-bold text-black -ml-4 -mt-1.5">Booky</div>
       </div>
 
-      <div className="flex w-[700px] h-11 border-2 border-red-700 rounded-full">
+      <div className="flex flex-1 max-w-[700px] h-11 border-2 border-red-700 rounded-full">
         <Input
-          className="rounded-full w-[650px] h-full border-none shadow-none focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="rounded-full flex-1 max-w-[650px] h-full border-none shadow-none focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
           value={courseSearch}
           onChange={(e) => setCourseSearch(e.target.value)}
           onKeyDown={(e) => {
