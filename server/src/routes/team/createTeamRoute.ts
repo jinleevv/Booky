@@ -1,5 +1,5 @@
 import express, { Request, Response, RequestHandler } from "express";
-import { customAlphabet } from "nanoid";
+import ShortUniqueId from "short-uuid";
 import Team from "../../models/team";
 
 const router = express.Router();
@@ -15,9 +15,7 @@ export const createTeamHandler: RequestHandler = async (req: Request, res: Respo
     }
 
     // Generate unique teamId
-    const numbers = '0123456789';
-    const generateNumericId = customAlphabet(numbers, 6);
-    const _id = `team-${name}-${generateNumericId()}`;
+    const _id = `team-${name}-${ShortUniqueId().generate()}`;
 
     // Create the new team and save in teams collection.
     // Unitialized attributes are set to their default values.

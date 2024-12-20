@@ -3,10 +3,9 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-export const deleteAppointmentHandler: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+// When a user cancels their appointment via their confirmation link.
+// Delete the appointment from the team appointments list.
+export const deleteAppointmentHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { teamId, appointmentToken } = req.query;
 
   if (!appointmentToken || typeof appointmentToken !== "string") {
