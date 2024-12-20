@@ -13,7 +13,7 @@ import { useState } from "react";
 import { auth } from "../../firebase";
 import { Label } from "@/components/ui/label";
 import { signOut } from "firebase/auth";
-import { LayoutPanelLeft, LogOut, UserPen } from "lucide-react";
+import { LayoutPanelLeft, LogOut } from "lucide-react";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { Input } from "@/components/ui/input";
 import { IoSearchOutline } from "react-icons/io5";
@@ -84,9 +84,9 @@ export default function NavigationBar() {
                   <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                     <LayoutPanelLeft /> <span>Dashboard</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/")}>
+                  {/* <DropdownMenuItem onClick={() => navigate("/")}>
                     <UserPen /> <span>Profile</span>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => {

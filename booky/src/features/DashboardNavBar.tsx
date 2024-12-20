@@ -12,14 +12,14 @@ import {
 import { IoPersonCircle } from "react-icons/io5";
 import { Label } from "@/components/ui/label";
 import { RiArrowDropDownLine } from "react-icons/ri";
-import { LayoutPanelLeft, LogOut, UserPen } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
 
 export default function NavigationBar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userName, userEmail } = useHook();
+  const { userName } = useHook();
 
   return (
     <nav className="flex flex-col h-screen w-1/6 min-w-[147px] py-4 bg-zinc-50 border-r border-gray-200">
@@ -70,9 +70,9 @@ export default function NavigationBar() {
           <DropdownMenuContent className="w-32">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/")}>
+            {/* <DropdownMenuItem onClick={() => navigate("/")}>
               <UserPen /> <span>Profile</span>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {

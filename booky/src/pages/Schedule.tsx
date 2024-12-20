@@ -127,21 +127,6 @@ export default function Schedule() {
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + 7);
 
-    // Format the current date into MM-DD-YYYY format
-    const formatDate = (date: Date) => {
-      const month = (date.getMonth() + 1).toString().padStart(2, "0"); // months are 0-based
-      const day = date.getDate().toString().padStart(2, "0");
-      const year = date.getFullYear().toString();
-      return `${month}-${day}-${year}`;
-    };
-
-    // Check if the formatted date is in the cancelledDays array
-    const formattedDate = formatDate(date);
-
-    // if (cancelledDays.includes(formattedDate)) {
-    //   return true; // Disable the date if it's in the cancelledDays array
-    // }
-
     const dayIndex = date.getDay();
 
     // Check if the date is beyond the range or not in enabledDays

@@ -7,9 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../../firebase"; // Firebase authentication
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"; // Assuming you have the card component

@@ -129,15 +129,15 @@ export default function DashBoardSchedule() {
     maxDate.setDate(today.getDate() + 7);
 
     // Format the current date into MM-DD-YYYY format
-    const formatDate = (date: Date) => {
-      const month = (date.getMonth() + 1).toString().padStart(2, "0"); // months are 0-based
-      const day = date.getDate().toString().padStart(2, "0");
-      const year = date.getFullYear().toString();
-      return `${month}-${day}-${year}`;
-    };
+    // const formatDate = (date: Date) => {
+    //   const month = (date.getMonth() + 1).toString().padStart(2, "0"); // months are 0-based
+    //   const day = date.getDate().toString().padStart(2, "0");
+    //   const year = date.getFullYear().toString();
+    //   return `${month}-${day}-${year}`;
+    // };
 
     // Check if the formatted date is in the cancelledDays array
-    const formattedDate = formatDate(date);
+    // const formattedDate = formatDate(date);
 
     // if (cancelledDays.includes(formattedDate)) {
     //   return true; // Disable the date if it's in the cancelledDays array
@@ -334,7 +334,7 @@ export default function DashBoardSchedule() {
                         </CardDescription>
                       </div>
                       <div className="flex w-full justify-center">
-                        <Button
+                        {/* <Button
                           onClick={() => {
                             navigator.clipboard.writeText(teamId);
                             toast(
@@ -344,6 +344,23 @@ export default function DashBoardSchedule() {
                           className="w-full"
                         >
                           Copy Invite Code
+                        </Button> */}
+                        <Button
+                          onClick={() => {
+                            const el = document.createElement("textarea");
+                            el.value = teamId || "";
+                            el.style.position = "absolute";
+                            el.style.left = "-9999px"; // Move it out of view
+                            document.body.appendChild(el);
+
+                            el.select();
+                            document.execCommand("copy"); // Fallback command for older browsers
+                            document.body.removeChild(el);
+
+                            toast("Team Code copied to clipboard!");
+                          }}
+                        >
+                          Copy Team Code
                         </Button>
                       </div>
                     </div>

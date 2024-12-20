@@ -17,7 +17,7 @@ import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 dotenv.config();
 
 const app = express();
-const PORT = 5001;
+const PORT = 5000;
 
 // Middleware
 app.use(
@@ -46,7 +46,7 @@ app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
 
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGODB_URI!, {
+  .connect(process.env.SERVER_MONGODB!, {
     dbName: "booky",
   })
   .then(() => console.log("Connected to MongoDB"))
