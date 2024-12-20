@@ -12,10 +12,13 @@ interface ISchedule {
 }
 
 interface IAppointment {
-  day: string; // Store as Date type
+  _id: string;
+  day: string;
   time: string;
   name: string;
   email: string;
+  token: string;
+  tokenExpiry: Date;
 }
 
 interface ICancelMeeting {
@@ -50,10 +53,12 @@ const ScheduleSchema: Schema = new Schema<ISchedule>({
 
 // Define Appointment Schema
 const AppointmentSchema: Schema = new Schema<IAppointment>({
-  day: { type: String, required: true }, // Store date as Date type
-  time: { type: String, required: true }, // Store time as string
+  day: { type: String, required: true },
+  time: { type: String, required: true },
   name: { type: String, required: false },
-  email: { type: String, required: true }, // Store email as string
+  email: { type: String, required: true },
+  token: { type: String, required: true },              
+  tokenExpiry: { type: Date, required: true },
 });
 
 const CancelMeetingSchema: Schema = new Schema<ICancelMeeting>({

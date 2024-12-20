@@ -15,6 +15,7 @@ import SignIn from "./pages/SignIn";
 import { Toaster } from "@/components/ui/sonner";
 import CreateTeam from "./pages/CreateTeam";
 import { useHook } from "./hooks.ts";
+import { Appointment } from "./pages/Appointment.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -44,6 +45,7 @@ function App() {
         {/* <Route path="/search/:searchCode" element={<Search />} /> */}
         <Route path="/schedule/:code" element={<Schedule />} />
         {/* <Route path="/team/:teamId" element={<RegisterTeam />} />  */}
+        <Route path="/:team/:code" element={<Appointment />} />
         <Route
           path="/dashboard"
           element={

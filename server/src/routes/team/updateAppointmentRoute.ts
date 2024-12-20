@@ -38,14 +38,16 @@ export const updateAppointmentsHandler: RequestHandler = async (
       from: `Booky <${process.env.EMAIL}>`,
       to: appointments[0].email,
       subject: "Booky Confirmation",
-      text: "Booky Confirmation Email Test",
+      text: `Booky Confirmation Email Test, ${appointments[0].token}`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Email sending failed:", error);
       } else {
-        console.log("Email sent: " + appointments[0].email + " | " + info.response);
+        console.log(
+          "Email sent: " + appointments[0].email + " | " + info.response
+        );
       }
     });
 

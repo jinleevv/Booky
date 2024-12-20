@@ -70,6 +70,15 @@ export default function ScheduleForm({
       return;
     }
 
+    const newAppointmentToken = {
+      day: selectedDay,
+      time: selectedTime,
+      name: values.name,
+      email: values.email,
+      token: generateRandomToken(),
+      tokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    };
+
     const newAppointment = {
       day: selectedDay,
       time: selectedTime,
@@ -86,7 +95,7 @@ export default function ScheduleForm({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ appointments: [newAppointment] }),
+          body: JSON.stringify({ appointments: [newAppointmentToken] }),
         }
       );
 
@@ -101,6 +110,14 @@ export default function ScheduleForm({
       toast.error("Something went wrong!");
     }
   }
+
+  const generateRandomToken = (length = 32) => {
+    const array = new Uint8Array(length);
+    window.crypto.getRandomValues(array); // Fill the array with random values
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
+      ""
+    );
+  };
 
   return (
     <Form {...form}>
