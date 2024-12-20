@@ -37,7 +37,7 @@ export default function Schedule() {
   const [userSelectedDate, setUserSelectedDate] = useState<string>(""); //Kind of redundent
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
-  // Generate time slots dynamically when the selected date changes
+  // Generate time slots when the selected date changes.
   useEffect(() => {
     if (!selectedDate || availableTime.length === 0) return;
     const month = selectedDate.getMonth() + 1;
@@ -46,9 +46,7 @@ export default function Schedule() {
 
     setUserSelectedDate(month + "-" + date + "-" + year);
 
-    const dayOfWeek = selectedDate.toLocaleDateString("en-US", {
-      weekday: "long",
-    });
+    const dayOfWeek = selectedDate.toLocaleDateString("en-US", {weekday: "long"});
     const dayAvailability = availableTime.find((day) => day.day === dayOfWeek);
 
     if (dayAvailability?.enabled) {
