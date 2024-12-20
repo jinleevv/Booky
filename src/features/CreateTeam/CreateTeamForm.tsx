@@ -280,10 +280,8 @@ export default function CreateTeamForm() {
                         type="button"
                         variant="ghost"
                         onClick={() => {
-                          const updatedDurations = isSelected
-                            ? field.value.filter((val: string) => val !== time)
-                            : [...field.value, time];
-                          field.onChange(updatedDurations);
+                          const selectedDuration = isSelected ? [] : [time];
+                          field.onChange(selectedDuration);
                         }}
                         className={`${
                           isSelected
