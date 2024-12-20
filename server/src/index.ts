@@ -2,14 +2,14 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import userRoutes from "./routes/user/userRegistrationRoute";
-import createTeamRoutes from "./routes/team/createTeamRoute";
-import getTeamRoutes from "./routes/team/getTeamRoute";
-import updateAppointmentRoutes from "./routes/team/updateAppointmentRoute";
-import queryTeamRoutes from "./routes/team/queryTeamRoute";
+import userRoute from "./routes/user/userRegistrationRoute";
+import createTeamRoute from "./routes/team/createTeamRoute";
+import getTeamRoute from "./routes/team/getTeamRoute";
+import updateAppointmentRoute from "./routes/team/updateAppointmentRoute";
+import queryTeamRoute from "./routes/team/queryTeamRoute";
 import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
-import queryUserTeamsRoutes from "./routes/team/queryUserTeamsRoute";
-import updateCancellationRoutes from "./routes/team/updateCancellationRoute";
+import queryUserTeamsRoute from "./routes/team/queryUserTeamsRoute";
+import updateCancellationRoute from "./routes/team/updateCancellationRoute";
 import queryAppointmentRoute from "./routes/team/queryAppointmentRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
 
@@ -31,14 +31,14 @@ app.use(
 app.use(express.json());
 
 // Routes
-app.use("/api/users", userRoutes);
-app.use("/api/teams", queryUserTeamsRoutes);
-app.use("/api/teams", createTeamRoutes);
-app.use("/api/teams", updateAppointmentRoutes);
-app.use("/api/teams", queryTeamRoutes);
+app.use("/api/users", userRoute);
+app.use("/api/teams", queryUserTeamsRoute);
+app.use("/api/teams", createTeamRoute);
+app.use("/api/teams", updateAppointmentRoute);
+app.use("/api/teams", queryTeamRoute);
 app.use("/api/teams", updateTeamMembersRoute);
-app.use("/api/teams", updateCancellationRoutes);
-app.use("/api/teams", getTeamRoutes);
+app.use("/api/teams", updateCancellationRoute);
+app.use("/api/teams", getTeamRoute);
 app.use("/api/appointment/get-appointment", queryAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
 
