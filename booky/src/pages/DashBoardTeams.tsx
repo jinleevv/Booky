@@ -5,9 +5,18 @@ import DashboardNavBar from "@/features/DashboardNavBar";
 import { IoIosAdd } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../firebase"; // Firebase authentication
-import { Card } from "@/components/ui/card"; // Assuming you have the card component
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"; // Assuming you have the card component
 import { User } from "firebase/auth"; // Import user type for TypeScript
 import { useHook } from "@/hooks";
+import { Trash } from "lucide-react";
+import { toast } from "sonner";
 
 export default function DashBoardTeams() {
   const navigate = useNavigate();
@@ -50,8 +59,24 @@ export default function DashBoardTeams() {
 
   const handleCardClick = (teamId: string) => {
     // Navigate to the schedule page for the clicked team
-    navigate(`/schedule/${teamId}`);
+    navigate(`/dashboard/${teamId}`);
   };
+
+  async function handleRemoveTeam(teamId: string) {
+    const response = await fetch(
+      `${server}/api/team/remove-user-from-team?teamId=${teamId}&userEmail=${userEmail}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (!response.ok) {
+      toast("Failed to delete the team");
+    }
+    toast("Successfully deleted the team");
+  }
 
   return (
     <section className="h-screen w-screen bg-white">
@@ -78,17 +103,21 @@ export default function DashBoardTeams() {
             {teams.map((team) => (
               <Card
                 key={team._id}
-                className="p-4 border rounded shadow-md cursor-pointer"
+                className="border rounded shadow-md cursor-pointer"
                 onClick={() => handleCardClick(team._id)} // Use navigate here
               >
-                <h3 className="text-lg font-semibold">{team.name}</h3>
-                <p className="text-sm text-gray-500">Admin: {team.admin}</p>
-                <p className="text-sm text-gray-500">
-                  Members:{" "}
-                  {Array.isArray(team.members)
-                    ? team.members.join(", ")
-                    : team.members}
-                </p>
+                <CardHeader>
+                  <CardTitle className="flex text-lg font-bold justify-between">
+                    {team.name}
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleRemoveTeam(team._id)}
+                    >
+                      <Trash size={20} />
+                    </Button>
+                  </CardTitle>
+                  <CardDescription>Professor: {team.admin}</CardDescription>
+                </CardHeader>
               </Card>
             ))}
           </div>

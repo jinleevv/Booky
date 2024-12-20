@@ -12,6 +12,7 @@ import queryUserTeamsRoute from "./routes/team/queryUserTeamsRoute";
 import updateCancellationRoute from "./routes/team/updateCancellationRoute";
 import queryAppointmentRoute from "./routes/team/queryAppointmentRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
+import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use("/api/teams", updateCancellationRoute);
 app.use("/api/teams", getTeamRoute);
 app.use("/api/appointment/get-appointment", queryAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
+app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
 
 // MongoDB connection
 mongoose

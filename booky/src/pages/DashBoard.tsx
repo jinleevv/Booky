@@ -22,7 +22,7 @@ export default function DashBoard() {
     const fetchOfficeHours = async () => {
       try {
         const response = await fetch(
-          `${server}/api/teams/get-user-teams?userEmail=${userEmail}`
+          `${server}/api/teams/by-user?userEmail=${userEmail}`
         );
 
         if (!response.ok) {
@@ -45,6 +45,7 @@ export default function DashBoard() {
         teams.forEach((team) => {
           const teamName = team.name;
           const teamId = team._id;
+          const teamAdmin = team.admin;
           const teamAvailableTime = team.availableTime;
           team.appointments.forEach((appointment) => {
             const daysOfWeek = [
@@ -98,6 +99,7 @@ export default function DashBoard() {
                 if (!checkDateEntry) {
                   upcoming.push({
                     teamId: teamId,
+                    admin: teamAdmin,
                     date: appointment.day,
                     day: appointmentDay,
                     start: validStartTime,
@@ -149,6 +151,7 @@ export default function DashBoard() {
                 if (!checkDateEntry) {
                   past.push({
                     teamId: teamId,
+                    admin: teamAdmin,
                     date: appointment.day,
                     day: appointmentDay,
                     start: validStartTime,
@@ -207,6 +210,7 @@ export default function DashBoard() {
                 if (!checkDateEntry) {
                   upcoming.push({
                     teamId: teamId,
+                    admin: teamAdmin,
                     date: appointment.day,
                     day: appointmentDay,
                     start: validStartTime,
@@ -256,6 +260,7 @@ export default function DashBoard() {
                 if (!checkDateEntry) {
                   past.push({
                     teamId: teamId,
+                    admin: teamAdmin,
                     date: appointment.day,
                     day: appointmentDay,
                     start: validStartTime,
@@ -357,7 +362,7 @@ export default function DashBoard() {
         /(\d{2}):(\d{2}) (AM|PM)/
       )!;
       let militaryHours = parseInt(hours);
-      if (period === "PM") {
+      if (period === "PM" && hours !== "12") {
         militaryHours += 12;
       }
       return militaryHours * 60 + parseInt(minutes);
@@ -487,22 +492,26 @@ export default function DashBoard() {
                                   )}
                                 </div>
                               </div>
-                              <div className="flex w-full justify-end mt-5">
-                                <Button
-                                  variant="outline"
-                                  className="ml-4"
-                                  onClick={() => {
-                                    handleCancel(
-                                      meeting.date,
-                                      meeting.teamId,
-                                      meeting.start,
-                                      meeting.end
-                                    );
-                                  }}
-                                >
-                                  Cancel the Meeting
-                                </Button>
-                              </div>
+                              {meeting.admin === userEmail ? (
+                                <div className="flex w-full justify-end mt-5">
+                                  <Button
+                                    variant="outline"
+                                    className="ml-4"
+                                    onClick={() => {
+                                      handleCancel(
+                                        meeting.date,
+                                        meeting.teamId,
+                                        meeting.start,
+                                        meeting.end
+                                      );
+                                    }}
+                                  >
+                                    Cancel the Meeting
+                                  </Button>
+                                </div>
+                              ) : (
+                                <></>
+                              )}
                             </AccordionContent>
                           </AccordionItem>
                         ))}

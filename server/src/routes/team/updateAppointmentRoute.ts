@@ -5,7 +5,10 @@ import Team from "../../models/team";
 const router = express.Router();
 
 // Called when a user makes an appointment. Adds the appointment to the team appointments list.
-export const updateAppointmentsHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const updateAppointmentsHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { teamId } = req.params;
   const { appointments } = req.body;
 
@@ -29,15 +32,15 @@ export const updateAppointmentsHandler: RequestHandler = async (req: Request, re
       service: "Gmail",
       auth: {
         user: process.env.EMAIL,
-        pass: process.env.PASSWORD
-      }
+        pass: process.env.PASSWORD,
+      },
     });
 
     const mailOptions = {
       from: `Booky <${process.env.EMAIL}>`,
       to: appointments[0].email,
       subject: "Booky Confirmation",
-      text: `Booky Confirmation Email Test, ${appointments[0].token}`
+      text: `Booky Confirmation Email\n\n Cancel Link: http://10.140.17.108:3000/${team._id}/${appointments[0].token} \n\n Have a great day :) \n Booky`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {

@@ -1,13 +1,32 @@
 import { Button } from "@/components/ui/button";
+import { useHook } from "@/hooks";
 import { useNavigate, useLocation } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { IoPersonCircle } from "react-icons/io5";
+import { Label } from "@/components/ui/label";
+import { RiArrowDropDownLine } from "react-icons/ri";
+import { LayoutPanelLeft, LogOut, UserPen } from "lucide-react";
+import { auth } from "../../firebase";
+import { signOut } from "firebase/auth";
 
 export default function NavigationBar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { userName, userEmail } = useHook();
 
   return (
     <nav className="flex flex-col h-screen w-1/6 min-w-[147px] py-4 bg-zinc-50 border-r border-gray-200">
-      <div className="flex items-center gap-2 px-8">
+      <div
+        className="flex items-center gap-2 px-8"
+        onClick={() => navigate("/")}
+      >
         <img src="/mcgill.png" alt="McGill Logo" className="w-10 h-10" />
         <div className="text-sm font-bold text-black -ml-4 -mt-1.5">Booky</div>
       </div>
@@ -35,6 +54,35 @@ export default function NavigationBar() {
         >
           Teams
         </Button>
+      </div>
+      <div className="mt-auto flex w-full justify-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            asChild
+            className="hover:bg-slate-100 p-1 rounded-lg"
+          >
+            <div className="flex gap-1">
+              <IoPersonCircle size={25} className="m-auto" />
+              <Label className="font-bold m-auto">{userName}</Label>
+              <RiArrowDropDownLine className="m-auto" />
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-32">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate("/")}>
+              <UserPen /> <span>Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                signOut(auth);
+              }}
+            >
+              <LogOut /> <span>Sign Out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
   );

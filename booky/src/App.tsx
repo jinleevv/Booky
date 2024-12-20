@@ -16,6 +16,7 @@ import { Toaster } from "@/components/ui/sonner";
 import CreateTeam from "./pages/CreateTeam";
 import { useHook } from "./hooks.ts";
 import { Appointment } from "./pages/Appointment.tsx";
+import DashBoardSchedule from "./pages/DashBoardSchedule.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -67,6 +68,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CreateTeam />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/:team"
+          element={
+            <ProtectedRoute>
+              <DashBoardSchedule />
             </ProtectedRoute>
           }
         />
