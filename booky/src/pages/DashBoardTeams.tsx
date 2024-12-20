@@ -7,10 +7,11 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../../firebase"; // Firebase authentication
 import { Card } from "@/components/ui/card"; // Assuming you have the card component
 import { User } from "firebase/auth"; // Import user type for TypeScript
+import { useHook } from "@/hooks";
 
 export default function DashBoardTeams() {
   const navigate = useNavigate();
-
+  const { server } = useHook();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [teams, setTeams] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export default function DashBoardTeams() {
       const fetchTeams = async () => {
         try {
           const response = await fetch(
-            `http://10.140.17.108:5000/api/teams/by-user?userEmail=${userEmail}`
+            `${server}/api/teams/by-user?userEmail=${userEmail}`
           );
           const data = await response.json();
 

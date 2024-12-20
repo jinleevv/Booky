@@ -12,7 +12,7 @@ import { useHook } from "@/hooks";
 import { toast } from "sonner";
 
 export default function DashBoard() {
-  const { userEmail } = useHook();
+  const { server, userEmail } = useHook();
 
   const [upcomingOfficeHours, setUpcomingOfficeHours] = useState<any[]>([]);
   const [pastOfficeHours, setPastOfficeHours] = useState<any[]>([]);
@@ -22,7 +22,7 @@ export default function DashBoard() {
     const fetchOfficeHours = async () => {
       try {
         const response = await fetch(
-          `http://10.140.17.108:5000/api/teams/get-user-teams?userEmail=${userEmail}`
+          `${server}/api/teams/get-user-teams?userEmail=${userEmail}`
         );
 
         if (!response.ok) {
@@ -377,20 +377,17 @@ export default function DashBoard() {
     end: string
   ) => {
     try {
-      const response = await fetch(
-        `http://10.140.17.108:5000/api/teams/${teamId}/cancel`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            cancelledDate: cancelledDate,
-            start: start,
-            end: end,
-          }),
-        }
-      );
+      const response = await fetch(`${server}/api/teams/${teamId}/cancel`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cancelledDate: cancelledDate,
+          start: start,
+          end: end,
+        }),
+      });
 
       if (!response.ok) throw toast("Failed to cancel office hour");
 

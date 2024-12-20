@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
+import { useHook } from "@/hooks";
 
 // Define Zod schema for validation
 const formSchema = z.object({
@@ -48,7 +49,8 @@ export default function ScheduleForm({
   teamId,
   handleNewAppointment,
 }: ScheduleFormProps) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // <<<<<<<<<<<<<<<
+  const { server } = useHook();
 
   useEffect(() => {
     onAuthStateChanged(auth, (currentUser) => {
@@ -89,7 +91,7 @@ export default function ScheduleForm({
     try {
       // Example API call or logic to handle form submission
       const response = await fetch(
-        `http://10.140.17.108:5000/api/teams/${teamId}/appointments`,
+        `${server}/api/teams/${teamId}/appointments`,
         {
           method: "PATCH",
           headers: {
@@ -121,7 +123,10 @@ export default function ScheduleForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4 max-h-1/2">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 p-4 max-h-1/2"
+      >
         <FormField
           control={form.control}
           name="name"

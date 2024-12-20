@@ -23,6 +23,7 @@ import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { availableTime } from "@/features/time";
 import { Switch } from "@/components/ui/switch";
+import { useHook } from "@/hooks";
 
 const days = [
   "Sunday",
@@ -65,6 +66,8 @@ export default function CreateTeamForm() {
     },
   });
 
+  const { server } = useHook();
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
 
     const user = auth.currentUser;
@@ -74,7 +77,7 @@ export default function CreateTeamForm() {
       return;
     }
 
-    const response = await fetch("http://10.140.17.108:5000/api/teams/register", {
+    const response = await fetch(`${server}/api/teams/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
