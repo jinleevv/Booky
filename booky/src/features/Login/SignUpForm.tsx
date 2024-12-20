@@ -107,7 +107,7 @@ export default function SignUpForm() {
 
   async function saveUserToDatabase(uid: string, email: string, name: string) {
     const response = await fetch(
-      "https://fall2024-comp307-group08.cs.mcgill.ca/api/users/register",
+      "http://10.140.17.108:5000/api/users/register",
       {
         method: "POST",
         headers: {

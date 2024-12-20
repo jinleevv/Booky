@@ -78,7 +78,7 @@ export default function Schedule() {
   async function fetchTeamDetails() {
     try {
       const response = await fetch(
-        `https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/${teamId}`
+        `http://10.140.17.108:5000/api/teams/${teamId}`
       );
       const data = await response.json();
 
@@ -247,7 +247,7 @@ export default function Schedule() {
   const handleJoinTeam = async () => {
     try {
       const response = await fetch(
-        `https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/${teamId}/members`,
+        `http://10.140.17.108:5000/api/teams/${teamId}/members`,
         {
           method: "PATCH",
           headers: {

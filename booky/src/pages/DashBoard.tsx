@@ -22,7 +22,7 @@ export default function DashBoard() {
     const fetchOfficeHours = async () => {
       try {
         const response = await fetch(
-          `https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/get-user-teams?userEmail=${userEmail}`
+          `http://10.140.17.108:5000/api/teams/get-user-teams?userEmail=${userEmail}`
         );
 
         if (!response.ok) {
@@ -378,7 +378,7 @@ export default function DashBoard() {
   ) => {
     try {
       const response = await fetch(
-        `https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/${teamId}/cancel`,
+        `http://10.140.17.108:5000/api/teams/${teamId}/cancel`,
         {
           method: "PATCH",
           headers: {

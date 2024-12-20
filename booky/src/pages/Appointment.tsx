@@ -38,7 +38,7 @@ export function Appointment() {
       try {
         // Send GET request to backend API
         const response = await fetch(
-          `http://localhost:5000/api/appointment/get-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`
+          `http://10.140.17.108:5000/api/appointment/get-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`
         );
 
         if (!response.ok) {
@@ -64,7 +64,7 @@ export function Appointment() {
 
   async function handleCancel() {
     const response = await fetch(
-      `https://fall2024-comp307-group08.cs.mcgill.ca/api/appointment/delete-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`,
+      `http://10.140.17.108:5000/api/appointment/delete-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`,
       {
         method: "PATCH",
         headers: {

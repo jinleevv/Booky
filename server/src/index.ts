@@ -16,7 +16,7 @@ import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
 dotenv.config();
 
 const app = express();
-const PORT = 5001;
+const PORT = 5000;
 
 // Middleware
 app.use(
@@ -44,7 +44,7 @@ app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
 
 // MongoDB connection
 mongoose
-  .connect(process.env.SERVER_MONGODB!, {
+  .connect(process.env.MONGODB_URI!, {
     dbName: "booky",
   })
   .then(() => console.log("Connected to MongoDB"))

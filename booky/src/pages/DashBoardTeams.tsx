@@ -31,7 +31,7 @@ export default function DashBoardTeams() {
       const fetchTeams = async () => {
         try {
           const response = await fetch(
-            `https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/by-user?userEmail=${userEmail}`
+            `http://10.140.17.108:5000/api/teams/by-user?userEmail=${userEmail}`
           );
           const data = await response.json();
 

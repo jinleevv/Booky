@@ -2,6 +2,12 @@ import { Label } from "@/components/ui/label";
 import NavigationBar from "@/features/NavigationBar";
 
 export default function Home() {
+  // async function handleTest() {
+  //   const response = await fetch("http://10.140.17.108:5000/api/health");
+
+  //   console.log(response);
+
+  // }
   return (
     <section className="h-screen w-screen bg-white">
       <div className="relative z-1">
@@ -9,6 +15,7 @@ export default function Home() {
       </div>
       <div className="flex flex-col items-center justify-start h-5/6 relative">
         <div className="z-10 mt-8">
+          {/* <Button onClick={handleTest}>Test Please</Button> */}
           <Label className="text-5xl font-bold text-black">
             Making Time for What Matters
           </Label>{" "}
