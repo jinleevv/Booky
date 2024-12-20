@@ -24,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { availableTime } from "@/features/time";
 import { Switch } from "@/components/ui/switch";
 import { useHook } from "@/hooks";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const days = [
   "Sunday",
@@ -67,9 +69,9 @@ export default function CreateTeamForm() {
   });
 
   const { server } = useHook();
+  const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-
     const user = auth.currentUser;
 
     if (!user) {
@@ -86,7 +88,7 @@ export default function CreateTeamForm() {
         name: values.teamName,
         durations: values.durations,
         availableTime: values.schedule,
-        admin: user.email
+        admin: user.email,
       }),
     });
 
@@ -94,6 +96,8 @@ export default function CreateTeamForm() {
       console.error("Failed to save team to database");
       return -1;
     }
+    toast("Successfully Created Team");
+    navigate("/dashboard/teams");
     return 0;
   }
   return (

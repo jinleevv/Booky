@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import ScheduleForm from "@/features/CreateAppointment/ScheduleForm";
 import { useHook } from "@/hooks";
+import { toast } from "sonner";
 
 export default function Schedule() {
   const { code: teamId } = useParams();
@@ -84,8 +85,8 @@ export default function Schedule() {
         setAvailableTime(data.availableTime);
         setDuration(parseInt(data.durations[0], 10));
         setExistingAppointments(data.appointments); // Set the existing appointments
-        setTeamMembers(data.members || []); // Store the team members
-        setCancelledDays(data.cancelledDays || []); // Assuming you fetch the cancelled days array
+        setTeamMembers(data.members); // Store the team members
+        setCancelledDays(data.cancelledMeetings); // Assuming you fetch the cancelled days array
 
         const dayMap: { [key: string]: number } = {
           Sunday: 0,
@@ -250,15 +251,15 @@ export default function Schedule() {
       });
 
       if (response.ok) {
-        alert("Successfully joined the team!");
+        toast("Successfully joined the team!");
         setTeamMembers([...teamMembers, userEmail]); // Update local team members
       } else {
         const errorData = await response.json();
-        alert(errorData.message || "Failed to join the team");
+        toast(errorData.message || "Failed to join the team");
       }
     } catch (error) {
       console.error("Error joining team:", error);
-      alert("An error occurred while trying to join the team.");
+      toast("An error occurred while trying to join the team.");
     }
   };
 

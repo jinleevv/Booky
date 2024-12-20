@@ -38,8 +38,6 @@ export default function DashBoardTeams() {
 
           if (response.ok) {
             setTeams(data); // Update the teams state
-          } else {
-            setError("No teams found for this user");
           }
         } catch (err) {
           setError("Error fetching teams");

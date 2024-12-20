@@ -16,11 +16,6 @@ export const queryTeamsByUserHandler: RequestHandler = async (req: Request, res:
     // Find teams where userEmail is in the admin or members attribute.
     const teams = await Team.find({ $or: [{admin: userEmail}, {members: userEmail}] }).exec();
 
-    if (!teams || teams.length === 0) {
-      res.status(404).json({ message: "No teams found for this user" });
-      return;
-    }
-
     res.status(200).json(teams);
   } catch (error) {
     console.error("Error querying teams:", error);

@@ -29,6 +29,7 @@ export const getTeamDetailsHandler: RequestHandler = async (req: Request, res: R
       name: team.name,
       adminName: adminUser.name,
       adminEmail: team.admin,
+      members: team.members,
       availableTime: team.availableTime,
       durations: team.durations,
       appointments: team.appointments,
