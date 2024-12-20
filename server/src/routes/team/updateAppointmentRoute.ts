@@ -4,10 +4,8 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-export const updateAppointmentsHandler: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+// Called when a user makes an appointment. Adds the appointment to the team appointments list.
+export const updateAppointmentsHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { teamId } = req.params;
   const { appointments } = req.body;
 
@@ -26,19 +24,20 @@ export const updateAppointmentsHandler: RequestHandler = async (
     team.appointments = [...team.appointments, ...appointments];
     await team.save();
 
+    // Set up email components to send a confirmation email to the user about their appointment.
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
         user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
-      },
+        pass: process.env.PASSWORD
+      }
     });
 
     const mailOptions = {
       from: `Booky <${process.env.EMAIL}>`,
       to: appointments[0].email,
       subject: "Booky Confirmation",
-      text: `Booky Confirmation Email Test, ${appointments[0].token}`,
+      text: `Booky Confirmation Email Test, ${appointments[0].token}`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -51,9 +50,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
       }
     });
 
-    res
-      .status(200)
-      .json({ message: "Appointments updated successfully", team });
+    res.status(200).json({ message: "Appointments updated successfully" });
   } catch (error) {
     console.error("Error updating appointments:", error);
     res.status(500).json({ message: "Server error" });

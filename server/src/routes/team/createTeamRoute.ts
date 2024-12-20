@@ -1,39 +1,32 @@
 import express, { Request, Response, RequestHandler } from "express";
-import { v4 as uuidv4 } from "uuid";
+import { customAlphabet } from "nanoid";
 import Team from "../../models/team";
 
 const router = express.Router();
 
-export const createTeamHandler: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+// Create a new team.
+export const createTeamHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { name, durations, availableTime, admin } = req.body;
 
   try {
     if (!name || !durations || !availableTime || !admin) {
-      res.status(400).json({
-        message:
-          "Missing required fields: name, durations, availableTime, or admin.",
-      });
+      res.status(400).json({ message: "Missing required fields: name, durations, availableTime, or admin." });
       return;
     }
 
-    const teamId = `team-${uuidv4()}`;
+    // Generate unique teamId
+    const numbers = '0123456789';
+    const generateNumericId = customAlphabet(numbers, 6);
+    const _id = `team-${name}-${generateNumericId()}`;
 
-    const newTeam = new Team({
-      _id: teamId,
-      name,
-      durations,
-      availableTime,
-      appointments: [],
-      admin,
-    });
-
+    // Create the new team and save in teams collection.
+    // Unitialized attributes are set to their default values.
+    const newTeam = new Team({ _id, name, admin, availableTime, durations });
     await newTeam.save();
-    res.status(201).json({ message: "Team registered successfully" });
+
+    res.status(201).json({ message: "Team creating successfully" });
   } catch (error) {
-    console.error("Error registering team:", error);
+    console.error("Error creating team:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -4,33 +4,34 @@ import User from "../../models/user";
 
 const router = express.Router();
 
-export const getTeamDetailsHandler: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+// Retrieve all team information (except createdAt, plus admin name)
+export const getTeamDetailsHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { teamId } = req.params;
 
   try {
+    // Fetch team by id.
     const team = await Team.findById(teamId).exec();
     if (!team) {
       res.status(404).json({ message: "Team not found" });
       return;
     }
 
+    // Get the name of the admin.
     const adminUser = await User.findOne({ email: team.admin }).exec();
     if (!adminUser) {
       res.status(404).json({ message: "Admin user not found" });
       return;
     }
 
+    // Set response with team information.
     res.status(200).json({
       teamId: team._id,
       name: team.name,
-      durations: team.durations,
-      availableTime: team.availableTime,
-      appointments: team.appointments,
       adminName: adminUser.name,
       adminEmail: team.admin,
+      availableTime: team.availableTime,
+      durations: team.durations,
+      appointments: team.appointments,
       cancelledMeetings: team.cancelledMeetings,
     });
   } catch (error) {
