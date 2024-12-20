@@ -1,31 +1,6 @@
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import DashboardNavBar from "@/features/DashboardNavBar";
-import { memo, useState } from "react";
-import { availableTime } from "@/features/time";
 import CreateTeamForm from "@/features/CreateTeam/CreateTeamForm";
-
-interface MemoizedSelectProps {
-  value: string;
-  onChange: (value: string) => void;
-  availableTime: string[];
-}
-
-const days = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
+import DashboardNavBar from "@/features/DashboardNavBar";
 
 export default function CreateTeam() {
   // const [teamName, setTeamName] = useState<string>("");

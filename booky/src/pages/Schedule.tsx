@@ -77,7 +77,9 @@ export default function Schedule() {
 
   async function fetchTeamDetails() {
     try {
-      const response = await fetch(`http://localhost:5001/api/teams/${teamId}`);
+      const response = await fetch(
+        `https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/${teamId}`
+      );
       const data = await response.json();
 
       if (response.ok) {
@@ -245,7 +247,7 @@ export default function Schedule() {
   const handleJoinTeam = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5001/api/teams/${teamId}/members`,
+        `https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/${teamId}/members`,
         {
           method: "PATCH",
           headers: {
@@ -299,9 +301,9 @@ export default function Schedule() {
                       </Button>
                     )}
                     {!currentUser && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Log in to join a team.
-                    </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Log in to join a team.
+                      </p>
                     )}
                   </div>
                 </div>

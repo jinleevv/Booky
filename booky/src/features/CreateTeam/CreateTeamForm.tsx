@@ -74,7 +74,7 @@ export default function CreateTeamForm() {
       return;
     }
 
-    const response = await fetch("http://localhost:5001/api/teams/register", {
+    const response = await fetch("https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

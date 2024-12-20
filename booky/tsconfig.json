@@ -18,7 +18,7 @@
     "strict": false,
     "strictNullChecks": false,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
 
     /* Shadcn UI */
@@ -26,7 +26,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    
+
     "types": ["node"]
   },
   "include": ["src"],
