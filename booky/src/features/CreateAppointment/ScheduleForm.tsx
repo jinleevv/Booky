@@ -89,7 +89,7 @@ export default function ScheduleForm({
     try {
       // Example API call or logic to handle form submission
       const response = await fetch(
-        `http://localhost:5001/api/teams/${teamId}/appointments`,
+        `https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/${teamId}/appointments`,
         {
           method: "PATCH",
           headers: {

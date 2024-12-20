@@ -30,7 +30,9 @@ export default function DashBoardTeams() {
     if (userEmail) {
       const fetchTeams = async () => {
         try {
-          const response = await fetch(`http://localhost:5001/api/teams/by-user?userEmail=${userEmail}`);
+          const response = await fetch(
+            `https://fall2024-comp307-group08.cs.mcgill.ca/api/teams/by-user?userEmail=${userEmail}`
+          );
           const data = await response.json();
 
           if (response.ok) {
@@ -83,11 +85,14 @@ export default function DashBoardTeams() {
                 <h3 className="text-lg font-semibold">{team.name}</h3>
                 <p className="text-sm text-gray-500">Admin: {team.admin}</p>
                 <p className="text-sm text-gray-500">
-                  Members: {Array.isArray(team.members) ? team.members.join(", ") : team.members}
+                  Members:{" "}
+                  {Array.isArray(team.members)
+                    ? team.members.join(", ")
+                    : team.members}
                 </p>
               </Card>
             ))}
-        </div>
+          </div>
         </div>
       </div>
     </section>

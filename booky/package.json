@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -26,6 +27,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
+    "express": "^4.21.2",
     "firebase": "^11.0.2",
     "jotai": "^2.10.4",
     "jotai-immer": "^0.4.1",

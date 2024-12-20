@@ -106,21 +106,27 @@ export default function SignUpForm() {
   }
 
   async function saveUserToDatabase(uid: string, email: string, name: string) {
-    const response = await fetch("http://localhost:5001/api/users/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        uid: uid,
-        email: email,
-        name: name,
-      }),
-    });
+    const response = await fetch(
+      "https://fall2024-comp307-group08.cs.mcgill.ca/api/users/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uid: uid,
+          email: email,
+          name: name,
+        }),
+      }
+    );
 
     if (!response.ok) {
-      console.error("Failed to save user to database");
+      console.log("Failed to save user to database");
+      console.log(response);
       return -1;
+    } else {
+      console.log("Successfully saved user to database");
     }
     return 0;
   }

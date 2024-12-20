@@ -20,9 +20,17 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
+interface IAppointment {
+  day: string;
+  time: string;
+}
+
 export function Appointment() {
   const { team: teamId, code: appointmentToken } = useParams();
-  const [appointment, setAppointment] = useState("");
+  const [appointment, setAppointment] = useState<IAppointment>({
+    day: "",
+    time: "",
+  });
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
@@ -30,7 +38,7 @@ export function Appointment() {
       try {
         // Send GET request to backend API
         const response = await fetch(
-          `http://localhost:5001/api/appointment/get-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`
+          `http://localhost:5000/api/appointment/get-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`
         );
 
         if (!response.ok) {
@@ -56,7 +64,7 @@ export function Appointment() {
 
   async function handleCancel() {
     const response = await fetch(
-      `http://localhost:5001/api/appointment/delete-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`,
+      `https://fall2024-comp307-group08.cs.mcgill.ca/api/appointment/delete-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`,
       {
         method: "PATCH",
         headers: {

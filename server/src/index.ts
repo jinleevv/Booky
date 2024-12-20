@@ -16,15 +16,18 @@ import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "*",
     methods: ["GET", "POST", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // If cookies or credentials are involved
   })
 );
+
 app.use(express.json());
 
 // Routes
@@ -36,13 +39,13 @@ app.use("/api/teams/get-user-teams", queryTeamRoutes);
 app.use("/api/teams", updateTeamMembersRoute);
 app.use("/api/teams", updateCancellationRoutes);
 app.use("/api/teams", getTeamRoutes);
-app.use("/api/appointment/get-appointment", queryAppointmentRoute)
-app.use("/api/appointment/delete-appointment", deleteAppointmentRoute)
+app.use("/api/appointment/get-appointment", queryAppointmentRoute);
+app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
 
 // MongoDB connection
 mongoose
-  .connect(process.env.MONGODB_URI!, {
-    dbName: "userData",
+  .connect(process.env.SERVER_MONGODB!, {
+    dbName: "booky",
   })
   .then(() => console.log("Connected to MongoDB"))
   .catch((error) => console.error("MongoDB connection error:", error));
