@@ -3,10 +3,7 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-export const queryAppointmentHandler: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const queryAppointmentHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { teamId, appointmentToken } = req.query;
 
   if (!appointmentToken || typeof appointmentToken !== "string") {
@@ -15,6 +12,7 @@ export const queryAppointmentHandler: RequestHandler = async (
   }
 
   try {
+    // Find the team.
     const team = await Team.findById(teamId).exec();
 
     if (!team) {
@@ -22,10 +20,12 @@ export const queryAppointmentHandler: RequestHandler = async (
       return;
     }
 
+    // Find the appointment with the matching token.
     const appointment = team.appointments.find(
       (item) => item.token === appointmentToken
     );
 
+    // TODO: only check if expire date has not been passed.
     const isWithin7Days = (tokenExpireDate: Date) => {
       const today = new Date();
       const sevenDaysFromNow = new Date();

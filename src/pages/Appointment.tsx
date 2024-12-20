@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 
 export function Appointment() {
   const { team: teamId, code: appointmentToken } = useParams();
-  const [appointment, setAppointment] = useState("");
+  const [appointment, setAppointment] = useState(null);
   const [error, setError] = useState<string>("");
 
   useEffect(() => {

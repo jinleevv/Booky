@@ -3,12 +3,9 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-// Handler to query teams by the admin's email
-export const queryTeamsByAdminHandler: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const { userEmail } = req.query; // Expecting query parameter 'admin'
+// Retrieve all the teams that the user is an admin of.
+export const queryTeamsByAdminHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+  const { userEmail } = req.query;
 
   if (!userEmail || typeof userEmail !== "string") {
     res.status(400).json({ message: "Invalid or missing admin email" });
@@ -16,7 +13,7 @@ export const queryTeamsByAdminHandler: RequestHandler = async (
   }
 
   try {
-    // Find teams where the 'admin' field matches the provided email
+    // Find teams that have their admin attribute set to userEmail
     const teams = await Team.find({ admin: userEmail }).exec();
 
     if (teams.length === 0) {
@@ -24,7 +21,6 @@ export const queryTeamsByAdminHandler: RequestHandler = async (
       return;
     }
 
-    // Return the list of teams
     res.status(200).json(teams);
   } catch (error) {
     console.error("Error querying teams:", error);
@@ -32,7 +28,6 @@ export const queryTeamsByAdminHandler: RequestHandler = async (
   }
 };
 
-// Set up the route to handle GET requests for teams by admin email
-router.get("/", queryTeamsByAdminHandler);
+router.get("/get-user-teams", queryTeamsByAdminHandler);
 
 export default router;
