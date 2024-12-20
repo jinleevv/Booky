@@ -2,12 +2,6 @@ import { Label } from "@/components/ui/label";
 import NavigationBar from "@/features/NavigationBar";
 
 export default function Home() {
-  // async function handleTest() {
-  //   const response = await fetch("http://10.140.17.108:5000/api/health");
-
-  //   console.log(response);
-
-  // }
   return (
     <section className="h-screen w-screen bg-white">
       <div className="relative z-1">

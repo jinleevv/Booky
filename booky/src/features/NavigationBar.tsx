@@ -21,7 +21,7 @@ import { useHook } from "@/hooks";
 
 export default function NavigationBar() {
   const navigate = useNavigate();
-  const { userName } = useHook();
+  const { loggedInUser, userName } = useHook();
   const [courseSearch, setCourseSearch] = useState<string>("");
 
   const handleSearch = () => {
@@ -64,7 +64,7 @@ export default function NavigationBar() {
         </Button>
       </div>
       <div className="flex items-center gap-2">
-        {userName ? (
+        {loggedInUser ? (
           <>
             <div className="mt-auto mb-auto">
               <DropdownMenu>

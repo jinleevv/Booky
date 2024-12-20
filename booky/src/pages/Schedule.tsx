@@ -8,18 +8,15 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import ScheduleForm from "@/features/CreateAppointment/ScheduleForm";
-import { AuthContext } from "@/features/AuthContext";
 import { useHook } from "@/hooks";
 
 export default function Schedule() {
   const { code: teamId } = useParams();
-  // Check user status
-  const { currentUser } = useContext(AuthContext);
-  const { userEmail } = useHook();
+  const { server, userEmail, loggedInUser } = useHook();
 
   const [teamName, setTeamName] = useState<string>("Loading...");
   const [adminName, setAdminName] = useState<string>("Loading...");
@@ -46,7 +43,9 @@ export default function Schedule() {
 
     setUserSelectedDate(month + "-" + date + "-" + year);
 
-    const dayOfWeek = selectedDate.toLocaleDateString("en-US", {weekday: "long"});
+    const dayOfWeek = selectedDate.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
     const dayAvailability = availableTime.find((day) => day.day === dayOfWeek);
 
     if (dayAvailability?.enabled) {
@@ -75,9 +74,7 @@ export default function Schedule() {
 
   async function fetchTeamDetails() {
     try {
-      const response = await fetch(
-        `http://10.140.17.108:5000/api/teams/${teamId}`
-      );
+      const response = await fetch(`${server}/api/teams/${teamId}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -244,16 +241,13 @@ export default function Schedule() {
 
   const handleJoinTeam = async () => {
     try {
-      const response = await fetch(
-        `http://10.140.17.108:5000/api/teams/${teamId}/members`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ members: userEmail }),
-        }
-      );
+      const response = await fetch(`${server}/api/teams/${teamId}/members`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ members: userEmail }),
+      });
 
       if (response.ok) {
         alert("Successfully joined the team!");
@@ -293,12 +287,12 @@ export default function Schedule() {
                       <Button
                         className="w-full"
                         onClick={handleJoinTeam}
-                        disabled={!currentUser}
+                        disabled={!loggedInUser}
                       >
                         Join Team
                       </Button>
                     )}
-                    {!currentUser && (
+                    {!loggedInUser && (
                       <p className="text-xs text-gray-500 mt-1">
                         Log in to join a team.
                       </p>
@@ -310,12 +304,12 @@ export default function Schedule() {
                     <Button
                       className="w-full"
                       onClick={handleJoinTeam}
-                      disabled={!currentUser}
+                      disabled={!loggedInUser}
                     >
                       Join Team
                     </Button>
                   )}
-                  {!currentUser && (
+                  {!loggedInUser && (
                     <p className="text-xs text-gray-500 mt-1">
                       Log in to join a team.
                     </p>

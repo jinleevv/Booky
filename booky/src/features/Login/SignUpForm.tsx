@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { auth } from "../../../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface PasswordRequirement {
   match: boolean;
@@ -50,7 +51,7 @@ export default function SignUpForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-
+  const navigate = useNavigate();
   const [password, setPassword] = useState<string>("");
   const [requirements, setRequirements] = useState<PasswordRequirements>({
     length: { match: false, text: "At least 8 characters" },
@@ -103,6 +104,8 @@ export default function SignUpForm() {
     if (db_response !== 0) {
       toast("Faild to store the information on MongoDB");
     }
+    toast("Successfully Created Account");
+    navigate("/login");
   }
 
   async function saveUserToDatabase(uid: string, email: string, name: string) {

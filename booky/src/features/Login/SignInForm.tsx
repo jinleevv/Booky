@@ -15,6 +15,7 @@ import { auth } from "../../../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useHook } from "@/hooks";
 
 const formSchema = z.object({
   email: z.string().min(1),
@@ -23,6 +24,7 @@ const formSchema = z.object({
 
 export default function SignInForm() {
   const navigate = useNavigate();
+  const { setLoggedInUser, setUserName } = useHook();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -40,6 +42,8 @@ export default function SignInForm() {
       console.log("User UID:", response.user.uid);
       console.log("User Email:", response.user.email);
       toast("Sign-In Successful");
+      setLoggedInUser(true);
+      setUserName(response.user.displayName);
       navigate("/");
       // Optionally, redirect the user or perform further actions
       return { success: true, user: response.user };
