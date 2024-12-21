@@ -4,14 +4,14 @@ import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
 import { IoIosAdd } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../firebase"; // Firebase authentication
+import { auth } from "../../firebase"; 
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"; // Assuming you have the card component
-import { User } from "firebase/auth"; // Import user type for TypeScript
+} from "@/components/ui/card"; 
+import { User } from "firebase/auth";
 import { useHook } from "@/hooks";
 import { Trash } from "lucide-react";
 import { toast } from "sonner";
@@ -23,17 +23,16 @@ export default function DashBoardTeams() {
   const [teams, setTeams] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Get the user's email from Firebase
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
       if (user) {
-        setUserEmail(user.email); // Store the user's email
+        setUserEmail(user.email);
       }
     });
-    return () => unsubscribe(); // Clean up on component unmount
+    return () => unsubscribe();
   }, []);
 
-  // Fetch teams from the backend API
+  // Retrieve teams that the user is a part of
   useEffect(() => {
     if (userEmail) {
       const fetchTeams = async () => {
@@ -44,7 +43,7 @@ export default function DashBoardTeams() {
           const data = await response.json();
 
           if (response.ok) {
-            setTeams(data); // Update the teams state
+            setTeams(data); 
           }
         } catch (err) {
           setError("Error fetching teams");
@@ -72,7 +71,10 @@ export default function DashBoardTeams() {
     );
     if (!response.ok) {
       toast("Failed to delete the team");
+      return;
     }
+
+    setTeams((prevTeams) => prevTeams.filter((team) => team._id !== teamId));
     toast("Successfully deleted the team");
   }
 
@@ -102,14 +104,17 @@ export default function DashBoardTeams() {
               <Card
                 key={team._id}
                 className="border rounded shadow-md cursor-pointer"
-                onClick={() => handleCardClick(team._id)} // Use navigate here
+                onClick={() => handleCardClick(team._id)}
               >
                 <CardHeader>
                   <CardTitle className="flex text-lg font-bold justify-between">
                     {team.name}
                     <Button
                       variant="ghost"
-                      onClick={() => handleRemoveTeam(team._id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveTeam(team._id);
+                      }}
                     >
                       <Trash size={20} />
                     </Button>
