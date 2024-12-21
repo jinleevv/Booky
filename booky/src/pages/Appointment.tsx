@@ -89,8 +89,8 @@ export function Appointment() {
       <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 left-1/3 z-10"></div>
       <Card className="relative translate-y-1/4 w-1/2 z-50 items-center justify-center ml-auto mr-auto">
         <CardHeader>
-          <CardTitle>Modify or Cancel the Appointment</CardTitle>
-          <CardDescription>modify or cancel the appoiontment</CardDescription>
+          <CardTitle>Cancel the Appointment</CardTitle>
+          <CardDescription>cancel the appoiontment</CardDescription>
         </CardHeader>
         <CardContent className="w-full">
           {error !== "" ? (

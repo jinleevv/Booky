@@ -14,7 +14,7 @@ export const deleteAppointmentHandler: RequestHandler = async (req: Request, res
   }
 
   try {
-    await Team.updateOne({ _id: teamId }, { $pull: {appointments: {token: appointmentToken}} });
+    await Team.updateOne({ _id: teamId }, { $pull: {appointments: {token: appointmentToken}} }).exec();
 
     res.status(200).json();
   } catch (error) {

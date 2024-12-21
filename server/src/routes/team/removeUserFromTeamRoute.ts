@@ -19,10 +19,10 @@ export const deleteUserFromTeamHandler: RequestHandler = async (
     const isMember = team!.members.includes(userEmail as string);
 
     if (isAdmin) {
-      await Team.deleteOne({ _id: teamId });
+      await Team.deleteOne({ _id: teamId }).exec();
       res.status(200).json({ message: "Team deleted successfully" });
     } else {
-      await Team.updateOne({ _id: teamId }, { $pull: { members: userEmail } });
+      await Team.updateOne({ _id: teamId }, { $pull: { members: userEmail } }).exec();
       res.status(200).json({ message: "User removed from team members" });
     }
   } catch (error) {
