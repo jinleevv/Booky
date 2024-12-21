@@ -84,12 +84,12 @@ export default function Schedule() {
       if (response.ok) {
         setTeamName(data.name);
         setAdminName(data.adminName);
-        setAdminEmail(data.adminEmail); // Assuming you fetch the admin email as well
+        setAdminEmail(data.adminEmail);
         setAvailableTime(data.availableTime);
         setDuration(parseInt(data.durations[0], 10));
-        setExistingAppointments(data.appointments); // Set the existing appointments
-        setTeamMembers(data.members); // Store the team members
-        setCancelledDays(data.cancelledMeetings); // Assuming you fetch the cancelled days array
+        setExistingAppointments(data.appointments);
+        setTeamMembers(data.members);
+        setCancelledDays(data.cancelledMeetings);
 
         const dayMap: { [key: string]: number } = {
           Sunday: 0,
@@ -180,8 +180,8 @@ export default function Schedule() {
 
     const bookedTimes = new Set(
       existingAppointments
-        .filter((appointment) => appointment.day === date) // Only filter for the selected day
-        .map((appointment) => appointment.time) // Extract the time from the appointment
+        .filter((appointment) => appointment.day === date)
+        .map((appointment) => appointment.time)
     );
 
     while (startTime < endTime) {
@@ -232,7 +232,6 @@ export default function Schedule() {
     return timeInMinutes >= startInMinutes && timeInMinutes <= endInMinutes;
   }
 
-  // Utility to convert 12-hour time to 24-hour time format
   const convertTo24Hour = (time: string) => {
     const [hours, minutes, period] = time.match(/(\d+):(\d+) (\w+)/)!.slice(1);
     let hours24 = parseInt(hours, 10);
@@ -242,7 +241,7 @@ export default function Schedule() {
   };
 
   const handleTimeSlotClick = (time: string) => {
-    setSelectedTimeSlot(time); // Set the selected time slot
+    setSelectedTimeSlot(time);
   };
 
   const handleNewAppointment = (newAppointment: {
@@ -271,7 +270,7 @@ export default function Schedule() {
 
       if (response.ok) {
         toast("Successfully joined the team!");
-        setTeamMembers([...teamMembers, userEmail]); // Update local team members
+        setTeamMembers([...teamMembers, userEmail]);
       } else {
         const errorData = await response.json();
         toast(errorData.message || "Failed to join the team");

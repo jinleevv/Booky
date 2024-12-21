@@ -85,12 +85,12 @@ export default function DashBoardSchedule() {
       if (response.ok) {
         setTeamName(data.name);
         setAdminName(data.adminName);
-        setAdminEmail(data.adminEmail); // Assuming you fetch the admin email as well
+        setAdminEmail(data.adminEmail);
         setAvailableTime(data.availableTime);
         setDuration(parseInt(data.durations[0], 10));
-        setExistingAppointments(data.appointments); // Set the existing appointments
-        setTeamMembers(data.members); // Store the team members
-        setCancelledDays(data.cancelledMeetings); // Assuming you fetch the cancelled days array
+        setExistingAppointments(data.appointments);
+        setTeamMembers(data.members);
+        setCancelledDays(data.cancelledMeetings);
 
         const dayMap: { [key: string]: number } = {
           Sunday: 0,
@@ -128,21 +128,6 @@ export default function DashBoardSchedule() {
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + 7);
 
-    // Format the current date into MM-DD-YYYY format
-    // const formatDate = (date: Date) => {
-    //   const month = (date.getMonth() + 1).toString().padStart(2, "0"); // months are 0-based
-    //   const day = date.getDate().toString().padStart(2, "0");
-    //   const year = date.getFullYear().toString();
-    //   return `${month}-${day}-${year}`;
-    // };
-
-    // Check if the formatted date is in the cancelledDays array
-    // const formattedDate = formatDate(date);
-
-    // if (cancelledDays.includes(formattedDate)) {
-    //   return true; // Disable the date if it's in the cancelledDays array
-    // }
-
     const dayIndex = date.getDay();
 
     // Check if the date is beyond the range or not in enabledDays
@@ -158,7 +143,7 @@ export default function DashBoardSchedule() {
       );
 
       if (dayAvailability?.enabled) {
-        const currentTime = new Date(); // Get the current time
+        const currentTime = new Date();
         const currentTimeInMinutes =
           currentTime.getHours() * 60 + currentTime.getMinutes();
 
@@ -196,8 +181,8 @@ export default function DashBoardSchedule() {
 
     const bookedTimes = new Set(
       existingAppointments
-        .filter((appointment) => appointment.day === date) // Only filter for the selected day
-        .map((appointment) => appointment.time) // Extract the time from the appointment
+        .filter((appointment) => appointment.day === date)
+        .map((appointment) => appointment.time)
     );
 
     while (startTime < endTime) {
@@ -258,7 +243,7 @@ export default function DashBoardSchedule() {
   };
 
   const handleTimeSlotClick = (time: string) => {
-    setSelectedTimeSlot(time); // Set the selected time slot
+    setSelectedTimeSlot(time);
   };
 
   const handleNewAppointment = (newAppointment: {
@@ -287,7 +272,7 @@ export default function DashBoardSchedule() {
 
       if (response.ok) {
         toast("Successfully joined the team!");
-        setTeamMembers([...teamMembers, userEmail]); // Update local team members
+        setTeamMembers([...teamMembers, userEmail]);
       } else {
         const errorData = await response.json();
         toast(errorData.message || "Failed to join the team");
@@ -333,27 +318,16 @@ export default function DashBoardSchedule() {
                         </CardDescription>
                       </div>
                       <div className="flex w-full justify-center">
-                        {/* <Button
-                          onClick={() => {
-                            navigator.clipboard.writeText(teamId);
-                            toast(
-                              `Invitation Code copied to clipboard!: ${teamId}`
-                            );
-                          }}
-                          className="w-full"
-                        >
-                          Copy Invite Code
-                        </Button> */}
                         <Button
                           onClick={() => {
                             const el = document.createElement("textarea");
                             el.value = teamId || "";
                             el.style.position = "absolute";
-                            el.style.left = "-9999px"; // Move it out of view
+                            el.style.left = "-9999px";
                             document.body.appendChild(el);
 
                             el.select();
-                            document.execCommand("copy"); // Fallback command for older browsers
+                            document.execCommand("copy");
                             document.body.removeChild(el);
 
                             toast("Team Code copied to clipboard!");

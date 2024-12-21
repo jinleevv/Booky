@@ -10,14 +10,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { auth } from "../../../firebase";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { useEffect } from "react";
 import { useHook } from "@/hooks";
 
-// Define Zod schema for validation
 const formSchema = z.object({
   name: z
     .string()
@@ -40,7 +37,7 @@ interface ScheduleFormProps {
     day: string;
     time: string;
     email: string;
-  }) => void; // Add handler for updating parent state
+  }) => void;
 }
 
 export default function ScheduleForm({
@@ -49,18 +46,14 @@ export default function ScheduleForm({
   teamId,
   handleNewAppointment,
 }: ScheduleFormProps) {
-  const [user, setUser] = useState(null); // <<<<<<<<<<<<<<<
-  const { server } = useHook();
+  const { server, userName, userEmail, loggedInUser } = useHook();
 
   useEffect(() => {
-    onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        form.setValue("email", currentUser.email);
-        form.setValue("name", currentUser.displayName);
+      if (loggedInUser) {
+        form.setValue("email", userEmail);
+        form.setValue("name", userName);
       }
-    });
-  }, []);
+    }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -89,7 +82,6 @@ export default function ScheduleForm({
     };
 
     try {
-      // Example API call or logic to handle form submission
       const response = await fetch(
         `${server}/api/teams/${teamId}/appointments`,
         {
@@ -115,7 +107,7 @@ export default function ScheduleForm({
 
   const generateRandomToken = (length = 32) => {
     const array = new Uint8Array(length);
-    window.crypto.getRandomValues(array); // Fill the array with random values
+    window.crypto.getRandomValues(array);
     return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
       ""
     );
@@ -134,7 +126,7 @@ export default function ScheduleForm({
             <FormItem>
               <FormLabel>Name (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Name" disabled={user} {...field} />
+                <Input placeholder="Name" disabled={loggedInUser} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -149,7 +141,7 @@ export default function ScheduleForm({
               <FormControl>
                 <Input
                   placeholder="yourname@mail.mcgill.ca"
-                  disabled={user}
+                  disabled={loggedInUser}
                   {...field}
                 />
               </FormControl>

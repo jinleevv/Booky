@@ -4,33 +4,21 @@ import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
 import { IoIosAdd } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../../firebase"; 
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"; 
-import { User } from "firebase/auth";
 import { useHook } from "@/hooks";
 import { Trash } from "lucide-react";
 import { toast } from "sonner";
 
 export default function DashBoardTeams() {
   const navigate = useNavigate();
-  const { server } = useHook();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const { server, userEmail } = useHook();
   const [teams, setTeams] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
-      if (user) {
-        setUserEmail(user.email);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
 
   // Retrieve teams that the user is a part of
   useEffect(() => {

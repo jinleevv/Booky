@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { auth } from "../../../firebase";
 
 import {
   Form,
@@ -68,13 +67,11 @@ export default function CreateTeamForm() {
     },
   });
 
-  const { server } = useHook();
+  const { server, loggedInUser, userEmail } = useHook();
   const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const user = auth.currentUser;
-
-    if (!user) {
+    if (!loggedInUser) {
       console.error("No user is logged in");
       return;
     }
@@ -88,7 +85,7 @@ export default function CreateTeamForm() {
         name: values.teamName,
         durations: values.durations,
         availableTime: values.schedule,
-        admin: user.email,
+        admin: userEmail,
       }),
     });
 
@@ -136,7 +133,7 @@ export default function CreateTeamForm() {
                     <div key={day.day} className="flex items-center space-x-4">
                       <FormField
                         control={form.control}
-                        name={`schedule.${dayIndex}.enabled`} // Explicitly map 'enabled'
+                        name={`schedule.${dayIndex}.enabled`}
                         render={({ field }) => (
                           <FormItem className="flex w-32 items-center space-x-2">
                             <FormControl>
@@ -164,7 +161,7 @@ export default function CreateTeamForm() {
                               {/* Start Time */}
                               <FormField
                                 control={form.control}
-                                name={`schedule.${dayIndex}.times.${timeIndex}.start`} // Target nested start field
+                                name={`schedule.${dayIndex}.times.${timeIndex}.start`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
@@ -198,7 +195,7 @@ export default function CreateTeamForm() {
                               {/* End Time */}
                               <FormField
                                 control={form.control}
-                                name={`schedule.${dayIndex}.times.${timeIndex}.end`} // Target nested start field
+                                name={`schedule.${dayIndex}.times.${timeIndex}.end`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
@@ -279,7 +276,6 @@ export default function CreateTeamForm() {
                 </div>
                 <div className="flex border w-fit rounded-md py-1 px-0.5 gap-1">
                   {["5m", "15m", "30m", "45m", "1h"].map((time) => {
-                    // Check if the time is already in the array
                     const isSelected = field.value.includes(time);
 
                     return (
