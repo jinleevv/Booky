@@ -39,7 +39,7 @@ const days = [
 
 const formSchema = z.object({
   teamName: z.string().min(2).max(50),
-  durations: z.array(z.string()),
+  durations: z.array(z.string()).min(1, "Please select a duration"),
   schedule: z.array(
     z.object({
       day: z.string(),
@@ -227,6 +227,7 @@ export default function CreateTeamForm() {
                               />
 
                               <Button
+                                type="button"
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => {
