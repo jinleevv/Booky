@@ -266,7 +266,6 @@ export default function DashBoardSchedule() {
     time: string;
     email: string;
   }) => {
-    console.log("New appointment received:", newAppointment);
     setExistingAppointments((prevAppointments) => {
       const updatedAppointments = [...prevAppointments, newAppointment];
       return updatedAppointments;

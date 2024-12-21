@@ -124,12 +124,10 @@ export default function SignUpForm() {
     });
 
     if (!response.ok) {
-      console.log("Failed to save user to database");
-      console.log(response);
+      console.error("Failed to save user to database: ", response);
       return -1;
-    } else {
-      console.log("Successfully saved user to database");
-    }
+    } 
+    
     return 0;
   }
 

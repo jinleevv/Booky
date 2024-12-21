@@ -62,8 +62,6 @@ export const cancelOfficeHourHandler: RequestHandler = async (
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Email sending failed:", error);
-      } else {
-        console.log("Email sent for: " + team.name + " | " + info.response);
       }
     });
 

@@ -10,7 +10,6 @@ export const deleteUserFromTeamHandler: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const { teamId, userEmail } = req.query;
-  console.log(teamId);
   try {
     // 1. Find the team with the given teamId
     const team = await Team.findById(teamId);

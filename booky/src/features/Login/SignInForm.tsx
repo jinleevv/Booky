@@ -37,10 +37,6 @@ export default function SignInForm() {
         values.password
       );
 
-      // If successful, response contains a UserCredential object
-      console.log("Sign-in successful:", response.user);
-      console.log("User UID:", response.user.uid);
-      console.log("User Email:", response.user.email);
       toast("Sign-In Successful");
       setLoggedInUser(true);
       setUserName(response.user.displayName);

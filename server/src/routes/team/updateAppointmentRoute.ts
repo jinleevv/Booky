@@ -46,11 +46,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Email sending failed:", error);
-      } else {
-        console.log(
-          "Email sent: " + appointments[0].email + " | " + info.response
-        );
-      }
+      } 
     });
 
     res.status(200).json({ message: "Appointments updated successfully" });
