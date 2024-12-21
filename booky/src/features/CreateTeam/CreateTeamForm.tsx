@@ -241,6 +241,7 @@ export default function CreateTeamForm() {
                               </Button>
                               {day.times.length > 1 && (
                                 <Button
+                                  type="button"
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => {
