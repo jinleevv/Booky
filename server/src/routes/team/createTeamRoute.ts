@@ -15,7 +15,7 @@ export const createTeamHandler: RequestHandler = async (req: Request, res: Respo
     }
 
     // Generate unique teamId
-    const _id = `team-${name}-${ShortUniqueId().generate()}`;
+    const _id = `team-${name.replaceAll(/\s/g, "-")}-${ShortUniqueId().generate()}`;
 
     // Create the new team and save in teams collection.
     // Unitialized attributes are set to their default values.

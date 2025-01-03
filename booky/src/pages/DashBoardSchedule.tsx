@@ -217,10 +217,10 @@ export default function DashBoardSchedule() {
   ): boolean {
     const toMilitaryTime = (timeStr: string): number => {
       const [_, hours, minutes, period] = timeStr.match(
-        /(\d{2}):(\d{2}) (AM|PM)/
+        /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
       )!;
       let militaryHours = parseInt(hours);
-      if (period === "PM" && hours !== "12") {
+      if ((period === "PM" || period === "p.m.") && hours !== "12") {
         militaryHours += 12;
       }
       return militaryHours * 60 + parseInt(minutes);
