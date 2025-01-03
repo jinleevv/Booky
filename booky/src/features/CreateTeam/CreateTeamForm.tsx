@@ -37,7 +37,7 @@ const days = [
 ];
 
 const formSchema = z.object({
-  teamName: z.string().min(2).max(50),
+  teamName: z.string().min(1).max(50),
   durations: z.array(z.string()).min(1, "Please select a duration"),
   schedule: z.array(
     z.object({
@@ -50,6 +50,15 @@ const formSchema = z.object({
         })
       ),
     })
+  ),
+  coadmins: z.array(
+    z
+      .string()
+      .refine(
+        (email) =>
+          email === "" || /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/.test(email),
+          "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
+      )
   ),
 });
 
@@ -64,6 +73,7 @@ export default function CreateTeamForm() {
         enabled: day !== "Sunday" && day !== "Saturday",
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
       })),
+      coadmins: [],
     },
   });
 
@@ -76,6 +86,8 @@ export default function CreateTeamForm() {
       return;
     }
 
+    const filteredCoadmins = values.coadmins.filter((email) => email && email.trim() !== "");
+
     const response = await fetch(`${server}/api/teams/register`, {
       method: "POST",
       headers: {
@@ -86,6 +98,7 @@ export default function CreateTeamForm() {
         durations: values.durations,
         availableTime: values.schedule,
         admin: userEmail,
+        coadmins: filteredCoadmins,
       }),
     });
 
@@ -97,10 +110,22 @@ export default function CreateTeamForm() {
     navigate("/dashboard/teams");
     return 0;
   }
+
+  const handleAddCoadmin = () => {
+    const currentCoadmins = form.getValues("coadmins");
+    form.setValue("coadmins", [...currentCoadmins, ""]);
+  };
+
+  const handleRemoveCoadmin = (index: number) => {
+    const currentCoadmins = form.getValues("coadmins");
+    form.setValue("coadmins", currentCoadmins.filter((_, i) => i !== index));
+  };
+
   return (
     <section className="grid mt-10 bg-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="border rounded-lg p-4">
           <FormField
             control={form.control}
             name="teamName"
@@ -123,6 +148,7 @@ export default function CreateTeamForm() {
               </FormItem>
             )}
           />
+        </div>
           <FormField
             control={form.control}
             name="schedule"
@@ -267,42 +293,90 @@ export default function CreateTeamForm() {
               </div>
             )}
           />
-          <FormField
-            control={form.control}
-            name="durations"
-            render={({ field }) => (
-              <FormItem className="flex">
-                <div className="flex w-20 space-x-2 mt-auto mb-auto">
-                  <FormLabel>Duration:</FormLabel>
-                </div>
-                <div className="flex border w-fit rounded-md py-1 px-0.5 gap-1">
-                  {["5m", "15m", "30m", "45m", "1h"].map((time) => {
-                    const isSelected = field.value.includes(time);
+          <div className="border rounded-lg p-4">
+            <FormField
+              control={form.control}
+              name="durations"
+              render={({ field }) => (
+                <FormItem className="flex">
+                  <div className="flex w-20 space-x-2 mt-auto mb-auto">
+                    <FormLabel>Duration:</FormLabel>
+                  </div>
+                  <div className="flex border w-fit rounded-md py-1 px-0.5 gap-1">
+                    {["5m", "15m", "30m", "45m", "1h"].map((time) => {
+                      const isSelected = field.value.includes(time);
 
-                    return (
-                      <Button
-                        key={time}
-                        type="button"
-                        variant="ghost"
-                        onClick={() => {
-                          const selectedDuration = isSelected ? [] : [time];
-                          field.onChange(selectedDuration);
-                        }}
-                        className={`${
-                          isSelected
-                            ? "text-red-700 border border-red-700"
-                            : "text-gray-700 hover:text-gray-900"
-                        }`}
-                      >
-                        {time}
-                      </Button>
-                    );
-                  })}
+                      return (
+                        <Button
+                          key={time}
+                          type="button"
+                          variant="ghost"
+                          onClick={() => {
+                            const selectedDuration = isSelected ? [] : [time];
+                            field.onChange(selectedDuration);
+                          }}
+                          className={`${
+                            isSelected
+                              ? "text-red-700 border border-red-700"
+                              : "text-gray-700 hover:text-gray-900"
+                          }`}
+                        >
+                          {time}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="border rounded-lg p-4">
+            <FormLabel className="mb-2 text-lg font-medium">Coadmins</FormLabel>
+            <div className="space-y-2">
+              {(form.watch("coadmins") || []).map((coadmin, index) => (
+                <div key={index} className="flex items-center space-x-3">
+                  <FormField
+                    control={form.control}
+                    name={`coadmins.${index}`}
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Coadmin Email"
+                            className={`mt-2 ${fieldState.invalid ? "border-red-400" : ""}`}
+                          />
+                        </FormControl>
+                        {fieldState.error && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {fieldState.error.message}
+                          </p>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveCoadmin(index)}
+                  >
+                    <Trash className="w-4 h-4 text-red-500" />
+                  </Button>
                 </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleAddCoadmin}
+              className="mt-2"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
           <div className="flex w-full justify-end">
             <Button type="submit">Submit</Button>
           </div>

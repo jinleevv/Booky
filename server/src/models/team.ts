@@ -2,12 +2,11 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 // The structure of a team. 
 // All team related information like office hours and appointments are stored here.
-// Most of our queries are requesting this information.
 interface ITeam extends Document {
   _id: string;
   name: string;
   admin: string;
-  // coadmin: string[];
+  coadmins: string[];
   members: string[];
   availableTime: ISchedule[];
   durations: string[];
@@ -81,6 +80,7 @@ const TeamSchema: Schema = new Schema<ITeam>({
   _id: { type: String, required: true },
   name: { type: String, required: true },
   admin: { type: String, required: true },
+  coadmins: [{ type: String, required: false }],
   members: [{ type: String, required: true }],
   availableTime: [ScheduleSchema],
   appointments: [AppointmentSchema],
