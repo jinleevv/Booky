@@ -17,7 +17,6 @@ export const getTeamDetailsHandler: RequestHandler = async (req: Request, res: R
 
   try {
     // Fetch team by id.
-    console.log(teamId);
     const team = await Team.findById(teamId).lean();
     if (!team) {
       res.status(404).json({ message: "Team not found" });

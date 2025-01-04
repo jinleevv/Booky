@@ -36,8 +36,8 @@ interface IAppointment {
   _id: string;
   day: string;
   time: string;
-  hostName: string;
-  hostEmail: string;
+  //hostName: string;
+  //hostEmail: string;
   name: string;
   email: string;
   token: string;
@@ -67,8 +67,8 @@ const ScheduleSchema: Schema = new Schema<ISchedule>({
 const AppointmentSchema: Schema = new Schema<IAppointment>({
   day: { type: String, required: true },
   time: { type: String, required: true },
-  hostName: { type: String, required: true },
-  hostEmail: { type: String, required: true },
+  //hostName: { type: String, required: true },
+  //hostEmail: { type: String, required: true },
   name: { type: String, required: false },
   email: { type: String, required: true },
   token: { type: String, required: true },              
