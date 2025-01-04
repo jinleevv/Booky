@@ -17,6 +17,7 @@ import CreateTeam from "./pages/CreateTeam";
 import { useHook } from "./hooks.ts";
 import { Appointment } from "./pages/Appointment.tsx";
 import DashBoardSchedule from "./pages/DashBoardSchedule.tsx";
+import TeamSettings from "./pages/TeamSettings.tsx"
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -79,6 +80,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route 
+        path="/dashboard/:team/settings" 
+        element={
+          <ProtectedRoute>
+            <TeamSettings />
+          </ProtectedRoute>
+        }
+      />
       </Routes>
       <Toaster />
     </Router>
