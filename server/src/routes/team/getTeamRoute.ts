@@ -5,12 +5,16 @@ import User from "../../models/user";
 const router = express.Router();
 
 // Retrieve all team information (except createdAt, plus admin name)
-export const getTeamDetailsHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const getTeamDetailsHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { teamId } = req.params;
 
   try {
     // Fetch team by id.
     const team = await Team.findById(teamId).exec();
+
     if (!team) {
       res.status(404).json({ message: "Team not found" });
       return;
