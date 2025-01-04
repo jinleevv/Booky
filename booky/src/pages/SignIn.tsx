@@ -10,8 +10,7 @@ export default function SignIn() {
   return (
     <section className="h-screen w-screen bg-white px-8 py-4">
       <div className="flex items-center gap-2">
-        <img src="/mcgill.png" alt="McGill Logo" className="w-10 h-10" />
-        <div className="text-sm font-bold text-black -ml-4 -mt-1.5">Booky</div>
+        <img src="/booky_logo.png" alt="Booky Logo" className="w-26 h-14" />
       </div>
       <div className="flex flex-col-2 items-center justify-center h-5/6 w-full mt-12">
         <div className="flex flex-col h-full w-1/2 py-12">

@@ -39,8 +39,7 @@ export default function NavigationBar() {
         className="flex items-center gap-2 cursor-pointer"
         onClick={() => navigate("/")}
       >
-        <img src="/mcgill.png" alt="McGill Logo" className="w-10 h-10" />
-        <div className="text-sm font-bold text-black -ml-4 -mt-1.5">Booky</div>
+        <img src="/booky_logo.png" alt="Booky Logo" className="w-26 h-14" />
       </div>
 
       <div className="flex flex-1 max-w-[700px] h-11 border-2 border-red-700 rounded-full">
