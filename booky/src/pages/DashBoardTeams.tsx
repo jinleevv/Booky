@@ -98,7 +98,7 @@ export default function DashBoardTeams() {
                   <CardTitle className="flex text-lg font-bold justify-between">
                     {team.name}
                     <div className="flex space-x-1">
-                      {team.coadmins.includes(userEmail) && (
+                      {(team.admin === userEmail || team.coadmins.includes(userEmail)) && (
                         <Button
                           variant="ghost"
                           onClick={(e) => {
