@@ -4,6 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { NextUIProvider } from "@nextui-org/react";
 import { AuthContext } from "./features/AuthContext.tsx";
 import { useContext } from "react";
 import SignUp from "./pages/SignUp";
@@ -17,7 +18,7 @@ import CreateTeam from "./pages/CreateTeam";
 import { useHook } from "./hooks.ts";
 import { Appointment } from "./pages/Appointment.tsx";
 import DashBoardSchedule from "./pages/DashBoardSchedule.tsx";
-import TeamSettings from "./pages/TeamSettings.tsx"
+import TeamSettings from "./pages/TeamSettings.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -40,56 +41,58 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<SignIn />} />
-        <Route path="/register" element={<SignUp />} />
-        {/* <Route path="/search/:searchCode" element={<Search />} /> */}
-        <Route path="/schedule/:code" element={<Schedule />} />
-        {/* <Route path="/team/:teamId" element={<RegisterTeam />} />  */}
-        <Route path="/:team/:code" element={<Appointment />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashBoard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/teams"
-          element={
-            <ProtectedRoute>
-              <DashBoardTeams />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/teams/create-team"
-          element={
-            <ProtectedRoute>
-              <CreateTeam />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/:team"
-          element={
-            <ProtectedRoute>
-              <DashBoardSchedule />
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-        path="/dashboard/:team/settings" 
-        element={
-          <ProtectedRoute>
-            <TeamSettings />
-          </ProtectedRoute>
-        }
-      />
-      </Routes>
-      <Toaster />
+      <NextUIProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<SignIn />} />
+          <Route path="/register" element={<SignUp />} />
+          {/* <Route path="/search/:searchCode" element={<Search />} /> */}
+          <Route path="/schedule/:code" element={<Schedule />} />
+          {/* <Route path="/team/:teamId" element={<RegisterTeam />} />  */}
+          <Route path="/:team/:code" element={<Appointment />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashBoard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/teams"
+            element={
+              <ProtectedRoute>
+                <DashBoardTeams />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/teams/create-team"
+            element={
+              <ProtectedRoute>
+                <CreateTeam />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/:team"
+            element={
+              <ProtectedRoute>
+                <DashBoardSchedule />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/:team/settings"
+            element={
+              <ProtectedRoute>
+                <TeamSettings />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+        <Toaster />
+      </NextUIProvider>
     </Router>
   );
 }

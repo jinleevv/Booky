@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
   FormControl,
@@ -17,6 +17,8 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { DateRangePicker } from "@nextui-org/react";
+import { parseZonedDateTime } from "@internationalized/date";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,11 +58,25 @@ const formSchema = z.object({
       .string()
       .refine(
         (email) =>
-          email === "" || /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/.test(email),
-          "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
+          email === "" ||
+          /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/.test(email),
+        "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
       )
   ),
+  oneTimeMeeting: z.object({
+    start: z.any(),
+    end: z.any(),
+  }),
 });
+
+const formatDateTime = (dateObject: any): string => {
+  const { year, month, day, hour, minute } = dateObject;
+
+  // Pad month, day, hour, and minute with leading zeros if needed
+  const pad = (value: number) => value.toString().padStart(2, "0");
+
+  return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
+};
 
 export default function CreateTeamForm() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -74,6 +90,18 @@ export default function CreateTeamForm() {
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
       })),
       coadmins: [],
+      oneTimeMeeting: {
+        start: formatDateTime(
+          parseZonedDateTime(
+            `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
+          )
+        ),
+        end: formatDateTime(
+          parseZonedDateTime(
+            `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
+          )
+        ),
+      },
     },
   });
 
@@ -86,9 +114,11 @@ export default function CreateTeamForm() {
       return;
     }
 
-    const filteredCoadmins = values.coadmins.filter((email) => email && email.trim() !== "");
+    const filteredCoadmins = values.coadmins.filter(
+      (email) => email && email.trim() !== ""
+    );
 
-     // Create the availableTime map
+    // Create the availableTime map
     const availableTime = {
       [userEmail]: values.schedule, // Assign admin's schedule to their email
       // Optionally, initialize schedules for co-admins if needed
@@ -128,178 +158,259 @@ export default function CreateTeamForm() {
 
   const handleRemoveCoadmin = (index: number) => {
     const currentCoadmins = form.getValues("coadmins");
-    form.setValue("coadmins", currentCoadmins.filter((_, i) => i !== index));
+    form.setValue(
+      "coadmins",
+      currentCoadmins.filter((_, i) => i !== index)
+    );
   };
 
   return (
     <section className="grid mt-10 bg-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="border rounded-lg p-4">
-          <FormField
-            control={form.control}
-            name="teamName"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex w-full">
-                  <FormLabel className="w-24 mt-auto mb-auto">
-                    Team Name
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className="w-1/3"
-                      placeholder="Team Name"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
+          <div className="border rounded-lg p-4">
+            <FormField
+              control={form.control}
+              name="teamName"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex w-full">
+                    <FormLabel className="w-24 mt-auto mb-auto">
+                      Team Name
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        className="w-1/3"
+                        placeholder="Team Name"
+                        {...field}
+                      />
+                    </FormControl>
+                  </div>
 
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
             name="schedule"
             render={() => (
               <div className="border rounded-lg p-4">
-                <div className="space-y-4">
-                  {form.watch("schedule").map((day, dayIndex) => (
-                    <div key={day.day} className="flex items-center space-x-4">
-                      <FormField
-                        control={form.control}
-                        name={`schedule.${dayIndex}.enabled`}
-                        render={({ field }) => (
-                          <FormItem className="flex w-32 items-center space-x-2">
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="mt-2"
-                              />
-                            </FormControl>
-                            <FormLabel className="font-medium">
-                              {day.day}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
+                <Tabs defaultValue="recurring">
+                  <TabsList>
+                    <TabsTrigger value="recurring">
+                      Recurring Meetings
+                    </TabsTrigger>
+                    <TabsTrigger value="one-time">
+                      One-Time Meeting / Event
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="recurring">
+                    <div className="space-y-4">
+                      {form.watch("schedule").map((day, dayIndex) => (
+                        <div
+                          key={day.day}
+                          className="flex items-center space-x-4"
+                        >
+                          <FormField
+                            control={form.control}
+                            name={`schedule.${dayIndex}.enabled`}
+                            render={({ field }) => (
+                              <FormItem className="flex w-32 items-center space-x-2">
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    className="mt-2"
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-medium">
+                                  {day.day}
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
 
-                      {/* Time Selects */}
-                      {day.enabled && (
-                        <div className="flex flex-col space-y-2">
-                          {day.times.map((time, timeIndex) => (
-                            <div
-                              key={timeIndex}
-                              className="flex items-center space-x-2"
-                            >
-                              {/* Start Time */}
-                              <FormField
-                                control={form.control}
-                                name={`schedule.${dayIndex}.times.${timeIndex}.start`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Select
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                      >
-                                        <SelectTrigger className="w-28">
-                                          <SelectValue placeholder="Start Time" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {availableTime.map((timeOption) => (
-                                            <SelectItem
-                                              key={timeOption}
-                                              value={timeOption}
-                                            >
-                                              {timeOption}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </FormControl>
-                                    <FormMessage />{" "}
-                                    {/* Display any validation error */}
-                                  </FormItem>
-                                )}
-                              />
-
-                              <span className="text-gray-500">-</span>
-
-                              {/* End Time */}
-                              <FormField
-                                control={form.control}
-                                name={`schedule.${dayIndex}.times.${timeIndex}.end`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Select
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                      >
-                                        <SelectTrigger className="w-28">
-                                          <SelectValue placeholder="End Time" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {availableTime.map((timeOption) => (
-                                            <SelectItem
-                                              key={timeOption}
-                                              value={timeOption}
-                                            >
-                                              {timeOption}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  const updatedSchedule =
-                                    form.getValues("schedule");
-                                  updatedSchedule[dayIndex].times.push({
-                                    start: "09:00 AM",
-                                    end: "05:00 PM",
-                                  });
-                                  form.setValue("schedule", updatedSchedule);
-                                }}
-                              >
-                                <Plus className="w-4 h-4" />
-                              </Button>
-                              {day.times.length > 1 && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => {
-                                    const updatedSchedule =
-                                      form.getValues("schedule");
-                                    updatedSchedule[dayIndex].times.splice(
-                                      timeIndex,
-                                      1
-                                    );
-                                    form.setValue("schedule", updatedSchedule);
-                                  }}
+                          {/* Time Selects */}
+                          {day.enabled && (
+                            <div className="flex flex-col space-y-2">
+                              {day.times.map((time, timeIndex) => (
+                                <div
+                                  key={timeIndex}
+                                  className="flex items-center space-x-2"
                                 >
-                                  <Trash className="w-4 h-4 text-red-500" />
-                                </Button>
-                              )}
+                                  {/* Start Time */}
+                                  <FormField
+                                    control={form.control}
+                                    name={`schedule.${dayIndex}.times.${timeIndex}.start`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Select
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                          >
+                                            <SelectTrigger className="w-28">
+                                              <SelectValue placeholder="Start Time" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {availableTime.map(
+                                                (timeOption) => (
+                                                  <SelectItem
+                                                    key={timeOption}
+                                                    value={timeOption}
+                                                  >
+                                                    {timeOption}
+                                                  </SelectItem>
+                                                )
+                                              )}
+                                            </SelectContent>
+                                          </Select>
+                                        </FormControl>
+                                        <FormMessage />{" "}
+                                        {/* Display any validation error */}
+                                      </FormItem>
+                                    )}
+                                  />
+
+                                  <span className="text-gray-500">-</span>
+
+                                  {/* End Time */}
+                                  <FormField
+                                    control={form.control}
+                                    name={`schedule.${dayIndex}.times.${timeIndex}.end`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Select
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                          >
+                                            <SelectTrigger className="w-28">
+                                              <SelectValue placeholder="End Time" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {availableTime.map(
+                                                (timeOption) => (
+                                                  <SelectItem
+                                                    key={timeOption}
+                                                    value={timeOption}
+                                                  >
+                                                    {timeOption}
+                                                  </SelectItem>
+                                                )
+                                              )}
+                                            </SelectContent>
+                                          </Select>
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      const updatedSchedule =
+                                        form.getValues("schedule");
+                                      updatedSchedule[dayIndex].times.push({
+                                        start: "09:00 AM",
+                                        end: "05:00 PM",
+                                      });
+                                      form.setValue(
+                                        "schedule",
+                                        updatedSchedule
+                                      );
+                                    }}
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </Button>
+                                  {day.times.length > 1 && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => {
+                                        const updatedSchedule =
+                                          form.getValues("schedule");
+                                        updatedSchedule[dayIndex].times.splice(
+                                          timeIndex,
+                                          1
+                                        );
+                                        form.setValue(
+                                          "schedule",
+                                          updatedSchedule
+                                        );
+                                      }}
+                                    >
+                                      <Trash className="w-4 h-4 text-red-500" />
+                                    </Button>
+                                  )}
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                          )}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </TabsContent>
+                  <TabsContent value="one-time">
+                    <FormField
+                      control={form.control}
+                      name="oneTimeMeeting"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col p-1">
+                          <div className="w-full max-w-xl flex flex-row gap-4 bg-white">
+                            <DateRangePicker
+                              hideTimeZone
+                              defaultValue={{
+                                start: parseZonedDateTime(
+                                  `${
+                                    new Date().toISOString().split("T")[0]
+                                  }T09:00[America/Toronto]`
+                                ),
+                                end: parseZonedDateTime(
+                                  `${
+                                    new Date().toISOString().split("T")[0]
+                                  }T17:00[America/Toronto]`
+                                ),
+                              }}
+                              label="Meeting / Event"
+                              visibleMonths={2}
+                              classNames={{
+                                base: "bg-white",
+                                calendar: "bg-white",
+                                calendarContent: "bg-white",
+                                popoverContent: "bg-white",
+                                inputWrapper: "bg-white shadow-none border",
+                                input: "text-black",
+                                bottomContent: "bg-white",
+                                label: "text-black",
+                              }}
+                              onChange={(value) => {
+                                const formattedStart = value.start
+                                  ? formatDateTime(value.start)
+                                  : "";
+                                const formattedEnd = value.end
+                                  ? formatDateTime(value.end)
+                                  : "";
+
+                                field.onChange({
+                                  start: formattedStart,
+                                  end: formattedEnd,
+                                });
+                              }}
+                            />
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
               </div>
             )}
           />
@@ -355,7 +466,9 @@ export default function CreateTeamForm() {
                           <Input
                             {...field}
                             placeholder="Coadmin Email"
-                            className={`mt-2 ${fieldState.invalid ? "border-red-400" : ""}`}
+                            className={`mt-2 ${
+                              fieldState.invalid ? "border-red-400" : ""
+                            }`}
                           />
                         </FormControl>
                         {fieldState.error && (
