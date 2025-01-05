@@ -9,12 +9,13 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import ScheduleForm from "@/features/CreateAppointment/ScheduleForm";
 import { useHook } from "@/hooks";
 import { toast } from "sonner";
+import { IoPersonCircle } from "react-icons/io5";
 
 interface ITimeRange {
   start: string;
@@ -45,6 +46,21 @@ export default function DashBoardSchedule() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [userSelectedDate, setUserSelectedDate] = useState<string>(""); //Kind of redundent
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  
+  const [selectedAdmin, setSelectedAdmin] = useState<string | null>(null);
+  const [teamAdmins, setTeamAdmins] = useState<
+    { email: string; name: string; role: string }[]
+  >([]);
+
+  useEffect(() => {
+    fetchTeamDetails();
+  }, [teamId]);
+
+  useEffect(() => {
+    if (selectedAdmin && availableTime) {
+      updateEnabledDays(selectedAdmin);
+    }
+  }, [selectedAdmin, availableTime]);
 
   // Generate time slots when the selected date changes.
   useEffect(() => {
@@ -58,7 +74,12 @@ export default function DashBoardSchedule() {
     const dayOfWeek = selectedDate.toLocaleDateString("en-US", {
       weekday: "long",
     });
-    const dayAvailability = availableTime.find((day) => day.day === dayOfWeek);
+    const dayAvailability = availableTime[selectedAdmin].find((day) => day.day === dayOfWeek);
+
+    if (!dayAvailability || !dayAvailability.enabled) {
+      setTimeSlots([]);
+      return;
+    }
 
     let userOptionSlots = [];
     dayAvailability.times.forEach((time) => {
@@ -72,10 +93,6 @@ export default function DashBoardSchedule() {
     });
     setTimeSlots(userOptionSlots);
   }, [selectedDate, availableTime, duration, existingAppointments]);
-
-  useEffect(() => {
-    fetchTeamDetails();
-  }, [teamId]);
 
   async function fetchTeamDetails() {
     try {
@@ -91,26 +108,19 @@ export default function DashBoardSchedule() {
         setExistingAppointments(data.appointments);
         setTeamMembers(data.members);
         setCancelledDays(data.cancelledMeetings);
+        setSelectedAdmin(data.adminEmail);
 
-        const dayMap: { [key: string]: number } = {
-          Sunday: 0,
-          Monday: 1,
-          Tuesday: 2,
-          Wednesday: 3,
-          Thursday: 4,
-          Friday: 5,
-          Saturday: 6,
-        };
+        // Combine admin and coadmins
+        const teamAdmins = [
+          { email: data.adminEmail, role: "Admin" },
+          ...(data.coadmins || []).map((coadmin: any) => ({
+            email: coadmin,
+            role: "Coadmin",
+          })),
+        ];
+        setTeamAdmins(teamAdmins);
 
-        // Check for the available days (Monday, Tuesday, Wednesday, Thursday, Friday, Saterday, Sunday)
-        const enabled = data.availableTime.reduce((acc: number[], day: any) => {
-          if (day.enabled && dayMap[day.day] !== undefined) {
-            acc.push(dayMap[day.day]);
-          }
-          return acc;
-        }, []);
-
-        setEnabledDays(new Set(enabled));
+        updateEnabledDays(data.adminEmail);
       } else {
         setTeamName("Not Found");
         setAdminName("Not Found");
@@ -120,44 +130,69 @@ export default function DashBoardSchedule() {
     }
   }
 
-  const disablePastDates = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Calculate the maximum allowed date (7 days from today)
-    const maxDate = new Date(today);
-    maxDate.setDate(today.getDate() + 7);
-
-    const dayIndex = date.getDay();
-
-    // Check if the date is beyond the range or not in enabledDays
-    if (date < today || date > maxDate || !enabledDays.has(dayIndex)) {
-      return true;
-    }
-
-    // If the date is today, check if there are any remaining slots
-    if (date.toDateString() === today.toDateString()) {
-      const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
-      const dayAvailability = availableTime.find(
-        (day) => day.day === dayOfWeek
-      );
-
-      if (dayAvailability?.enabled) {
-        const currentTime = new Date();
-        const currentTimeInMinutes =
-          currentTime.getHours() * 60 + currentTime.getMinutes();
-
-        // Check if any slots are still available today
-        return !dayAvailability.times.some((timeSlot: any) => {
-          const slotStartInMinutes = convertTimeToMinutes(timeSlot.start);
-          return slotStartInMinutes > currentTimeInMinutes;
-        });
+  const updateEnabledDays = (email: string) => {
+    const dayMap: { [key: string]: number } = {
+      Sunday: 0,
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+    };
+  
+    // Recalculate enabledDays based on the admin's availability
+    const enabled = availableTime[email]?.reduce((acc: number[], day: any) => {
+      if (day.enabled && dayMap[day.day] !== undefined) {
+        acc.push(dayMap[day.day]);
       }
-      return true; // If no availability for today
-    }
-
-    return false; // Allow selection otherwise
+      return acc;
+    }, []);
+  
+    setEnabledDays(new Set(enabled)); // Update the enabledDays state
   };
+
+  const disableUnavailableDates = useCallback(
+    (date: Date) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Calculate the maximum allowed date (7 days from today)
+      const maxDate = new Date(today);
+      maxDate.setDate(today.getDate() + 7);
+
+      const dayIndex = date.getDay();
+
+      // Check if the date is beyond the range or not in enabledDays
+      if (date < today || date > maxDate || !enabledDays.has(dayIndex)) {
+        return true;
+      }
+
+      // If the date is today, check if there are any remaining slots
+      if (date.toDateString() === today.toDateString()) {
+        const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
+        const dayAvailability = availableTime[adminEmail].find(
+          (day) => day.day === dayOfWeek
+        );
+
+        if (dayAvailability?.enabled) {
+          const currentTime = new Date();
+          const currentTimeInMinutes =
+            currentTime.getHours() * 60 + currentTime.getMinutes();
+
+          // Check if any slots are still available today
+          return !dayAvailability.times.some((timeSlot: any) => {
+            const slotStartInMinutes = convertTimeToMinutes(timeSlot.start);
+            return slotStartInMinutes > currentTimeInMinutes;
+          });
+        }
+        return true; // If no availability for today
+      }
+
+      return false; // Allow selection otherwise
+    },
+    [selectedAdmin, availableTime, enabledDays]
+  );
 
   // Helper function: Convert time (e.g., "10:00 AM") to total minutes since midnight
   const convertTimeToMinutes = (time: string) => {
@@ -217,10 +252,10 @@ export default function DashBoardSchedule() {
   ): boolean {
     const toMilitaryTime = (timeStr: string): number => {
       const [_, hours, minutes, period] = timeStr.match(
-        /(\d{2}):(\d{2}) (AM|PM)/
+        /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
       )!;
       let militaryHours = parseInt(hours);
-      if (period === "PM" && hours !== "12") {
+      if ((period === "PM" || period === "p.m.") && hours !== "12") {
         militaryHours += 12;
       }
       return militaryHours * 60 + parseInt(minutes);
@@ -309,15 +344,36 @@ export default function DashBoardSchedule() {
             ) : (
               <>
                 <Card className="flex flex-col md:flex-row w-full h-auto md:h-4/6 shadow-sm overflow-hidden ">
-                  <CardHeader className="w-full border-b-[1px] md:w-1/6 md:border-r-[1px] border-gray-200 flex flex-col justify-between md:h-full">
-                    <div className="md:flex sm:grid md:flex-col sm:grid-cols-2 h-full justify-between">
+                  <CardHeader className="w-full border-b-[1px] md:w-1/6 md:border-r-[1px] border-gray-200 flex flex-col justify-between md:h-full max-w-full overflow-hidden">
+                    <div className="flex flex-col gap-4 h-full">
                       <div>
-                        <CardTitle>Course: {teamName}</CardTitle>
-                        <CardDescription>
-                          Professor: {adminName}
-                        </CardDescription>
+                        <CardTitle>Team: {teamName}</CardTitle>
                       </div>
-                      <div className="flex w-full justify-center">
+                      <div className="flex flex-col gap-2">
+                        {teamAdmins.map((user, index) => (
+                          <div
+                            key={index}
+                            onClick={() => {
+                              setSelectedAdmin(user.email);
+                              updateEnabledDays(user.email);
+                              setSelectedDate(undefined);
+                              setTimeSlots([]);
+                            }}
+                            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer ${
+                              selectedAdmin === user.email ? "bg-gray-200" : "hover:bg-gray-100"
+                            }`}
+                          >
+                            <IoPersonCircle size={24} className="text-gray-600" />
+                            <div>
+                              <span className="text-sm font-medium text-gray-700">
+                                {user.email}
+                              </span>
+                              <span className="text-xs text-gray-500"> ({user.role})</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex w-full justify-center mt-auto">
                         <Button
                           onClick={() => {
                             const el = document.createElement("textarea");
@@ -359,7 +415,7 @@ export default function DashBoardSchedule() {
                       mode="single"
                       selected={selectedDate}
                       onSelect={setSelectedDate}
-                      disabled={disablePastDates}
+                      disabled={disableUnavailableDates}
                       showOutsideDays={false}
                       className="flex-1 max-h-[461px] overflow-y-auto mt-3 p-0"
                       classNames={{
@@ -389,6 +445,9 @@ export default function DashBoardSchedule() {
                   </CardContent>
                   <div className="w-full md:w-2/6 h-full overflow-y-auto flex flex-col">
                     <CardContent className="max-md:max-h-[27vh] h-1/2 w-full flex-1 py-2 border-b-[1px] border-gray-200 overflow-auto">
+                      <div className="flex justify-center mb-4">
+                        <Label className="font-bold text-black">{selectedAdmin}</Label>
+                      </div>
                       <div className="grid grid-cols-2 gap-2">
                         {timeSlots.length > 0 ? (
                           timeSlots.map((time) => (

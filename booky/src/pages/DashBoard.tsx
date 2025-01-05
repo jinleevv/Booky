@@ -175,10 +175,10 @@ export default function DashBoard() {
               }
             } else {
               const [_, hours, __, period] = appointment.time.match(
-                /(\d{2}):(\d{2}) (AM|PM)/
+                /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
               )!;
               let convertHours = parseInt(hours);
-              if (period == "PM") {
+              if ((period === "PM" || period === "p.m.") && convertHours !== 12) {
                 convertHours += 12;
               }
               if (hour <= convertHours) {
@@ -302,11 +302,11 @@ export default function DashBoard() {
 
         const timeToMinutes = (time: string): number => {
           const [_, hours, minutes, period] = time.match(
-            /(\d{2}):(\d{2}) (AM|PM)/
+            /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
           )!;
           let militaryHours = parseInt(hours);
-          if (period === "PM" && militaryHours !== 12) militaryHours += 12;
-          if (period === "AM" && militaryHours === 12) militaryHours = 0;
+          if ((period === "PM" || period ==="p.m.") && militaryHours !== 12) militaryHours += 12;
+          if ((period === "AM" || period === "a.m.") && militaryHours === 12) militaryHours = 0;
           return militaryHours * 60 + parseInt(minutes);
         };
 
@@ -346,6 +346,7 @@ export default function DashBoard() {
         setPastOfficeHours(past);
       } catch (error) {
         toast("Unable to fetch the meeting information");
+        console.log(error);
       }
     };
 
@@ -359,10 +360,10 @@ export default function DashBoard() {
   ): boolean {
     const toMilitaryTime = (timeStr: string): number => {
       const [_, hours, minutes, period] = timeStr.match(
-        /(\d{2}):(\d{2}) (AM|PM)/
+        /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
       )!;
       let militaryHours = parseInt(hours);
-      if (period === "PM" && hours !== "12") {
+      if ((period === "PM" || period === "p.m.") && hours !== "12") {
         militaryHours += 12;
       }
       return militaryHours * 60 + parseInt(minutes);

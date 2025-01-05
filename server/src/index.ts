@@ -10,6 +10,7 @@ import queryTeamRoute from "./routes/team/queryTeamRoute";
 import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
 import queryUserTeamsRoute from "./routes/team/queryUserTeamsRoute";
 import updateCancellationRoute from "./routes/team/updateCancellationRoute";
+import updateAvailableTimeRoute from "./routes/team/updateAvailableTimeRoute";
 import queryAppointmentRoute from "./routes/team/queryAppointmentRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
@@ -17,7 +18,7 @@ import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 dotenv.config();
 
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 
 // Middleware
 app.use(
@@ -39,6 +40,7 @@ app.use("/api/teams", updateAppointmentRoute);
 app.use("/api/teams", queryTeamRoute);
 app.use("/api/teams", updateTeamMembersRoute);
 app.use("/api/teams", updateCancellationRoute);
+app.use("/api/teams", updateAvailableTimeRoute);
 app.use("/api/teams", getTeamRoute);
 app.use("/api/appointment/get-appointment", queryAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
@@ -46,7 +48,7 @@ app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
 
 // MongoDB connection
 mongoose
-  .connect(process.env.SERVER_MONGODB!, {
+  .connect(process.env.MONGODB_URI!, {
     dbName: "booky",
   })
   .then(() => console.log("Connected to MongoDB"))

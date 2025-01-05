@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"; 
 import { useHook } from "@/hooks";
-import { Trash } from "lucide-react";
+import { Trash, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 export default function DashBoardTeams() {
@@ -97,15 +97,28 @@ export default function DashBoardTeams() {
                 <CardHeader>
                   <CardTitle className="flex text-lg font-bold justify-between">
                     {team.name}
-                    <Button
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveTeam(team._id);
-                      }}
-                    >
-                      <Trash size={20} />
-                    </Button>
+                    <div className="flex space-x-1">
+                      {(team.admin === userEmail || team.coadmins.includes(userEmail)) && (
+                        <Button
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/dashboard/${team._id}/settings`);
+                          }}
+                        >
+                          <Settings size={20} />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveTeam(team._id);
+                        }}
+                      >
+                        <Trash size={20} />
+                      </Button>
+                    </div>
                   </CardTitle>
                   <CardDescription>Professor: {team.admin}</CardDescription>
                 </CardHeader>

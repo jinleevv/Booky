@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import {
   Form,
@@ -17,14 +19,12 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { availableTime } from "@/features/time";
+import { availableTime as defaultAvailableTime } from "@/features/time";
 import { Switch } from "@/components/ui/switch";
-import { useHook } from "@/hooks";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useHook } from "@/hooks";
 
 const days = [
   "Sunday",
@@ -37,7 +37,6 @@ const days = [
 ];
 
 const formSchema = z.object({
-  teamName: z.string().min(1).max(50),
   durations: z.array(z.string()).min(1, "Please select a duration"),
   schedule: z.array(
     z.object({
@@ -51,34 +50,43 @@ const formSchema = z.object({
       ),
     })
   ),
-  coadmins: z.array(
-    z
-      .string()
-      .refine(
-        (email) =>
-          email === "" || /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/.test(email),
-          "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
-      )
-  ),
 });
 
-export default function CreateTeamForm() {
+export default function TeamSettings() {
+  const navigate = useNavigate();
+  const { team: teamId } = useParams();
+  const { server, loggedInUser, userEmail } = useHook(); // Use global state from the hook
+  const [teamName, setTeamName] = useState<string | null>(null);
+  const [availableTime, setAvailableTime] = useState<Record<string, any>>({});
+
+  // Fetch team name on load
+  useEffect(() => {
+    const fetchTeam = async () => {
+      const response = await fetch(`${server}/api/teams/${teamId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setAvailableTime(data.availableTime);
+        setTeamName(data.name);
+      } else {
+        console.error("Failed to fetch team details");
+        toast("Failed to fetch team details");
+        navigate("/dashboard/teams");
+      }
+    };
+    fetchTeam();
+  }, [teamId, server, navigate]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      teamName: "",
       durations: [],
       schedule: days.map((day) => ({
         day,
-        enabled: day !== "Sunday" && day !== "Saturday",
+        enabled: false,
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
       })),
-      coadmins: [],
     },
   });
-
-  const { server, loggedInUser, userEmail } = useHook();
-  const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!loggedInUser) {
@@ -86,79 +94,41 @@ export default function CreateTeamForm() {
       return;
     }
 
-    const filteredCoadmins = values.coadmins.filter((email) => email && email.trim() !== "");
-
-     // Create the availableTime map
-    const availableTime = {
-      [userEmail]: values.schedule, // Assign admin's schedule to their email
-      // Optionally, initialize schedules for co-admins if needed
-      ...filteredCoadmins.reduce((acc, email) => {
-        acc[email] = []; // Assign an empty schedule or default values
-        return acc;
-      }, {}),
+    const updatedAvailableTime = {
+      ...availableTime,
+      [userEmail]: values.schedule,
     };
 
-    const response = await fetch(`${server}/api/teams/register`, {
-      method: "POST",
+    const response = await fetch(`${server}/api/teams/${teamId}/availableTime`, {
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: values.teamName,
-        durations: values.durations,
-        availableTime: availableTime,
-        admin: userEmail,
-        coadmins: filteredCoadmins,
+        availableTime: updatedAvailableTime,
       }),
     });
 
     if (!response.ok) {
-      console.error("Failed to save team to database");
-      return -1;
+      console.error("Failed to update schedule");
+      toast("Failed to update update schedule");
+      return;
     }
-    toast("Successfully Created Team");
+
+    toast("Successfully updated your schedule");
     navigate("/dashboard/teams");
-    return 0;
   }
-
-  const handleAddCoadmin = () => {
-    const currentCoadmins = form.getValues("coadmins");
-    form.setValue("coadmins", [...currentCoadmins, ""]);
-  };
-
-  const handleRemoveCoadmin = (index: number) => {
-    const currentCoadmins = form.getValues("coadmins");
-    form.setValue("coadmins", currentCoadmins.filter((_, i) => i !== index));
-  };
 
   return (
     <section className="grid mt-10 bg-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="border rounded-lg p-4">
-          <FormField
-            control={form.control}
-            name="teamName"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex w-full">
-                  <FormLabel className="w-24 mt-auto mb-auto">
-                    Team Name
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className="w-1/3"
-                      placeholder="Team Name"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
+          {/* Team Name Display */}
+          <div className="border rounded-lg p-4">
+            <FormLabel className="text-lg font-bold">{teamName || "Loading..."}</FormLabel>
+          </div>
 
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+          {/* Schedule Section */}
           <FormField
             control={form.control}
             name="schedule"
@@ -179,9 +149,7 @@ export default function CreateTeamForm() {
                                 className="mt-2"
                               />
                             </FormControl>
-                            <FormLabel className="font-medium">
-                              {day.day}
-                            </FormLabel>
+                            <FormLabel className="font-medium">{day.day}</FormLabel>
                           </FormItem>
                         )}
                       />
@@ -190,10 +158,7 @@ export default function CreateTeamForm() {
                       {day.enabled && (
                         <div className="flex flex-col space-y-2">
                           {day.times.map((time, timeIndex) => (
-                            <div
-                              key={timeIndex}
-                              className="flex items-center space-x-2"
-                            >
+                            <div key={timeIndex} className="flex items-center space-x-2">
                               {/* Start Time */}
                               <FormField
                                 control={form.control}
@@ -209,19 +174,14 @@ export default function CreateTeamForm() {
                                           <SelectValue placeholder="Start Time" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {availableTime.map((timeOption) => (
-                                            <SelectItem
-                                              key={timeOption}
-                                              value={timeOption}
-                                            >
+                                          {defaultAvailableTime.map((timeOption) => (
+                                            <SelectItem key={timeOption} value={timeOption}>
                                               {timeOption}
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
                                     </FormControl>
-                                    <FormMessage />{" "}
-                                    {/* Display any validation error */}
                                   </FormItem>
                                 )}
                               />
@@ -243,18 +203,14 @@ export default function CreateTeamForm() {
                                           <SelectValue placeholder="End Time" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {availableTime.map((timeOption) => (
-                                            <SelectItem
-                                              key={timeOption}
-                                              value={timeOption}
-                                            >
+                                          {defaultAvailableTime.map((timeOption) => (
+                                            <SelectItem key={timeOption} value={timeOption}>
                                               {timeOption}
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
                                     </FormControl>
-                                    <FormMessage />
                                   </FormItem>
                                 )}
                               />
@@ -264,8 +220,7 @@ export default function CreateTeamForm() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => {
-                                  const updatedSchedule =
-                                    form.getValues("schedule");
+                                  const updatedSchedule = form.getValues("schedule");
                                   updatedSchedule[dayIndex].times.push({
                                     start: "09:00 AM",
                                     end: "05:00 PM",
@@ -281,12 +236,8 @@ export default function CreateTeamForm() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => {
-                                    const updatedSchedule =
-                                      form.getValues("schedule");
-                                    updatedSchedule[dayIndex].times.splice(
-                                      timeIndex,
-                                      1
-                                    );
+                                    const updatedSchedule = form.getValues("schedule");
+                                    updatedSchedule[dayIndex].times.splice(timeIndex, 1);
                                     form.setValue("schedule", updatedSchedule);
                                   }}
                                 >
@@ -303,6 +254,8 @@ export default function CreateTeamForm() {
               </div>
             )}
           />
+
+          {/* Durations Section */}
           <div className="border rounded-lg p-4">
             <FormField
               control={form.control}
@@ -341,54 +294,9 @@ export default function CreateTeamForm() {
               )}
             />
           </div>
-          <div className="border rounded-lg p-4">
-            <FormLabel className="mb-2 text-lg font-medium">Coadmins</FormLabel>
-            <div className="space-y-2">
-              {(form.watch("coadmins") || []).map((coadmin, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <FormField
-                    control={form.control}
-                    name={`coadmins.${index}`}
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Coadmin Email"
-                            className={`mt-2 ${fieldState.invalid ? "border-red-400" : ""}`}
-                          />
-                        </FormControl>
-                        {fieldState.error && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {fieldState.error.message}
-                          </p>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveCoadmin(index)}
-                  >
-                    <Trash className="w-4 h-4 text-red-500" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleAddCoadmin}
-              className="mt-2"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
+
           <div className="flex w-full justify-end">
-            <Button type="submit">Submit</Button>
+            <Button type="submit">Save Schedule</Button>
           </div>
         </form>
       </Form>

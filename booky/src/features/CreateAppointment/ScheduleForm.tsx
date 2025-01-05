@@ -94,7 +94,7 @@ export default function ScheduleForm({
       );
 
       if (response.ok) {
-        toast.success("Email submitted successfully!");
+        toast.success("Appointment submitted successfully!");
         handleNewAppointment(newAppointment);
       } else {
         throw new Error("Failed to submit email");

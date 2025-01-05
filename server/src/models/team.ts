@@ -2,14 +2,13 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 // The structure of a team. 
 // All team related information like office hours and appointments are stored here.
-// Most of our queries are requesting this information.
 interface ITeam extends Document {
   _id: string;
   name: string;
   admin: string;
-  // coadmin: string[];
+  coadmins: string[];
   members: string[];
-  availableTime: ISchedule[];
+  availableTime: Record<string, ISchedule[]>;
   durations: string[];
   appointments: IAppointment[];
   cancelledMeetings: ICancelMeeting[];
@@ -37,6 +36,8 @@ interface IAppointment {
   _id: string;
   day: string;
   time: string;
+  //hostName: string;
+  //hostEmail: string;
   name: string;
   email: string;
   token: string;
@@ -66,6 +67,8 @@ const ScheduleSchema: Schema = new Schema<ISchedule>({
 const AppointmentSchema: Schema = new Schema<IAppointment>({
   day: { type: String, required: true },
   time: { type: String, required: true },
+  //hostName: { type: String, required: true },
+  //hostEmail: { type: String, required: true },
   name: { type: String, required: false },
   email: { type: String, required: true },
   token: { type: String, required: true },              
@@ -81,8 +84,13 @@ const TeamSchema: Schema = new Schema<ITeam>({
   _id: { type: String, required: true },
   name: { type: String, required: true },
   admin: { type: String, required: true },
+  coadmins: [{ type: String, required: false }],
   members: [{ type: String, required: true }],
-  availableTime: [ScheduleSchema],
+  availableTime: {
+    type: Map,
+    of: [ScheduleSchema], // Map of user IDs to their schedules
+    default: {}, // Initialize with an empty map
+  },
   appointments: [AppointmentSchema],
   durations: [{ type: String, required: true }],
   cancelledMeetings: [CancelMeetingSchema],
