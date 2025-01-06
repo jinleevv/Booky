@@ -343,6 +343,15 @@ export default function CreateTeamForm() {
           </div>
           <div className="border rounded-lg p-4">
             <FormLabel className="mb-2 text-lg font-medium">Coadmins</FormLabel>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleAddCoadmin}
+              className="ml-2"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
             <div className="space-y-2">
               {(form.watch("coadmins") || []).map((coadmin, index) => (
                 <div key={index} className="flex items-center space-x-3">
@@ -377,15 +386,6 @@ export default function CreateTeamForm() {
                 </div>
               ))}
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleAddCoadmin}
-              className="mt-2"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
           </div>
           <div className="flex w-full justify-end">
             <Button type="submit">Submit</Button>
