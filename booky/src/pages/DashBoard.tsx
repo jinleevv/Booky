@@ -41,6 +41,7 @@ export default function DashBoard() {
 
         const upcoming = [];
         const past = [];
+        const processedMeetings = new Set();
 
         teams.forEach((team) => {
           const teamName = team.name;
@@ -65,224 +66,239 @@ export default function DashBoard() {
             const dateDifference = Math.abs(
               todayDate.getDate() - appointmentDate.getDate()
             );
-            const appointmentAvailbleSlot = teamAvailableTime.find(
-              (item) => item.day === appointmentDay
-            );
 
-            if (todayDate < appointmentDate) {
-              if (dateDifference <= 7) {
-                let validStartTime;
-                let validEndTime;
-
-                appointmentAvailbleSlot.times.forEach((item) => {
-                  const startTime = item.start;
-                  const endTime = item.end;
-                  const checkRange = isTimeWithinRange(
-                    appointment.time,
-                    startTime,
-                    endTime
-                  );
-                  if (checkRange) {
-                    validStartTime = startTime;
-                    validEndTime = endTime;
-                    return;
-                  }
-                });
-
-                const checkDateEntry = upcoming.find(
-                  (item) =>
-                    item.date === appointment.day &&
-                    item.start === validStartTime &&
-                    item.end === validEndTime
-                );
-
-                if (!checkDateEntry) {
-                  upcoming.push({
-                    teamId: teamId,
-                    admin: teamAdmin,
-                    date: appointment.day,
-                    day: appointmentDay,
-                    start: validStartTime,
-                    end: validEndTime,
-                    team: teamName,
-                    appointments: [],
-                  });
-                }
-
-                const existingDateEntry = upcoming.find(
-                  (item) =>
-                    item.date === appointment.day &&
-                    item.start === validStartTime &&
-                    item.end === validEndTime
-                );
-
-                existingDateEntry.appointments.push({
-                  time: appointment.time,
-                  email: appointment.email,
-                });
+            Object.keys(teamAvailableTime).forEach((meetingHost) => {
+              if(processedMeetings.has(appointment.token)) {
+                return;
               }
-            } else if (todayDate > appointmentDate) {
-              if (dateDifference <= 7) {
-                let validStartTime;
-                let validEndTime;
 
-                appointmentAvailbleSlot.times.forEach((item) => {
-                  const startTime = item.start;
-                  const endTime = item.end;
-                  const checkRange = isTimeWithinRange(
-                    appointment.time,
-                    startTime,
-                    endTime
-                  );
-                  if (checkRange) {
-                    validStartTime = startTime;
-                    validEndTime = endTime;
-                    return;
-                  }
-                });
-
-                const checkDateEntry = past.find(
-                  (item) =>
-                    item.date === appointment.day &&
-                    item.start === validStartTime &&
-                    item.end === validEndTime
-                );
-
-                if (!checkDateEntry) {
-                  past.push({
-                    teamId: teamId,
-                    admin: teamAdmin,
-                    date: appointment.day,
-                    day: appointmentDay,
-                    start: validStartTime,
-                    end: validEndTime,
-                    team: teamName,
-                    appointments: [],
+              const appointmentAvailbleSlot = teamAvailableTime[meetingHost].find(
+                (item) => item.day === appointmentDay
+              );
+  
+              if (todayDate < appointmentDate) {
+                if (dateDifference <= 7) {
+                  let validStartTime;
+                  let validEndTime;
+  
+                  appointmentAvailbleSlot.times.forEach((item) => {
+                    const startTime = item.start;
+                    const endTime = item.end;
+                    const checkRange = isTimeWithinRange(
+                      appointment.time,
+                      startTime,
+                      endTime
+                    );
+                    if (checkRange) {
+                      validStartTime = startTime;
+                      validEndTime = endTime;
+                      return;
+                    }
                   });
-                }
-
-                const existingDateEntry = past.find(
-                  (item) =>
-                    item.date === appointment.day &&
-                    item.start === validStartTime &&
-                    item.end === validEndTime
-                );
-
-                existingDateEntry.appointments.push({
-                  time: appointment.time,
-                  email: appointment.email,
-                });
-              }
-            } else {
-              const [_, hours, __, period] = appointment.time.match(
-                /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
-              )!;
-              let convertHours = parseInt(hours);
-              if ((period === "PM" || period === "p.m.") && convertHours !== 12) {
-                convertHours += 12;
-              }
-              if (hour <= convertHours) {
-                let validStartTime;
-                let validEndTime;
-
-                appointmentAvailbleSlot.times.forEach((item) => {
-                  const startTime = item.start;
-                  const endTime = item.end;
-                  const checkRange = isTimeWithinRange(
-                    appointment.time,
-                    startTime,
-                    endTime
+  
+                  const checkDateEntry = upcoming.find(
+                    (item) =>
+                      item.date === appointment.day &&
+                      item.start === validStartTime &&
+                      item.end === validEndTime
                   );
-                  if (checkRange) {
-                    validStartTime = startTime;
-                    validEndTime = endTime;
-                    return;
+  
+                  if (!checkDateEntry) {
+                    upcoming.push({
+                      teamId: teamId,
+                      admin: teamAdmin,
+                      date: appointment.day,
+                      day: appointmentDay,
+                      start: validStartTime,
+                      end: validEndTime,
+                      team: teamName,
+                      appointments: [],
+                    });
                   }
-                });
-
-                const checkDateEntry = upcoming.find(
-                  (item) =>
-                    item.date === appointment.day &&
-                    item.start === validStartTime &&
-                    item.end === validEndTime
-                );
-
-                if (!checkDateEntry) {
-                  upcoming.push({
-                    teamId: teamId,
-                    admin: teamAdmin,
-                    date: appointment.day,
-                    day: appointmentDay,
-                    start: validStartTime,
-                    end: validEndTime,
-                    team: teamName,
-                    appointments: [],
+  
+                  const existingDateEntry = upcoming.find(
+                    (item) =>
+                      item.date === appointment.day &&
+                      item.start === validStartTime &&
+                      item.end === validEndTime
+                  );
+  
+                  existingDateEntry.appointments.push({
+                    time: appointment.time,
+                    email: appointment.email,
                   });
+
+                  processedMeetings.add(appointment.token);
                 }
+              } else if (todayDate > appointmentDate) {
+                if (dateDifference <= 7) {
+                  let validStartTime;
+                  let validEndTime;
+  
+                  appointmentAvailbleSlot.times.forEach((item) => {
+                    const startTime = item.start;
+                    const endTime = item.end;
+                    const checkRange = isTimeWithinRange(
+                      appointment.time,
+                      startTime,
+                      endTime
+                    );
+                    if (checkRange) {
+                      validStartTime = startTime;
+                      validEndTime = endTime;
+                      return;
+                    }
+                  });
+  
+                  const checkDateEntry = past.find(
+                    (item) =>
+                      item.date === appointment.day &&
+                      item.start === validStartTime &&
+                      item.end === validEndTime
+                  );
+  
+                  if (!checkDateEntry) {
+                    past.push({
+                      teamId: teamId,
+                      admin: teamAdmin,
+                      date: appointment.day,
+                      day: appointmentDay,
+                      start: validStartTime,
+                      end: validEndTime,
+                      team: teamName,
+                      appointments: [],
+                    });
+                  }
+  
+                  const existingDateEntry = past.find(
+                    (item) =>
+                      item.date === appointment.day &&
+                      item.start === validStartTime &&
+                      item.end === validEndTime
+                  );
+  
+                  existingDateEntry.appointments.push({
+                    time: appointment.time,
+                    email: appointment.email,
+                  });
 
-                const existingDateEntry = upcoming.find(
-                  (item) =>
-                    item.date === appointment.day &&
-                    item.start === validStartTime &&
-                    item.end === validEndTime
-                );
-
-                existingDateEntry.appointments.push({
-                  time: appointment.time,
-                  email: appointment.email,
-                });
+                  processedMeetings.add(appointment.token);
+                }
               } else {
-                let validStartTime;
-                let validEndTime;
-
-                appointmentAvailbleSlot.times.forEach((item) => {
-                  const startTime = item.start;
-                  const endTime = item.end;
-                  const checkRange = isTimeWithinRange(
-                    appointment.time,
-                    startTime,
-                    endTime
-                  );
-                  if (checkRange) {
-                    validStartTime = startTime;
-                    validEndTime = endTime;
-                    return;
-                  }
-                });
-
-                const checkDateEntry = past.find(
-                  (item) =>
-                    item.date === appointment.day &&
-                    item.start === validStartTime &&
-                    item.end === validEndTime
-                );
-
-                if (!checkDateEntry) {
-                  past.push({
-                    teamId: teamId,
-                    admin: teamAdmin,
-                    date: appointment.day,
-                    day: appointmentDay,
-                    start: validStartTime,
-                    end: validEndTime,
-                    team: teamName,
-                    appointments: [],
-                  });
+                const [_, hours, __, period] = appointment.time.match(
+                  /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
+                )!;
+                let convertHours = parseInt(hours);
+                if ((period === "PM" || period === "p.m.") && convertHours !== 12) {
+                  convertHours += 12;
                 }
+                if (hour <= convertHours) {
+                  let validStartTime;
+                  let validEndTime;
+  
+                  appointmentAvailbleSlot.times.forEach((item) => {
+                    const startTime = item.start;
+                    const endTime = item.end;
+                    const checkRange = isTimeWithinRange(
+                      appointment.time,
+                      startTime,
+                      endTime
+                    );
+                    if (checkRange) {
+                      validStartTime = startTime;
+                      validEndTime = endTime;
+                      return;
+                    }
+                  });
+  
+                  const checkDateEntry = upcoming.find(
+                    (item) =>
+                      item.date === appointment.day &&
+                      item.start === validStartTime &&
+                      item.end === validEndTime
+                  );
+  
+                  if (!checkDateEntry) {
+                    upcoming.push({
+                      teamId: teamId,
+                      admin: teamAdmin,
+                      date: appointment.day,
+                      day: appointmentDay,
+                      start: validStartTime,
+                      end: validEndTime,
+                      team: teamName,
+                      appointments: [],
+                    });
+                  }
+  
+                  const existingDateEntry = upcoming.find(
+                    (item) =>
+                      item.date === appointment.day &&
+                      item.start === validStartTime &&
+                      item.end === validEndTime
+                  );
+  
+                  existingDateEntry.appointments.push({
+                    time: appointment.time,
+                    email: appointment.email,
+                  });
 
-                const existingDateEntry = past.find(
-                  (item) =>
-                    item.date === appointment.day &&
-                    item.start === validStartTime &&
-                    item.end === validEndTime
-                );
+                  processedMeetings.add(appointment.token);
+                } else {
+                  let validStartTime;
+                  let validEndTime;
+  
+                  appointmentAvailbleSlot.times.forEach((item) => {
+                    const startTime = item.start;
+                    const endTime = item.end;
+                    const checkRange = isTimeWithinRange(
+                      appointment.time,
+                      startTime,
+                      endTime
+                    );
+                    if (checkRange) {
+                      validStartTime = startTime;
+                      validEndTime = endTime;
+                      return;
+                    }
+                  });
+  
+                  const checkDateEntry = past.find(
+                    (item) =>
+                      item.date === appointment.day &&
+                      item.start === validStartTime &&
+                      item.end === validEndTime
+                  );
+  
+                  if (!checkDateEntry) {
+                    past.push({
+                      teamId: teamId,
+                      admin: teamAdmin,
+                      date: appointment.day,
+                      day: appointmentDay,
+                      start: validStartTime,
+                      end: validEndTime,
+                      team: teamName,
+                      appointments: [],
+                    });
+                  }
+  
+                  const existingDateEntry = past.find(
+                    (item) =>
+                      item.date === appointment.day &&
+                      item.start === validStartTime &&
+                      item.end === validEndTime
+                  );
+  
+                  existingDateEntry.appointments.push({
+                    time: appointment.time,
+                    email: appointment.email,
+                  });
 
-                existingDateEntry.appointments.push({
-                  time: appointment.time,
-                  email: appointment.email,
-                });
+                  processedMeetings.add(appointment.token);
+                }
               }
-            }
+            })
           });
         });
 
