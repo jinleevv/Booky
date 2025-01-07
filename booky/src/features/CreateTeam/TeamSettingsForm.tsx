@@ -103,47 +103,45 @@ export default function TeamSettings() {
       console.error("No user is logged in");
       return;
     }
-
+  
     const updatedAvailableTime = {
       ...availableTime,
       [userEmail]: values.schedule,
     };
-    
+  
     try {
-      const [response1, response2] = await Promise.all([
-        fetch(`${server}/api/teams/${teamId}/availableTime`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            availableTime: updatedAvailableTime,
-          }),
+      const response1 = await fetch(`${server}/api/teams/${teamId}/availableTime`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          availableTime: updatedAvailableTime,
         }),
-        
-        fetch(`${server}/api/teams/${teamId}/coadmins`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            coadmins: values.coadmins,
-          }),
-        }),
-      ]);
-
-      if (!response1.ok || !response2.ok) {
-        if (!response1.ok) {
-          console.error("Failed to update schedule");
-          toast("Failed to update schedule");
-        }
-        if (!response2.ok) {
-          console.error("Failed to update coadmins");
-          toast("Failed to update coadmins");
-        }
+      });
+  
+      if (!response1.ok) {
+        console.error("Failed to update schedule");
+        toast("Failed to update schedule");
         return;
       }
-
+  
+      const response2 = await fetch(`${server}/api/teams/${teamId}/coadmins`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          coadmins: values.coadmins,
+        }),
+      });
+  
+      if (!response2.ok) {
+        console.error("Failed to update coadmins");
+        toast("Failed to update coadmins");
+        return;
+      }
+  
       toast("Successfully updated your schedule and coadmins");
       navigate("/dashboard/teams");
     } catch (error) {
