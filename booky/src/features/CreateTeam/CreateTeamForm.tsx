@@ -73,6 +73,7 @@ const formSchema = z.object({
   meetingType: z.enum(["appointment", "event"], {
     required_error: "You need to select the type.",
   }),
+  meetingLink: z.string(),
 });
 
 const formatDateTime = (dateObject: any): string => {
@@ -194,7 +195,6 @@ export default function CreateTeamForm() {
                       />
                     </FormControl>
                   </div>
-
                   <FormMessage />
                 </FormItem>
               )}
@@ -486,6 +486,22 @@ export default function CreateTeamForm() {
                     </TabsContent>
                   </Tabs>
                   <div className="h-fit border rounded-lg p-2.5">
+                    <FormField
+                      control={form.control}
+                      name="meetingLink"
+                      render={({ field }) => (
+                        <FormItem className="flex mb-6">
+                          <div className="w-32 my-auto">
+                            <FormLabel>Meeting Link:</FormLabel>
+                          </div>
+                          <Input
+                            placeholder="Zoom Link, Teams Link, etc"
+                            {...field}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormField
                       control={form.control}
                       name="meetingType"
