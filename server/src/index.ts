@@ -11,6 +11,7 @@ import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
 import queryUserTeamsRoute from "./routes/team/queryUserTeamsRoute";
 import updateCancellationRoute from "./routes/team/updateCancellationRoute";
 import updateAvailableTimeRoute from "./routes/team/updateAvailableTimeRoute";
+import updateCoadminRoute from "./routes/team/updateCoadminRoute"
 import queryAppointmentRoute from "./routes/team/queryAppointmentRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
@@ -41,6 +42,7 @@ app.use("/api/teams", queryTeamRoute);
 app.use("/api/teams", updateTeamMembersRoute);
 app.use("/api/teams", updateCancellationRoute);
 app.use("/api/teams", updateAvailableTimeRoute);
+app.use("/api/teams", updateCoadminRoute);
 app.use("/api/teams", getTeamRoute);
 app.use("/api/appointment/get-appointment", queryAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
