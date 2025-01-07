@@ -69,6 +69,7 @@ const formSchema = z.object({
     start: z.any(),
     end: z.any(),
   }),
+  meetingName: z.string(),
   meetingDescription: z.string(),
   meetingType: z.enum(["appointment", "event"], {
     required_error: "You need to select the type.",
@@ -257,19 +258,34 @@ export default function CreateTeamForm() {
             render={() => (
               <div className="border rounded-lg p-4">
                 <div className="border-b-1 mb-4">
-                  <FormField
-                    control={form.control}
-                    name="meetingDescription"
-                    render={({ field }) => (
-                      <FormItem className="flex mb-6">
-                        <div className="w-44 my-auto">
-                          <FormLabel>Meeting Description:</FormLabel>
-                        </div>
-                        <Input placeholder="Description" {...field} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex w-full space-x-6">
+                    <FormField
+                      control={form.control}
+                      name="meetingName"
+                      render={({ field }) => (
+                        <FormItem className="flex w-1/2 mb-6">
+                          <div className="w-40 my-auto">
+                            <FormLabel>Meeting Name:</FormLabel>
+                          </div>
+                          <Input placeholder="Name" {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="meetingDescription"
+                      render={({ field }) => (
+                        <FormItem className="flex w-1/2 mb-6">
+                          <div className="w-32 my-auto">
+                            <FormLabel>Description:</FormLabel>
+                          </div>
+                          <Input placeholder="Description" {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2">
                   <Tabs defaultValue="recurring">
