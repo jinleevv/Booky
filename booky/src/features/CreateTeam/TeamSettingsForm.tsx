@@ -55,8 +55,9 @@ const formSchema = z.object({
       .string()
       .refine(
         (email) =>
-          email === "" || /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/.test(email),
-          "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
+          email === "" ||
+          /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/.test(email),
+        "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
       )
   ),
 });
@@ -103,29 +104,32 @@ export default function TeamSettings() {
       console.error("No user is logged in");
       return;
     }
-  
+
     const updatedAvailableTime = {
       ...availableTime,
       [userEmail]: values.schedule,
     };
-  
+
     try {
-      const response1 = await fetch(`${server}/api/teams/${teamId}/availableTime`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          availableTime: updatedAvailableTime,
-        }),
-      });
-  
+      const response1 = await fetch(
+        `${server}/api/teams/${teamId}/availableTime`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            availableTime: updatedAvailableTime,
+          }),
+        }
+      );
+
       if (!response1.ok) {
         console.error("Failed to update schedule");
         toast("Failed to update schedule");
         return;
       }
-  
+
       const response2 = await fetch(`${server}/api/teams/${teamId}/coadmins`, {
         method: "PATCH",
         headers: {
@@ -135,13 +139,13 @@ export default function TeamSettings() {
           coadmins: values.coadmins,
         }),
       });
-  
+
       if (!response2.ok) {
         console.error("Failed to update coadmins");
         toast("Failed to update coadmins");
         return;
       }
-  
+
       toast("Successfully updated your schedule and coadmins");
       navigate("/dashboard/teams");
     } catch (error) {
@@ -157,7 +161,10 @@ export default function TeamSettings() {
 
   const handleRemoveCoadmin = (index: number) => {
     const currentCoadmins = form.getValues("coadmins");
-    form.setValue("coadmins", currentCoadmins.filter((_, i) => i !== index));
+    form.setValue(
+      "coadmins",
+      currentCoadmins.filter((_, i) => i !== index)
+    );
   };
 
   return (
@@ -166,7 +173,9 @@ export default function TeamSettings() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Team Name Display */}
           <div className="border rounded-lg p-4">
-            <FormLabel className="text-lg font-bold">{teamName || "Loading..."}</FormLabel>
+            <FormLabel className="text-lg font-bold">
+              {teamName || "Loading..."}
+            </FormLabel>
           </div>
 
           {/* Schedule Section */}
@@ -190,7 +199,9 @@ export default function TeamSettings() {
                                 className="mt-2"
                               />
                             </FormControl>
-                            <FormLabel className="font-medium">{day.day}</FormLabel>
+                            <FormLabel className="font-medium">
+                              {day.day}
+                            </FormLabel>
                           </FormItem>
                         )}
                       />
@@ -199,7 +210,10 @@ export default function TeamSettings() {
                       {day.enabled && (
                         <div className="flex flex-col space-y-2">
                           {day.times.map((time, timeIndex) => (
-                            <div key={timeIndex} className="flex items-center space-x-2">
+                            <div
+                              key={timeIndex}
+                              className="flex items-center space-x-2"
+                            >
                               {/* Start Time */}
                               <FormField
                                 control={form.control}
@@ -215,11 +229,16 @@ export default function TeamSettings() {
                                           <SelectValue placeholder="Start Time" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {defaultAvailableTime.map((timeOption) => (
-                                            <SelectItem key={timeOption} value={timeOption}>
-                                              {timeOption}
-                                            </SelectItem>
-                                          ))}
+                                          {defaultAvailableTime.map(
+                                            (timeOption) => (
+                                              <SelectItem
+                                                key={timeOption}
+                                                value={timeOption}
+                                              >
+                                                {timeOption}
+                                              </SelectItem>
+                                            )
+                                          )}
                                         </SelectContent>
                                       </Select>
                                     </FormControl>
@@ -244,11 +263,16 @@ export default function TeamSettings() {
                                           <SelectValue placeholder="End Time" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {defaultAvailableTime.map((timeOption) => (
-                                            <SelectItem key={timeOption} value={timeOption}>
-                                              {timeOption}
-                                            </SelectItem>
-                                          ))}
+                                          {defaultAvailableTime.map(
+                                            (timeOption) => (
+                                              <SelectItem
+                                                key={timeOption}
+                                                value={timeOption}
+                                              >
+                                                {timeOption}
+                                              </SelectItem>
+                                            )
+                                          )}
                                         </SelectContent>
                                       </Select>
                                     </FormControl>
@@ -261,7 +285,8 @@ export default function TeamSettings() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => {
-                                  const updatedSchedule = form.getValues("schedule");
+                                  const updatedSchedule =
+                                    form.getValues("schedule");
                                   updatedSchedule[dayIndex].times.push({
                                     start: "09:00 AM",
                                     end: "05:00 PM",
@@ -277,8 +302,12 @@ export default function TeamSettings() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => {
-                                    const updatedSchedule = form.getValues("schedule");
-                                    updatedSchedule[dayIndex].times.splice(timeIndex, 1);
+                                    const updatedSchedule =
+                                      form.getValues("schedule");
+                                    updatedSchedule[dayIndex].times.splice(
+                                      timeIndex,
+                                      1
+                                    );
                                     form.setValue("schedule", updatedSchedule);
                                   }}
                                 >
@@ -336,16 +365,19 @@ export default function TeamSettings() {
             />
           </div>
           <div className="border rounded-lg p-4">
-            <FormLabel className="mb-2 text-lg font-medium">Coadmins</FormLabel>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={handleAddCoadmin}
-              className="ml-2"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
+            <div className="flex">
+              <div className="my-auto">
+                <FormLabel className="mb-2">Co-admins</FormLabel>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleAddCoadmin}
+              >
+                <Plus className="w-2 h-2" />
+              </Button>
+            </div>
             <div className="space-y-2">
               {(form.watch("coadmins") || []).map((coadmin, index) => (
                 <div key={index} className="flex items-center space-x-3">
@@ -358,7 +390,9 @@ export default function TeamSettings() {
                           <Input
                             {...field}
                             placeholder="Coadmin Email"
-                            className={`mt-2 ${fieldState.invalid ? "border-red-400" : ""}`}
+                            className={`mt-2 ${
+                              fieldState.invalid ? "border-red-400" : ""
+                            }`}
                           />
                         </FormControl>
                         {fieldState.error && (
