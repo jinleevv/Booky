@@ -426,6 +426,19 @@ export default function TeamSettings() {
                 <div className="h-full border-l-1 p-2.5">
                   <FormField
                     control={form.control}
+                    name="meetingDescription"
+                    render={({ field }) => (
+                      <FormItem className="flex mb-6">
+                        <div className="w-48 my-auto">
+                          <FormLabel>Meeting Description:</FormLabel>
+                        </div>
+                        <Input placeholder="Description" {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="meetingLink"
                     render={({ field }) => (
                       <FormItem className="flex mb-6">
