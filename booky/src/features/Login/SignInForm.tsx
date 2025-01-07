@@ -41,14 +41,10 @@ export default function SignInForm() {
       setLoggedInUser(true);
       setUserName(response.user.displayName);
       navigate("/");
-      // Optionally, redirect the user or perform further actions
-      return { success: true, user: response.user };
     } catch (error) {
-      // Handle errors
-      console.error("Error signing in:", error.code, error.message);
-
-      // Return or display the error message
-      return { success: false, error: error.message };
+      if (error.code === "auth/invalid-credential") {
+        toast("Invalid email or password");
+      }
     }
   }
 
