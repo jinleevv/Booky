@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -50,9 +50,31 @@ const formSchema = z.object({
       ),
     })
   ),
+  coadmins: z.array(
+    z
+      .string()
+      .refine(
+        (email) =>
+          email === "" || /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/.test(email),
+          "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
+      )
+  ),
 });
 
 export default function TeamSettings() {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      durations: [],
+      schedule: days.map((day) => ({
+        day,
+        enabled: false,
+        times: [{ start: "09:00 AM", end: "05:00 PM" }],
+      })),
+      coadmins: [],
+    },
+  });
+
   const navigate = useNavigate();
   const { team: teamId } = useParams();
   const { server, loggedInUser, userEmail } = useHook(); // Use global state from the hook
@@ -76,18 +98,6 @@ export default function TeamSettings() {
     fetchTeam();
   }, [teamId, server, navigate]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      durations: [],
-      schedule: days.map((day) => ({
-        day,
-        enabled: false,
-        times: [{ start: "09:00 AM", end: "05:00 PM" }],
-      })),
-    },
-  });
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!loggedInUser) {
       console.error("No user is logged in");
@@ -98,26 +108,59 @@ export default function TeamSettings() {
       ...availableTime,
       [userEmail]: values.schedule,
     };
+    
+    try {
+      const [response1, response2] = await Promise.all([
+        fetch(`${server}/api/teams/${teamId}/availableTime`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            availableTime: updatedAvailableTime,
+          }),
+        }),
+        
+        fetch(`${server}/api/teams/${teamId}/coadmins`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            coadmins: values.coadmins,
+          }),
+        }),
+      ]);
 
-    const response = await fetch(`${server}/api/teams/${teamId}/availableTime`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        availableTime: updatedAvailableTime,
-      }),
-    });
+      if (!response1.ok || !response2.ok) {
+        if (!response1.ok) {
+          console.error("Failed to update schedule");
+          toast("Failed to update schedule");
+        }
+        if (!response2.ok) {
+          console.error("Failed to update coadmins");
+          toast("Failed to update coadmins");
+        }
+        return;
+      }
 
-    if (!response.ok) {
-      console.error("Failed to update schedule");
-      toast("Failed to update update schedule");
-      return;
+      toast("Successfully updated your schedule and coadmins");
+      navigate("/dashboard/teams");
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast("An error occurred while submitting the form");
     }
-
-    toast("Successfully updated your schedule");
-    navigate("/dashboard/teams");
   }
+
+  const handleAddCoadmin = () => {
+    const currentCoadmins = form.getValues("coadmins");
+    form.setValue("coadmins", [...currentCoadmins, ""]);
+  };
+
+  const handleRemoveCoadmin = (index: number) => {
+    const currentCoadmins = form.getValues("coadmins");
+    form.setValue("coadmins", currentCoadmins.filter((_, i) => i !== index));
+  };
 
   return (
     <section className="grid mt-10 bg-white">
@@ -294,7 +337,52 @@ export default function TeamSettings() {
               )}
             />
           </div>
-
+          <div className="border rounded-lg p-4">
+            <FormLabel className="mb-2 text-lg font-medium">Coadmins</FormLabel>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleAddCoadmin}
+              className="ml-2"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+            <div className="space-y-2">
+              {(form.watch("coadmins") || []).map((coadmin, index) => (
+                <div key={index} className="flex items-center space-x-3">
+                  <FormField
+                    control={form.control}
+                    name={`coadmins.${index}`}
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Coadmin Email"
+                            className={`mt-2 ${fieldState.invalid ? "border-red-400" : ""}`}
+                          />
+                        </FormControl>
+                        {fieldState.error && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {fieldState.error.message}
+                          </p>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveCoadmin(index)}
+                  >
+                    <Trash className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="flex w-full justify-end">
             <Button type="submit">Save Schedule</Button>
           </div>
