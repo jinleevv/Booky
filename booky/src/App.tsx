@@ -19,6 +19,7 @@ import { useHook } from "./hooks.ts";
 import { Appointment } from "./pages/Appointment.tsx";
 import DashBoardSchedule from "./pages/DashBoardSchedule.tsx";
 import TeamSettings from "./pages/TeamSettings.tsx";
+import AvailabilityScheduler from "./pages/AvailabilityScheduler.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -87,6 +88,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TeamSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/poll"
+            element={
+              <ProtectedRoute>
+                <AvailabilityScheduler />
               </ProtectedRoute>
             }
           />
