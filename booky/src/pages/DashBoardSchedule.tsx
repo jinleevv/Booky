@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardDescription,
 } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { useCallback, useEffect, useState } from "react";
@@ -330,7 +329,7 @@ export default function DashBoardSchedule() {
                   Schedule
                 </Label>{" "}
                 <Label className="text-xs text-gray-400">
-                  Book an Appointment
+                  Join a Meeting
                 </Label>
               </div>
             </div>

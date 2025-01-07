@@ -56,7 +56,7 @@ export function Appointment() {
         const data = await response.json();
         setAppointment(data);
       } catch (err) {
-        toast("Fetch Appointment Information Failed");
+        toast("Fetch Meeting Information Failed");
       }
     };
 
@@ -76,11 +76,11 @@ export function Appointment() {
     );
 
     if (!response.ok) {
-      toast("Unable to cancel the appointment");
+      toast("Unable to cancel the meeting");
       return;
     }
 
-    toast("Successfully cancelled the appointment");
+    toast("Successfully cancelled the meeting");
   }
 
   return (
@@ -89,8 +89,8 @@ export function Appointment() {
       <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 left-1/3 z-10"></div>
       <Card className="relative translate-y-1/4 w-1/2 z-50 items-center justify-center ml-auto mr-auto">
         <CardHeader>
-          <CardTitle>Cancel the Appointment</CardTitle>
-          <CardDescription>cancel the appoiontment</CardDescription>
+          <CardTitle>Cancel the Meeting</CardTitle>
+          <CardDescription>cancel the meeting</CardDescription>
         </CardHeader>
         <CardContent className="w-full">
           {error !== "" ? (
@@ -102,7 +102,7 @@ export function Appointment() {
               <div className="flex w-full justify-end">
                 <Dialog>
                   <DialogTrigger>
-                    <Button variant="outline">Cancel Appointment</Button>
+                    <Button variant="outline">Cancel Meeting</Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
