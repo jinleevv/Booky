@@ -22,7 +22,7 @@ export const updateCoadminsHandler: RequestHandler = async (req: Request, res: R
     team.coadmins = [...new Set([...team.coadmins, ...coadmins])];
     await team.save();
 
-    res.status(200).json({ message: "Coadmins updated successfully", availableTime: team.availableTime });
+    res.status(200).json({ message: "Coadmins updated successfully", availableTime: team.availableTimes });
   } catch (error) {
     console.error("Error updating coadmins:", error);
     res.status(500).json({ message: "Server error" });

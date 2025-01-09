@@ -4,9 +4,14 @@ import Team from "../../models/team";
 const router = express.Router();
 
 // Utility function to encode keys (replace "." with "__dot__")
-const encodeAvailableTime = (availableTime: Record<string, any>): Record<string, any> => {
-  return Object.fromEntries(
-    Object.entries(availableTime).map(([key, value]) => [key.replace(/\./g, "__dot__"), value])
+const encodeAvailableTime = (
+  availableTime: Map<string, any>
+): Map<string, any> => {
+  return new Map(
+    Array.from(availableTime.entries()).map(([key, value]) => [
+      key.replace(/\./g, "__dot__"),
+      value,
+    ])
   );
 };
 
@@ -29,10 +34,10 @@ export const updateAvailableTimeHandler: RequestHandler = async (req: Request, r
 
     const encodedAvailableTime = encodeAvailableTime(availableTime);
 
-    team.availableTime = encodedAvailableTime;
+    team.availableTimes = encodedAvailableTime;
     await team.save();
 
-    res.status(200).json({ message: "Available time updated successfully", availableTime: team.availableTime });
+    res.status(200).json({ message: "Available time updated successfully", availableTime: team.availableTimes });
   } catch (error) {
     console.error("Error updating available time:", error);
     res.status(500).json({ message: "Server error" });
