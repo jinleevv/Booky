@@ -8,9 +8,12 @@ import {
 } from "@firebase/auth";
 import { auth } from "@/../firebase";
 import { IoLogoGithub } from "react-icons/io5";
+import { HiOutlineMail } from "react-icons/hi";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function Home() {
+  const navigate = useNavigate();
   const handleGoogleLogin = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
@@ -83,7 +86,14 @@ export default function Home() {
             </div>
             <div className="w-2/3 border border-t-1 border-black rounded-full"></div>
             <div className="w-2/3 text-center">
-              <Label className="text-xs">Sign Up with Email</Label>
+              <Button
+                variant="ghost"
+                className="hover:bg-inherit hover:text-red-700"
+                onClick={() => navigate("/register")}
+              >
+                <HiOutlineMail />
+                <Label className="text-xs">Sign Up with Email</Label>
+              </Button>
             </div>
           </div>
         </div>
