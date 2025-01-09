@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
+    "@internationalized/date": "^3.6.0",
     "@nextui-org/date-picker": "^2.3.8",
     "@nextui-org/react": "^2.6.10",
     "@nextui-org/system": "^2.4.5",
@@ -38,6 +39,7 @@
     "express": "^4.21.2",
     "firebase": "^11.0.2",
     "framer-motion": "^11.15.0",
+    "immer": "^10.1.1",
     "jotai": "^2.10.4",
     "jotai-immer": "^0.4.1",
     "lucide-react": "^0.459.0",
