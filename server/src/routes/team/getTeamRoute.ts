@@ -31,7 +31,7 @@ export const getTeamDetailsHandler: RequestHandler = async (req: Request, res: R
     }
 
     // Decode `availableTime` keys
-    const decodedAvailableTime = decodeAvailableTime(team.availableTime);
+    const decodedAvailableTime = decodeAvailableTime(team.availableTimes);
 
     // Set response with team information.
     // TODO: don't need adminUser.
@@ -42,8 +42,7 @@ export const getTeamDetailsHandler: RequestHandler = async (req: Request, res: R
       adminEmail: team.admin,
       coadmins: team.coadmins,
       members: team.members,
-      availableTime: decodedAvailableTime,
-      durations: team.durations,
+      availableTimes: decodedAvailableTime,
       appointments: team.appointments,
       cancelledMeetings: team.cancelledMeetings,
     });
