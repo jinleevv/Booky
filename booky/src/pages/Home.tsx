@@ -18,7 +18,13 @@ export default function Home() {
         const user = result.user;
       })
       .catch((error) => {
-        toast("Unable to sign up with Google Account");
+        if (error.code === "auth/account-exists-with-different-credential") {
+          toast(
+            "Already account with the same email exist!\n Unable to sign up with Google Account"
+          );
+        } else {
+          toast("Unable to sign up with Google Account");
+        }
       });
   };
   const handleGithubLogin = () => {
@@ -28,7 +34,13 @@ export default function Home() {
         const user = result.user;
       })
       .catch((error) => {
-        toast("Unable to sign up with Github Account");
+        if (error.code === "auth/account-exists-with-different-credential") {
+          toast(
+            "Already account with the same email exist!\n Unable to sign up with Github Account"
+          );
+        } else {
+          toast("Unable to sign up with Github Account");
+        }
       });
   };
   return (
