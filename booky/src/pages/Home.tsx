@@ -1,9 +1,36 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import NavigationBar from "@/features/NavigationBar";
+import {
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup,
+} from "@firebase/auth";
+import { auth } from "@/../firebase";
 import { IoLogoGithub } from "react-icons/io5";
+import { toast } from "sonner";
 
 export default function Home() {
+  const handleGoogleLogin = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user;
+      })
+      .catch((error) => {
+        toast("Unable to sign up with Google Account");
+      });
+  };
+  const handleGithubLogin = () => {
+    const provider = new GithubAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user;
+      })
+      .catch((error) => {
+        toast("Unable to sign up with Github Account");
+      });
+  };
   return (
     <section className="h-screen w-screen bg-white font-outfit">
       <div className="relative z-1">
@@ -26,12 +53,18 @@ export default function Home() {
           </div>
           <div className="flex flex-col gap-2 w-full lg:w-3/5 justify-center items-center lg:justify-start lg:items-start">
             <div className="flex lg:flex-col w-2/3 gap-2">
-              <Button className="w-full h-12 text-lg flex items-center gap-3">
+              <Button
+                className="w-full h-12 text-lg flex items-center gap-3"
+                onClick={handleGoogleLogin}
+              >
                 <img src="/google_logo.png" className="w-5 h-5" />
                 Sign Up with Google
               </Button>
 
-              <Button className="w-full h-12 text-lg flex items-center gap-3">
+              <Button
+                className="w-full h-12 text-lg flex items-center gap-3"
+                onClick={handleGithubLogin}
+              >
                 <IoLogoGithub size={24} />
                 Sign Up with Github
               </Button>
