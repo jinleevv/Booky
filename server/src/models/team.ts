@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-// The structure of a team. 
+// The structure of a team.
 // All team related information like office hours and appointments are stored here.
 interface ITeam extends Document {
   _id: string;
@@ -8,34 +8,39 @@ interface ITeam extends Document {
   admin: string;
   coadmins: string[];
   members: string[];
-  availableTimes: Map<string,
-    {
-      recurring: IRecurringSchedule[];
-      oneTime: IOneTimeSchedule[];
-    }
-  >;  
+  availableTimes: IAvailableTime[];
   appointments: IAppointments[];
   cancelledMeetings: ICancelledMeetings[];
   createdAt: Date;
 }
 
+export interface IAvailableTime {
+  // _id: string;
+  email: string;
+  meeting: (IRecurringSchedule | IOneTimeSchedule)[];
+}
+
 interface IRecurringSchedule {
-  name: string,
-  weekSchedule: ISchedule[],
-  type: "oneOnOne" | "group",
+  schedule: "recurring";
+  name: string;
+  description: string;
+  weekSchedule: ISchedule[];
+  type: "oneOnOne" | "group";
   duration?: string;
   attendees?: number;
-  zoomLink: string,
+  zoomLink: string;
 }
 
 interface IOneTimeSchedule {
-  name: string,
-  date: string,
-  time: ITimeRange,
-  type: "oneOnOne" | "group",
+  schedule: "one-time";
+  name: string;
+  description: string;
+  date: string;
+  time: ITimeRange;
+  type: "oneOnOne" | "group";
   duration?: string;
   attendees?: number;
-  zoomLink: string,
+  zoomLink: string;
 }
 
 // An office hour schedule is defined by these attributes.
@@ -58,7 +63,7 @@ interface ITimeRange {
 interface IAppointments {
   meetingType: "recurring" | "oneTime";
   appointmentType: "oneOnOne" | "group";
-  meetingId: string,
+  meetingId: string;
   date: string;
   time: string;
   hostName: string;
@@ -85,16 +90,42 @@ const TimeRangeSchema: Schema = new Schema<ITimeRange>({
 const ScheduleSchema: Schema = new Schema<ISchedule>({
   day: { type: String, required: true },
   enabled: { type: Boolean, required: true },
-  times: [TimeRangeSchema], 
+  times: [TimeRangeSchema],
 });
 
 const RecurringScheduleSchema: Schema = new Schema<IRecurringSchedule>({
   name: { type: String, required: true },
+  description: { type: String },
   weekSchedule: { type: [ScheduleSchema], required: true },
-  type: { 
-    type: String, 
-    enum: ["oneOnOne", "group"], 
-    required: true 
+  type: {
+    type: String,
+    enum: ["oneOnOne", "group"],
+    required: true,
+  },
+  duration: {
+    type: String,
+    required: function (this: IRecurringSchedule) {
+      return this.type === "oneOnOne";
+    },
+  },
+  attendees: {
+    type: Number,
+    required: function (this: IRecurringSchedule) {
+      return this.type === "group";
+    },
+  },
+  zoomLink: { type: String, required: false },
+});
+
+const OneTimeScheduleSchema: Schema = new Schema<IOneTimeSchedule>({
+  name: { type: String, required: true },
+  description: { type: String },
+  date: { type: String, required: true },
+  time: { type: TimeRangeSchema, required: true },
+  type: {
+    type: String,
+    enum: ["oneOnOne", "group"],
+    required: true,
   },
   duration: {
     type: String,
@@ -111,41 +142,26 @@ const RecurringScheduleSchema: Schema = new Schema<IRecurringSchedule>({
   zoomLink: { type: String, required: true },
 });
 
-const OneTimeScheduleSchema: Schema = new Schema<IOneTimeSchedule>({
-  name: { type: String, required: true },
-  date: { type: String, required: true },
-  time: { type: TimeRangeSchema, required: true },
-  type: { 
-    type: String, 
-    enum: ["oneOnOne", "group"], 
-    required: true 
+const AvailableTimeSchema: Schema = new Schema<IAvailableTime>({
+  // _id: { type: String, required: true },
+  email: { type: String, required: true },
+  meeting: {
+    type: [RecurringScheduleSchema || OneTimeScheduleSchema],
+    required: true,
   },
-  duration: {
-    type: String,
-    required: function (this: IRecurringSchedule) {
-      return this.type === "oneOnOne";
-    },
-  },
-  attendees: {
-    type: Number,
-    required: function (this: IRecurringSchedule) {
-      return this.type === "group";
-    },
-  },
-  zoomLink: { type: String, required: true },
-})
+});
 
 // Storing the name is optional.
 const AppointmentSchema: Schema = new Schema<IAppointments>({
-  meetingType: { 
-    type: String, 
-    enum: ["recurring", "oneTime"], 
-    required: true 
+  meetingType: {
+    type: String,
+    enum: ["recurring", "oneTime"],
+    required: true,
   },
-  appointmentType: { 
-    type: String, 
-    enum: ["oneOnOne", "group"], 
-    required: true 
+  appointmentType: {
+    type: String,
+    enum: ["oneOnOne", "group"],
+    required: true,
   },
   meetingId: { type: String, required: true },
   date: { type: String, required: true },
@@ -154,7 +170,7 @@ const AppointmentSchema: Schema = new Schema<IAppointments>({
   hostEmail: { type: String, required: true },
   participantName: { type: String, required: false },
   participantEmail: { type: String, required: true },
-  token: { type: String, required: true },              
+  token: { type: String, required: true },
   tokenExpiry: { type: Date, required: true },
 });
 
@@ -169,14 +185,7 @@ const TeamSchema: Schema = new Schema<ITeam>({
   admin: { type: String, required: true },
   coadmins: [{ type: String, required: false }],
   members: [{ type: String, required: true }],
-  availableTimes: {
-    type: Map,
-    of: new Schema({
-      recurring: { type: [RecurringScheduleSchema], default: [] },
-      oneTime: { type: [OneTimeScheduleSchema], default: [] },
-    }),
-    default: {},
-  },
+  availableTimes: { type: [AvailableTimeSchema], required: true },
   appointments: [AppointmentSchema],
   cancelledMeetings: [CancelledMeetingsSchema],
   createdAt: { type: Date, default: Date.now },

@@ -17,6 +17,7 @@ import { useHook } from "@/hooks";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import CreateMeating from "./CreateMeeting";
+import { useState } from "react";
 
 const days = [
   "Sunday",
@@ -30,7 +31,7 @@ const days = [
 
 const formSchema = z.object({
   teamName: z.string().min(1).max(50),
-  durations: z.array(z.string()).min(1, "Please select a duration"),
+  duration: z.string(),
   schedule: z.array(
     z.object({
       day: z.string(),
@@ -57,9 +58,9 @@ const formSchema = z.object({
     start: z.any(),
     end: z.any(),
   }),
-  meetingName: z.string(),
+  meetingName: z.string().min(1, "Please define name for the meeting"),
   meetingDescription: z.string(),
-  meetingType: z.enum(["appointment", "event"], {
+  meetingType: z.enum(["oneOnOne", "group"], {
     required_error: "You need to select the type.",
   }),
   meetingLink: z.string(),
@@ -79,7 +80,7 @@ export default function CreateTeamForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       teamName: "",
-      durations: [],
+      duration: "",
       schedule: days.map((day) => ({
         day,
         enabled: day !== "Sunday" && day !== "Saturday",
@@ -98,12 +99,15 @@ export default function CreateTeamForm() {
           )
         ),
       },
+      meetingDescription: "",
+      meetingLink: "",
     },
   });
 
   const meetingTypeSelection = form.watch("meetingType");
 
   const { server, loggedInUser, userEmail } = useHook();
+  const [currentTab, setCurrentTab] = useState<string>("recurring");
   const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -116,32 +120,33 @@ export default function CreateTeamForm() {
       (email) => email && email.trim() !== ""
     );
 
-    // Create the availableTime map
-    const availableTime = {
-      [userEmail]: values.schedule, // Assign admin's schedule to their email
-      // Optionally, initialize schedules for co-admins if needed
-      ...filteredCoadmins.reduce((acc, email) => {
-        acc[email] = []; // Assign an empty schedule or default values
-        return acc;
-      }, {}),
-    };
+    if (values.meetingType === "oneOnOne" && values.duration == "") {
+      toast("Please select duration");
+      return;
+    }
 
-    const response = await fetch(`${server}/api/teams/register`, {
+    const response = await fetch(`${server}/api/teams/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         name: values.teamName,
-        durations: values.durations,
-        availableTime: availableTime,
         admin: userEmail,
         coadmins: filteredCoadmins,
+        currentTab: currentTab,
+        recurringMeeting: values.schedule,
+        oneTimeMeeting: values.oneTimeMeeting,
+        meetingName: values.meetingName,
+        meetingDescription: values.meetingDescription,
+        meetingType: values.meetingType,
+        duration: values.duration,
+        meetingLink: values.meetingLink,
       }),
     });
-
+    const data = await response.json();
     if (!response.ok) {
-      console.error("Failed to save team to database");
+      console.error("Failed to save team to database", data);
       return -1;
     }
     toast("Successfully Created Team");
@@ -240,7 +245,12 @@ export default function CreateTeamForm() {
               ))}
             </div>
           </div>
-          <CreateMeating form={form} meetingTypeSelection={meetingTypeSelection}/>
+          <CreateMeating
+            form={form}
+            meetingTypeSelection={meetingTypeSelection}
+            currentTab={currentTab}
+            setCurrentTab={setCurrentTab}
+          />
           <div className="flex w-full justify-end">
             <Button type="submit">Submit</Button>
           </div>

@@ -36,7 +36,7 @@ app.use(express.json());
 // Routes
 app.use("/api/users", userRoute);
 app.use("/api/teams", queryUserTeamsRoute);
-app.use("/api/teams", createTeamRoute);
+app.use("/api/teams/create", createTeamRoute);
 app.use("/api/teams", updateAppointmentRoute);
 app.use("/api/teams", queryTeamRoute);
 app.use("/api/teams", updateTeamMembersRoute);

@@ -22,7 +22,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 
-export default function CreateMeating({ form, meetingTypeSelection }) {
+export default function CreateMeating({
+  form,
+  meetingTypeSelection,
+  currentTab,
+  setCurrentTab,
+}) {
   const formatDateTime = (dateObject: any): string => {
     const { year, month, day, hour, minute } = dateObject;
 
@@ -31,6 +36,7 @@ export default function CreateMeating({ form, meetingTypeSelection }) {
 
     return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
   };
+
   return (
     <FormField
       control={form.control}
@@ -68,10 +74,18 @@ export default function CreateMeating({ form, meetingTypeSelection }) {
             </div>
           </div>
           <div className="grid grid-cols-2">
-            <Tabs defaultValue="recurring">
+            <Tabs defaultValue={currentTab}>
               <TabsList>
-                <TabsTrigger value="recurring">Recurring Meetings</TabsTrigger>
-                <TabsTrigger value="one-time">
+                <TabsTrigger
+                  value="recurring"
+                  onClick={() => setCurrentTab("recurring")}
+                >
+                  Recurring Meetings
+                </TabsTrigger>
+                <TabsTrigger
+                  value="one-time"
+                  onClick={() => setCurrentTab("one-time")}
+                >
                   One-Time Meeting / Event
                 </TabsTrigger>
               </TabsList>
@@ -300,19 +314,17 @@ export default function CreateMeating({ form, meetingTypeSelection }) {
                       >
                         <FormItem className="flex -mt-1 items-center space-x-1 space-y-0">
                           <FormControl>
-                            <RadioGroupItem value="appointment" />
+                            <RadioGroupItem value="oneOnOne" />
                           </FormControl>
                           <FormLabel className="font-normal">
-                            Appointment
+                            One on One
                           </FormLabel>
                         </FormItem>
                         <FormItem className="flex -mt-1 items-center space-x-1 space-y-0">
                           <FormControl>
-                            <RadioGroupItem value="event" />
+                            <RadioGroupItem value="group" />
                           </FormControl>
-                          <FormLabel className="font-normal">
-                            Meeting / Event
-                          </FormLabel>
+                          <FormLabel className="font-normal">Group</FormLabel>
                         </FormItem>
                       </RadioGroup>
                     </FormControl>
@@ -320,10 +332,10 @@ export default function CreateMeating({ form, meetingTypeSelection }) {
                   </FormItem>
                 )}
               />
-              {meetingTypeSelection === "appointment" ? (
+              {meetingTypeSelection === "oneOnOne" ? (
                 <FormField
                   control={form.control}
-                  name="durations"
+                  name="duration"
                   render={({ field }) => (
                     <FormItem className="flex p-4">
                       <div className="flex w-28 space-x-2 mt-auto mb-auto">
@@ -331,18 +343,14 @@ export default function CreateMeating({ form, meetingTypeSelection }) {
                       </div>
                       <div className="flex border w-fit rounded-md py-1 px-0.5 gap-1">
                         {["5m", "15m", "30m", "45m", "1h"].map((time) => {
-                          const isSelected = field.value.includes(time);
-
+                          const isSelected = field.value === time;
                           return (
                             <Button
                               key={time}
                               type="button"
                               variant="ghost"
                               onClick={() => {
-                                const selectedDuration = isSelected
-                                  ? []
-                                  : [time];
-                                field.onChange(selectedDuration);
+                                field.onChange(time);
                               }}
                               className={`${
                                 isSelected
