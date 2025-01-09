@@ -1,24 +1,37 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-// The structure of a team. 
+// The structure of a team.
 // All team related information like office hours and appointments are stored here.
 interface ITeam extends Document {
   _id: string;
   name: string;
-  admin: string;
+  adminEmail: string;
+  adminName: string;
   coadmins: string[];
   members: string[];
-  availableTime: Record<string, ISchedule[]>;
-  durations: string[];
-  appointments: IAppointment[];
-  cancelledMeetings: ICancelMeeting[];
+  availableTimes: IAvailableTime[];
+  appointments: IAppointments[];
+  cancelledMeetings: ICancelledMeetings[];
   createdAt: Date;
 }
 
-// The start and end time of an office hour.
-interface ITimeRange {
-  start: string;
-  end: string;
+export interface IAvailableTime {
+  // _id: string;
+  email: string;
+  meeting: IMeetingSchedule;
+}
+
+interface IMeetingSchedule {
+  schedule: "recurring" | "one-time";
+  name: string;
+  description: string;
+  weekSchedule?: ISchedule[];
+  date?: string;
+  time?: ITimeRange;
+  type: "oneOnOne" | "group";
+  duration?: string;
+  attendees?: number;
+  zoomLink: string;
 }
 
 // An office hour schedule is defined by these attributes.
@@ -29,17 +42,25 @@ interface ISchedule {
   times: ITimeRange[];
 }
 
+// The start and end time of an office hour.
+interface ITimeRange {
+  start: string;
+  end: string;
+}
+
 // Define the structure of an appointment.
 // The email is necessary to send a confirmation email.
 // The token/tokenExpirey is necessary to allow users to cancel their appointments.
-interface IAppointment {
-  _id: string;
-  day: string;
+interface IAppointments {
+  meetingType: "recurring" | "oneTime";
+  appointmentType: "oneOnOne" | "group";
+  meetingId: string;
+  date: string;
   time: string;
-  //hostName: string;
-  //hostEmail: string;
-  name: string;
-  email: string;
+  hostName: string;
+  hostEmail: string;
+  participantName: string;
+  participantEmail: string;
   token: string;
   tokenExpiry: Date;
 }
@@ -47,7 +68,7 @@ interface IAppointment {
 // A professor can cancel an office hour time slot.
 // An office hour time slot can be uniquely identified within a team by the day and meeting.
 // Necessary for modifying availability in the calendar.
-interface ICancelMeeting {
+interface ICancelledMeetings {
   day: string;
   meeting: ITimeRange;
 }
@@ -60,22 +81,69 @@ const TimeRangeSchema: Schema = new Schema<ITimeRange>({
 const ScheduleSchema: Schema = new Schema<ISchedule>({
   day: { type: String, required: true },
   enabled: { type: Boolean, required: true },
-  times: [TimeRangeSchema], 
+  times: [TimeRangeSchema],
+});
+
+const meetingScheduleSchema: Schema = new Schema<IMeetingSchedule>({
+  schedule: { type: String, required: true },
+  name: { type: String, required: true },
+  description: { type: String },
+  weekSchedule: { type: [ScheduleSchema], required: false },
+  date: { type: String, required: false },
+  time: { type: TimeRangeSchema, required: false },
+  type: {
+    type: String,
+    enum: ["oneOnOne", "group"],
+    required: true,
+  },
+  duration: {
+    type: String,
+    required: function () {
+      return this.type === "oneOnOne";
+    },
+  },
+  attendees: {
+    type: Number,
+    required: function () {
+      return this.type === "group";
+    },
+  },
+  zoomLink: { type: String, required: false },
+});
+
+const AvailableTimeSchema: Schema = new Schema<IAvailableTime>({
+  // _id: { type: String, required: true },
+  email: { type: String, required: true },
+  meeting: {
+    type: meetingScheduleSchema,
+    required: true,
+  },
 });
 
 // Storing the name is optional.
-const AppointmentSchema: Schema = new Schema<IAppointment>({
-  day: { type: String, required: true },
+const AppointmentSchema: Schema = new Schema<IAppointments>({
+  meetingType: {
+    type: String,
+    enum: ["recurring", "oneTime"],
+    required: true,
+  },
+  appointmentType: {
+    type: String,
+    enum: ["oneOnOne", "group"],
+    required: true,
+  },
+  meetingId: { type: String, required: true },
+  date: { type: String, required: true },
   time: { type: String, required: true },
-  //hostName: { type: String, required: true },
-  //hostEmail: { type: String, required: true },
-  name: { type: String, required: false },
-  email: { type: String, required: true },
-  token: { type: String, required: true },              
+  hostName: { type: String, required: false },
+  hostEmail: { type: String, required: true },
+  participantName: { type: String, required: false },
+  participantEmail: { type: String, required: true },
+  token: { type: String, required: true },
   tokenExpiry: { type: Date, required: true },
 });
 
-const CancelMeetingSchema: Schema = new Schema<ICancelMeeting>({
+const CancelledMeetingsSchema: Schema = new Schema<ICancelledMeetings>({
   day: { type: String, required: true },
   meeting: { type: TimeRangeSchema, required: true },
 });
@@ -83,17 +151,13 @@ const CancelMeetingSchema: Schema = new Schema<ICancelMeeting>({
 const TeamSchema: Schema = new Schema<ITeam>({
   _id: { type: String, required: true },
   name: { type: String, required: true },
-  admin: { type: String, required: true },
+  adminEmail: { type: String, required: true },
+  adminName: { type: String, required: true },
   coadmins: [{ type: String, required: false }],
   members: [{ type: String, required: true }],
-  availableTime: {
-    type: Map,
-    of: [ScheduleSchema], // Map of user IDs to their schedules
-    default: {}, // Initialize with an empty map
-  },
+  availableTimes: { type: [AvailableTimeSchema], required: true },
   appointments: [AppointmentSchema],
-  durations: [{ type: String, required: true }],
-  cancelledMeetings: [CancelMeetingSchema],
+  cancelledMeetings: [CancelledMeetingsSchema],
   createdAt: { type: Date, default: Date.now },
 });
 

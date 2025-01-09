@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"; 
+} from "@/components/ui/card";
 import { useHook } from "@/hooks";
 import { Trash, Settings } from "lucide-react";
 import { toast } from "sonner";
@@ -31,7 +31,7 @@ export default function DashBoardTeams() {
           const data = await response.json();
 
           if (response.ok) {
-            setTeams(data); 
+            setTeams(data);
           }
         } catch (err) {
           setError("Error fetching teams");
@@ -98,7 +98,8 @@ export default function DashBoardTeams() {
                   <CardTitle className="flex text-lg font-bold justify-between">
                     {team.name}
                     <div className="flex space-x-1">
-                      {(team.admin === userEmail || team.coadmins.includes(userEmail)) && (
+                      {(team.adminEmail === userEmail ||
+                        team.coadmins.includes(userEmail)) && (
                         <Button
                           variant="ghost"
                           onClick={(e) => {
@@ -120,7 +121,7 @@ export default function DashBoardTeams() {
                       </Button>
                     </div>
                   </CardTitle>
-                  <CardDescription>Professor: {team.admin}</CardDescription>
+                  <CardDescription>Professor: {team.adminEmail}</CardDescription>
                 </CardHeader>
               </Card>
             ))}

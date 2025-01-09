@@ -6,13 +6,12 @@ import userRoute from "./routes/user/userRegistrationRoute";
 import createTeamRoute from "./routes/team/createTeamRoute";
 import getTeamRoute from "./routes/team/getTeamRoute";
 import updateAppointmentRoute from "./routes/team/updateAppointmentRoute";
-import queryTeamRoute from "./routes/team/queryTeamRoute";
 import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
-import queryUserTeamsRoute from "./routes/team/queryUserTeamsRoute";
+import getUserTeamsRoute from "./routes/team/getUserTeamsRoute";
 import updateCancellationRoute from "./routes/team/updateCancellationRoute";
 import updateAvailableTimeRoute from "./routes/team/updateAvailableTimeRoute";
-import updateCoadminRoute from "./routes/team/updateCoadminRoute"
-import queryAppointmentRoute from "./routes/team/queryAppointmentRoute";
+import updateCoadminRoute from "./routes/team/updateCoadminRoute";
+import getAppointmentRoute from "./routes/team/getAppointmentRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 
@@ -35,16 +34,15 @@ app.use(express.json());
 
 // Routes
 app.use("/api/users", userRoute);
-app.use("/api/teams", queryUserTeamsRoute);
-app.use("/api/teams", createTeamRoute);
+app.use("/api/teams/by-user", getUserTeamsRoute);
+app.use("/api/teams/create", createTeamRoute);
 app.use("/api/teams", updateAppointmentRoute);
-app.use("/api/teams", queryTeamRoute);
 app.use("/api/teams", updateTeamMembersRoute);
 app.use("/api/teams", updateCancellationRoute);
 app.use("/api/teams", updateAvailableTimeRoute);
 app.use("/api/teams", updateCoadminRoute);
-app.use("/api/teams", getTeamRoute);
-app.use("/api/appointment/get-appointment", queryAppointmentRoute);
+app.use("/api/teams/", getTeamRoute);
+app.use("/api/appointment/get-appointment", getAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
 app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
 

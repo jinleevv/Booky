@@ -4,37 +4,109 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-// Utility function to encode keys (replace "." with "__dot__")
-const encodeAvailableTime = (availableTime: Record<string, any>): Record<string, any> => {
-  return Object.fromEntries(
-    Object.entries(availableTime).map(([key, value]) => [key.replace(/\./g, "__dot__"), value])
-  );
-};
-
 // Create a new team.
-export const createTeamHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-  const { name, durations, availableTime, admin, coadmins } = req.body;
+export const createTeamHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const {
+    name,
+    adminEmail,
+    adminName,
+    coadmins,
+    currentTab,
+    recurringMeeting,
+    oneTimeMeeting,
+    meetingName,
+    meetingDescription,
+    meetingType,
+    duration,
+    meetingLink,
+  } = req.body;
 
   try {
-    if (!name || !durations || !availableTime || !admin || !coadmins) {
-      res.status(400).json({ message: "Missing required fields: name, durations, availableTime, or admin." });
+    if (
+      !name ||
+      !adminEmail ||
+      !adminName ||
+      !currentTab ||
+      !recurringMeeting ||
+      !oneTimeMeeting ||
+      !meetingName ||
+      !meetingType
+    ) {
+      res.status(400).json({
+        message: "Missing required fields",
+      });
       return;
     }
 
-    const encodedAvailableTime = encodeAvailableTime(availableTime);
+    let availableTimes = [];
+
+    if (currentTab === "recurring") {
+      availableTimes = [
+        {
+          email: adminEmail,
+          meeting: {
+            schedule: "recurring",
+            name: meetingName,
+            description: meetingDescription,
+            weekSchedule: recurringMeeting,
+            type: meetingType,
+            duration: meetingType === "oneOnOne" ? duration : null,
+            attendees: meetingType === "group" ? 0 : undefined,
+            zoomLink: meetingLink === "" ? "" : meetingLink,
+          },
+        },
+      ];
+    } else {
+      const oneTimeMeetingStartInfo = oneTimeMeeting.start.split("T"); // YYYY-MM-DD
+      const oneTimeMeetingEndInfo = oneTimeMeeting.end.split("T");
+      const date =
+        oneTimeMeetingStartInfo[0].split("-")[1] +
+        "-" +
+        oneTimeMeetingStartInfo[0].split("-")[2] +
+        "-" +
+        oneTimeMeetingStartInfo[0].split("-")[0];
+      availableTimes = [
+        {
+          email: adminEmail,
+          meeting: {
+            schedule: "one-time",
+            name: meetingName,
+            description: meetingDescription,
+            // fix this after
+            date: date,
+            time: {
+              start: oneTimeMeetingStartInfo[1],
+              end: oneTimeMeetingEndInfo[1],
+            },
+            //
+            type: meetingType,
+            duration: meetingType === "oneOnOne" ? duration : null,
+            attendees: meetingType === "group" ? 0 : undefined,
+            zoomLink: meetingLink === "" ? "" : meetingLink,
+          },
+        },
+      ];
+    }
 
     // Generate unique teamId
-    const _id = `team-${name.replaceAll(/\s/g, "-")}-${ShortUniqueId().generate()}`;
+    const _id = `team-${name.replaceAll(
+      /\s/g,
+      "-"
+    )}-${ShortUniqueId().generate()}`;
 
     // Create the new team and save in teams collection.
     // Unitialized attributes are set to their default values.
     const newTeam = new Team({
       _id,
       name,
-      admin,
+      adminEmail,
+      adminName,
       coadmins,
-      availableTime: encodedAvailableTime, // Save as a Map
-      durations,
+      availableTimes: availableTimes, // Save as a Map
+      duration,
     });
     await newTeam.save();
 
@@ -45,6 +117,6 @@ export const createTeamHandler: RequestHandler = async (req: Request, res: Respo
   }
 };
 
-router.post("/register", createTeamHandler);
+router.post("/", createTeamHandler);
 
 export default router;

@@ -3,7 +3,10 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-export const queryAppointmentHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const getAppointmentHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { teamId, appointmentToken } = req.query;
 
   if (!appointmentToken || typeof appointmentToken !== "string") {
@@ -46,6 +49,6 @@ export const queryAppointmentHandler: RequestHandler = async (req: Request, res:
   }
 };
 
-router.get("/", queryAppointmentHandler);
+router.get("/", getAppointmentHandler);
 
 export default router;

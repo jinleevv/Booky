@@ -46,7 +46,7 @@ export default function DashBoard() {
         teams.forEach((team) => {
           const teamName = team.name;
           const teamId = team._id;
-          const teamAdmin = team.admin;
+          const teamAdmin = team.adminEmail;
           const teamAvailableTime = team.availableTime;
           team.appointments.forEach((appointment) => {
             const daysOfWeek = [
@@ -68,19 +68,19 @@ export default function DashBoard() {
             );
 
             Object.keys(teamAvailableTime).forEach((meetingHost) => {
-              if(processedMeetings.has(appointment.token)) {
+              if (processedMeetings.has(appointment.token)) {
                 return;
               }
 
-              const appointmentAvailbleSlot = teamAvailableTime[meetingHost].find(
-                (item) => item.day === appointmentDay
-              );
-  
+              const appointmentAvailbleSlot = teamAvailableTime[
+                meetingHost
+              ].find((item) => item.day === appointmentDay);
+
               if (todayDate < appointmentDate) {
                 if (dateDifference <= 7) {
                   let validStartTime;
                   let validEndTime;
-  
+
                   appointmentAvailbleSlot.times.forEach((item) => {
                     const startTime = item.start;
                     const endTime = item.end;
@@ -95,14 +95,14 @@ export default function DashBoard() {
                       return;
                     }
                   });
-  
+
                   const checkDateEntry = upcoming.find(
                     (item) =>
                       item.date === appointment.day &&
                       item.start === validStartTime &&
                       item.end === validEndTime
                   );
-  
+
                   if (!checkDateEntry) {
                     upcoming.push({
                       teamId: teamId,
@@ -115,14 +115,14 @@ export default function DashBoard() {
                       appointments: [],
                     });
                   }
-  
+
                   const existingDateEntry = upcoming.find(
                     (item) =>
                       item.date === appointment.day &&
                       item.start === validStartTime &&
                       item.end === validEndTime
                   );
-  
+
                   existingDateEntry.appointments.push({
                     time: appointment.time,
                     email: appointment.email,
@@ -134,7 +134,7 @@ export default function DashBoard() {
                 if (dateDifference <= 7) {
                   let validStartTime;
                   let validEndTime;
-  
+
                   appointmentAvailbleSlot.times.forEach((item) => {
                     const startTime = item.start;
                     const endTime = item.end;
@@ -149,14 +149,14 @@ export default function DashBoard() {
                       return;
                     }
                   });
-  
+
                   const checkDateEntry = past.find(
                     (item) =>
                       item.date === appointment.day &&
                       item.start === validStartTime &&
                       item.end === validEndTime
                   );
-  
+
                   if (!checkDateEntry) {
                     past.push({
                       teamId: teamId,
@@ -169,14 +169,14 @@ export default function DashBoard() {
                       appointments: [],
                     });
                   }
-  
+
                   const existingDateEntry = past.find(
                     (item) =>
                       item.date === appointment.day &&
                       item.start === validStartTime &&
                       item.end === validEndTime
                   );
-  
+
                   existingDateEntry.appointments.push({
                     time: appointment.time,
                     email: appointment.email,
@@ -189,13 +189,16 @@ export default function DashBoard() {
                   /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
                 )!;
                 let convertHours = parseInt(hours);
-                if ((period === "PM" || period === "p.m.") && convertHours !== 12) {
+                if (
+                  (period === "PM" || period === "p.m.") &&
+                  convertHours !== 12
+                ) {
                   convertHours += 12;
                 }
                 if (hour <= convertHours) {
                   let validStartTime;
                   let validEndTime;
-  
+
                   appointmentAvailbleSlot.times.forEach((item) => {
                     const startTime = item.start;
                     const endTime = item.end;
@@ -210,14 +213,14 @@ export default function DashBoard() {
                       return;
                     }
                   });
-  
+
                   const checkDateEntry = upcoming.find(
                     (item) =>
                       item.date === appointment.day &&
                       item.start === validStartTime &&
                       item.end === validEndTime
                   );
-  
+
                   if (!checkDateEntry) {
                     upcoming.push({
                       teamId: teamId,
@@ -230,14 +233,14 @@ export default function DashBoard() {
                       appointments: [],
                     });
                   }
-  
+
                   const existingDateEntry = upcoming.find(
                     (item) =>
                       item.date === appointment.day &&
                       item.start === validStartTime &&
                       item.end === validEndTime
                   );
-  
+
                   existingDateEntry.appointments.push({
                     time: appointment.time,
                     email: appointment.email,
@@ -247,7 +250,7 @@ export default function DashBoard() {
                 } else {
                   let validStartTime;
                   let validEndTime;
-  
+
                   appointmentAvailbleSlot.times.forEach((item) => {
                     const startTime = item.start;
                     const endTime = item.end;
@@ -262,14 +265,14 @@ export default function DashBoard() {
                       return;
                     }
                   });
-  
+
                   const checkDateEntry = past.find(
                     (item) =>
                       item.date === appointment.day &&
                       item.start === validStartTime &&
                       item.end === validEndTime
                   );
-  
+
                   if (!checkDateEntry) {
                     past.push({
                       teamId: teamId,
@@ -282,14 +285,14 @@ export default function DashBoard() {
                       appointments: [],
                     });
                   }
-  
+
                   const existingDateEntry = past.find(
                     (item) =>
                       item.date === appointment.day &&
                       item.start === validStartTime &&
                       item.end === validEndTime
                   );
-  
+
                   existingDateEntry.appointments.push({
                     time: appointment.time,
                     email: appointment.email,
@@ -298,7 +301,7 @@ export default function DashBoard() {
                   processedMeetings.add(appointment.token);
                 }
               }
-            })
+            });
           });
         });
 
@@ -321,8 +324,10 @@ export default function DashBoard() {
             /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
           )!;
           let militaryHours = parseInt(hours);
-          if ((period === "PM" || period ==="p.m.") && militaryHours !== 12) militaryHours += 12;
-          if ((period === "AM" || period === "a.m.") && militaryHours === 12) militaryHours = 0;
+          if ((period === "PM" || period === "p.m.") && militaryHours !== 12)
+            militaryHours += 12;
+          if ((period === "AM" || period === "a.m.") && militaryHours === 12)
+            militaryHours = 0;
           return militaryHours * 60 + parseInt(minutes);
         };
 
@@ -440,16 +445,24 @@ export default function DashBoard() {
           <div className="w-full h-5/6 mt-3 space-y-3">
             <div className="flex gap-1">
               <Button
-                variant={showUpcoming ? "default" : "ghost"}
+                variant={"ghost"}
                 onClick={() => setShowUpcoming(true)}
-                className="w-20"
+                className={`w-20 h-8 ${
+                  showUpcoming
+                    ? " text-red-700 hover:text-red-700 hover:bg-gray-100"
+                    : "text-black hover:bg-gray-100"
+                }`}
               >
                 Upcoming
               </Button>
               <Button
-                variant={!showUpcoming ? "default" : "ghost"}
+                variant={"ghost"}
                 onClick={() => setShowUpcoming(false)}
-                className="w-12"
+                className={`w-12 h-8 ${
+                  !showUpcoming
+                    ? " text-red-700 hover:text-red-700 hover:bg-gray-100"
+                    : "text-black hover:bg-gray-100"
+                }`}
               >
                 Past
               </Button>

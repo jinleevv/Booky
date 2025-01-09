@@ -4,7 +4,10 @@ import Team from "../../models/team";
 const router = express.Router();
 
 // Retrieve all teams the user is a part of.
-export const queryTeamsByUserHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const getTeamsByUserHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { userEmail } = req.query;
 
   if (!userEmail || typeof userEmail !== "string") {
@@ -14,7 +17,9 @@ export const queryTeamsByUserHandler: RequestHandler = async (req: Request, res:
 
   try {
     // Find teams where userEmail is in the admin or members attribute.
-    const teams = await Team.find({ $or: [{admin: userEmail}, {members: userEmail}] }).exec();
+    const teams = await Team.find({
+      $or: [{ adminEmail: userEmail }, { members: userEmail }],
+    }).exec();
 
     res.status(200).json(teams);
   } catch (error) {
@@ -23,6 +28,6 @@ export const queryTeamsByUserHandler: RequestHandler = async (req: Request, res:
   }
 };
 
-router.get("/by-user", queryTeamsByUserHandler);
+router.get("/", getTeamsByUserHandler);
 
 export default router;

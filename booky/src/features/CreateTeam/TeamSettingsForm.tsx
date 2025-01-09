@@ -31,10 +31,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { availableTime as defaultAvailableTime } from "@/features/time";
+import { parseZonedDateTime } from "@internationalized/date";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useHook } from "@/hooks";
 import { Label } from "@/components/ui/label";
+import CreateMeeting from "./CreateMeeting";
 
 const days = [
   "Sunday",
@@ -47,7 +49,7 @@ const days = [
 ];
 
 const formSchema = z.object({
-  durations: z.array(z.string()).min(1, "Please select a duration"),
+  duration: z.string(),
   schedule: z.array(
     z.object({
       day: z.string(),
@@ -70,25 +72,52 @@ const formSchema = z.object({
         "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
       )
   ),
-  meetingName: z.string(),
+  oneTimeMeeting: z.object({
+    start: z.any(),
+    end: z.any(),
+  }),
+  meetingName: z.string().min(1, "Please enter a name."),
   meetingDescription: z.string(),
-  meetingType: z.enum(["appointment", "event"], {
+  meetingType: z.enum(["oneOnOne", "group"], {
     required_error: "You need to select the type.",
   }),
   meetingLink: z.string(),
 });
 
+const formatDateTime = (dateObject: any): string => {
+  const { year, month, day, hour, minute } = dateObject;
+
+  // Pad month, day, hour, and minute with leading zeros if needed
+  const pad = (value: number) => value.toString().padStart(2, "0");
+
+  return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
+};
+
 export default function TeamSettings() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      durations: [],
+      duration: "",
       schedule: days.map((day) => ({
         day,
-        enabled: false,
+        enabled: day !== "Sunday" && day !== "Saturday",
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
       })),
       coadmins: [],
+      oneTimeMeeting: {
+        start: formatDateTime(
+          parseZonedDateTime(
+            `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
+          )
+        ),
+        end: formatDateTime(
+          parseZonedDateTime(
+            `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
+          )
+        ),
+      },
+      meetingDescription: "",
+      meetingLink: "",
     },
   });
 
@@ -96,7 +125,11 @@ export default function TeamSettings() {
   const { team: teamId } = useParams();
   const { server, loggedInUser, userEmail } = useHook(); // Use global state from the hook
   const [teamName, setTeamName] = useState<string | null>(null);
+  const [currentCoAdmins, setCurrentCoAdmins] = useState<Array<string>>([]);
   const [availableTime, setAvailableTime] = useState<Record<string, any>>({});
+  const [currentTab, setCurrentTab] = useState<string>("add");
+  const [currentMeetingTab, setCurrentMeetingTab] =
+    useState<string>("recurring");
 
   const meetingTypeSelection = form.watch("meetingType");
 
@@ -108,6 +141,7 @@ export default function TeamSettings() {
       if (response.ok) {
         setAvailableTime(data.availableTime);
         setTeamName(data.name);
+        setCurrentCoAdmins(data.coadmins);
       } else {
         console.error("Failed to fetch team details");
         toast("Failed to fetch team details");
@@ -116,61 +150,6 @@ export default function TeamSettings() {
     };
     fetchTeam();
   }, [teamId, server, navigate]);
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!loggedInUser) {
-      console.error("No user is logged in");
-      return;
-    }
-
-    const updatedAvailableTime = {
-      ...availableTime,
-      [userEmail]: values.schedule,
-    };
-
-    try {
-      const response1 = await fetch(
-        `${server}/api/teams/${teamId}/availableTime`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            availableTime: updatedAvailableTime,
-          }),
-        }
-      );
-
-      if (!response1.ok) {
-        console.error("Failed to update schedule");
-        toast("Failed to update schedule");
-        return;
-      }
-
-      const response2 = await fetch(`${server}/api/teams/${teamId}/coadmins`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          coadmins: values.coadmins,
-        }),
-      });
-
-      if (!response2.ok) {
-        console.error("Failed to update coadmins");
-        toast("Failed to update coadmins");
-        return;
-      }
-
-      toast("Successfully updated your schedule and coadmins");
-      navigate("/dashboard/teams");
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      toast("An error occurred while submitting the form");
-    }
-  }
 
   const handleAddCoadmin = () => {
     const currentCoadmins = form.getValues("coadmins");
@@ -184,6 +163,124 @@ export default function TeamSettings() {
       currentCoadmins.filter((_, i) => i !== index)
     );
   };
+
+  async function handleAddMeeting(
+    coadmins,
+    schedule,
+    oneTimeMeeting,
+    meetingName,
+    meetingDescription,
+    meetingType,
+    duration,
+    meetingLink
+  ) {
+    const filteredCoadmins = coadmins.filter(
+      (email) => email && email.trim() !== ""
+    );
+
+    if (meetingType === "oneOnOne" && duration == "") {
+      toast("Please select duration");
+      return;
+    }
+
+    const response = await fetch(
+      `${server}/api/teams/${teamId}/availableTime`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          hostEmail: userEmail,
+          coadmins: filteredCoadmins,
+          currentTab: currentMeetingTab,
+          recurringMeeting: schedule,
+          oneTimeMeeting: oneTimeMeeting,
+          meetingName: meetingName,
+          meetingDescription: meetingDescription,
+          meetingType: meetingType,
+          duration: duration,
+          meetingLink: meetingLink,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      toast("Failed to add meeting to database");
+      return -1;
+    }
+    toast("Successfully Created Team");
+    return 0;
+  }
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!loggedInUser) {
+      console.error("No user is logged in");
+      return;
+    }
+
+    if (currentTab == "add") {
+      const response = await handleAddMeeting(
+        values.coadmins,
+        values.schedule,
+        values.oneTimeMeeting,
+        values.meetingName,
+        values.meetingDescription,
+        values.meetingType,
+        values.duration,
+        values.meetingLink
+      );
+      return;
+    }
+
+    // const updatedAvailableTime = {
+    //   ...availableTime,
+    //   [userEmail]: values.schedule,
+    // };
+
+    // try {
+    //   const response1 = await fetch(
+    //     `${server}/api/teams/${teamId}/availableTime`,
+    //     {
+    //       method: "PATCH",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({
+    //         availableTime: updatedAvailableTime,
+    //       }),
+    //     }
+    //   );
+
+    //   if (!response1.ok) {
+    //     console.error("Failed to update schedule");
+    //     toast("Failed to update schedule");
+    //     return;
+    //   }
+
+    //   const response2 = await fetch(`${server}/api/teams/${teamId}/coadmins`, {
+    //     method: "PATCH",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       coadmins: values.coadmins,
+    //     }),
+    //   });
+
+    //   if (!response2.ok) {
+    //     console.error("Failed to update coadmins");
+    //     toast("Failed to update coadmins");
+    //     return;
+    //   }
+
+    //   toast("Successfully updated your schedule and coadmins");
+    //   navigate("/dashboard/teams");
+    // } catch (error) {
+    //   console.error("Error submitting form:", error);
+    //   toast("An error occurred while submitting the form");
+    // }
+  }
 
   return (
     <section className="grid mt-10 bg-white">
@@ -200,7 +297,7 @@ export default function TeamSettings() {
             <div className="flex">
               <div className="my-auto">
                 <FormLabel className="mb-2">
-                  Co-admins: display current co-admins
+                  Co-admins: {currentCoAdmins}
                 </FormLabel>
               </div>
               <Button
@@ -250,11 +347,32 @@ export default function TeamSettings() {
             </div>
           </div>
           <div className="border rounded-lg p-4">
-            <Tabs defaultValue="modify">
+            <Tabs defaultValue={currentTab}>
               <TabsList>
-                <TabsTrigger value="modify">Modify</TabsTrigger>
-                <TabsTrigger value="cancel">Cancel</TabsTrigger>
+                <TabsTrigger value="add" onClick={() => setCurrentTab("add")}>
+                  Add
+                </TabsTrigger>
+                <TabsTrigger
+                  value="modify"
+                  onClick={() => setCurrentTab("modify")}
+                >
+                  Modify
+                </TabsTrigger>
+                <TabsTrigger
+                  value="cancel"
+                  onClick={() => setCurrentTab("cancel")}
+                >
+                  Cancel
+                </TabsTrigger>
               </TabsList>
+              <TabsContent value="add">
+                <CreateMeeting
+                  form={form}
+                  meetingTypeSelection={meetingTypeSelection}
+                  currentTab={currentMeetingTab}
+                  setCurrentTab={setCurrentMeetingTab}
+                />
+              </TabsContent>
               <TabsContent value="modify" className="grid grid-cols-2">
                 <div>
                   <Select>
@@ -489,10 +607,10 @@ export default function TeamSettings() {
                       </FormItem>
                     )}
                   />
-                  {meetingTypeSelection === "appointment" ? (
+                  {meetingTypeSelection === "oneOnOne" ? (
                     <FormField
                       control={form.control}
-                      name="durations"
+                      name="duration"
                       render={({ field }) => (
                         <FormItem className="flex p-4">
                           <div className="flex w-28 space-x-2 mt-auto mb-auto">
@@ -500,18 +618,14 @@ export default function TeamSettings() {
                           </div>
                           <div className="flex border w-fit rounded-md py-1 px-0.5 gap-1">
                             {["5m", "15m", "30m", "45m", "1h"].map((time) => {
-                              const isSelected = field.value.includes(time);
-
+                              const isSelected = field.value === time;
                               return (
                                 <Button
                                   key={time}
                                   type="button"
                                   variant="ghost"
                                   onClick={() => {
-                                    const selectedDuration = isSelected
-                                      ? []
-                                      : [time];
-                                    field.onChange(selectedDuration);
+                                    field.onChange(time);
                                   }}
                                   className={`${
                                     isSelected

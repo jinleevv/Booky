@@ -54,7 +54,7 @@ export const cancelOfficeHourHandler: RequestHandler = async (
 
     const mailOptions = {
       from: `Booky <${process.env.EMAIL}>`,
-      to: [...team.members, team.admin].join(","),
+      to: [...team.members, team.adminEmail].join(","),
       subject: "Booky Cancel Announcement",
       text: `Booky Cancel Announcement \n\n Cancelled Date: ${cancelledDate} \n Start Time: ${start} \n End Time: ${end} \n\n We are sorry for the inconvenience,\n Booky`,
     };
@@ -65,12 +65,10 @@ export const cancelOfficeHourHandler: RequestHandler = async (
       }
     });
 
-    res
-      .status(200)
-      .json({
-        message: "Office hour cancelled successfully",
-        cancelledDays: team.cancelledMeetings,
-      });
+    res.status(200).json({
+      message: "Office hour cancelled successfully",
+      cancelledDays: team.cancelledMeetings,
+    });
   } catch (error) {
     console.error("Error cancelling office hour:", error);
     res.status(500).json({ message: "Server error" });
