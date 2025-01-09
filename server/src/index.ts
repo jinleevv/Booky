@@ -1,19 +1,22 @@
+import cors from "cors";
+import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
-import cors from "cors";
-import userRoute from "./routes/user/userRegistrationRoute";
+import createPollRoute from "./routes/poll/createPollRoute";
+import getPollRoute from "./routes/poll/getPollRoute";
+import updatePollRoute from "./routes/poll/updatePollRoute";
 import createTeamRoute from "./routes/team/createTeamRoute";
-import getTeamRoute from "./routes/team/getTeamRoute";
-import updateAppointmentRoute from "./routes/team/updateAppointmentRoute";
-import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
-import getUserTeamsRoute from "./routes/team/getUserTeamsRoute";
-import updateCancellationRoute from "./routes/team/updateCancellationRoute";
-import updateAvailableTimeRoute from "./routes/team/updateAvailableTimeRoute";
-import updateCoadminRoute from "./routes/team/updateCoadminRoute";
-import getAppointmentRoute from "./routes/team/getAppointmentRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
+import getAppointmentRoute from "./routes/team/getAppointmentRoute";
+import getTeamRoute from "./routes/team/getTeamRoute";
+import getUserTeamsRoute from "./routes/team/getUserTeamsRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
+import updateAppointmentRoute from "./routes/team/updateAppointmentRoute";
+import updateAvailableTimeRoute from "./routes/team/updateAvailableTimeRoute";
+import updateCancellationRoute from "./routes/team/updateCancellationRoute";
+import updateCoadminRoute from "./routes/team/updateCoadminRoute";
+import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
+import userRoute from "./routes/user/userRegistrationRoute";
 
 dotenv.config();
 
@@ -45,7 +48,9 @@ app.use("/api/teams/", getTeamRoute);
 app.use("/api/appointment/get-appointment", getAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
 app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
-
+app.use("/api/polls/create", createPollRoute);
+app.use("/api/polls", updatePollRoute);
+app.use("/api/polls", getPollRoute);
 // MongoDB connection
 mongoose
   .connect(process.env.MONGODB_URI!, {

@@ -1,25 +1,25 @@
+import { Toaster } from "@/components/ui/sonner";
+import { NextUIProvider } from "@nextui-org/react";
+import { useContext } from "react";
 import {
+  Navigate,
+  Route,
   BrowserRouter as Router,
   Routes,
-  Route,
-  Navigate,
 } from "react-router-dom";
-import { NextUIProvider } from "@nextui-org/react";
 import { AuthContext } from "./features/AuthContext.tsx";
-import { useContext } from "react";
-import SignUp from "./pages/SignUp";
-import Home from "./pages/Home";
-import DashBoard from "./pages/DashBoard";
-import Schedule from "./pages/Schedule";
-import DashBoardTeams from "./pages/DashBoardTeams";
-import SignIn from "./pages/SignIn";
-import { Toaster } from "@/components/ui/sonner";
-import CreateTeam from "./pages/CreateTeam";
 import { useHook } from "./hooks.ts";
 import { Appointment } from "./pages/Appointment.tsx";
+import CreatePoll from "./pages/CreatePoll.tsx";
+import CreateTeam from "./pages/CreateTeam";
+import DashBoard from "./pages/DashBoard";
 import DashBoardSchedule from "./pages/DashBoardSchedule.tsx";
+import DashBoardTeams from "./pages/DashBoardTeams";
+import Home from "./pages/Home";
+import Schedule from "./pages/Schedule";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
 import TeamSettings from "./pages/TeamSettings.tsx";
-import AvailabilityScheduler from "./pages/AvailabilityScheduler.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -95,7 +95,7 @@ function App() {
             path="/poll"
             element={
               <ProtectedRoute>
-                <AvailabilityScheduler />
+                <CreatePoll />
               </ProtectedRoute>
             }
           />
