@@ -209,7 +209,7 @@ export default function TeamSettings() {
       toast("Failed to add meeting to database");
       return -1;
     }
-    toast("Successfully Created Team");
+    toast("Successfully updated team settings");
     return 0;
   }
 
@@ -293,57 +293,75 @@ export default function TeamSettings() {
               {teamName || "Loading..."}
             </FormLabel>
           </div>
-          <div className="border rounded-lg p-4">
-            <div className="flex">
-              <div className="my-auto">
-                <FormLabel className="mb-2">
-                  Co-admins: {currentCoAdmins}
-                </FormLabel>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={handleAddCoadmin}
-              >
-                <Plus className="w-2 h-2" />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {(form.watch("coadmins") || []).map((coadmin, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <FormField
-                    control={form.control}
-                    name={`coadmins.${index}`}
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Coadmin Email"
-                            className={`mt-2 ${
-                              fieldState.invalid ? "border-red-400" : ""
-                            }`}
-                          />
-                        </FormControl>
-                        {fieldState.error && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {fieldState.error.message}
-                          </p>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveCoadmin(index)}
-                  >
-                    <Trash className="w-4 h-4 text-red-500" />
-                  </Button>
+          <div className="border rounded-lg p-4 grid grid-cols-2">
+            <div>
+              <div className="flex">
+                <div className="my-auto">
+                  <FormLabel className="mb-2">
+                    Add Co-admins
+                  </FormLabel>
                 </div>
-              ))}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleAddCoadmin}
+                >
+                  <Plus className="w-2 h-2" />
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {(form.watch("coadmins") || []).map((coadmin, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <FormField
+                      control={form.control}
+                      name={`coadmins.${index}`}
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Coadmin Email"
+                              className={`mt-2 ${
+                                fieldState.invalid ? "border-red-400" : ""
+                              }`}
+                            />
+                          </FormControl>
+                          {fieldState.error && (
+                            <p className="text-red-500 text-sm mt-1">
+                              {fieldState.error.message}
+                            </p>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveCoadmin(index)}
+                    >
+                      <Trash className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="border rounded-lg p-4">
+                <Label className="mb-2">Co-admins:</Label>
+                <div className="space-y-2">
+                  {currentCoAdmins.length > 0 ? (
+                    currentCoAdmins.map((coadmin, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span>{coadmin}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-gray-500">No co-admins added yet.</span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
           <div className="border rounded-lg p-4">
