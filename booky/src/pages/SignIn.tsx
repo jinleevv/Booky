@@ -35,8 +35,8 @@ export default function SignIn() {
             <SignInForm />
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center h-full w-1/2 border rounded-lg">
-          <img src="/register_img.png" />
+        <div className="flex flex-col items-center justify-center h-fit w-1/2 border rounded-lg">
+          <img src="/register_img.png" className="rounded-lg" />
         </div>
       </div>
     </section>
