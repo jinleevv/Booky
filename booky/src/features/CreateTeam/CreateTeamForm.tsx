@@ -106,7 +106,7 @@ export default function CreateTeamForm() {
 
   const meetingTypeSelection = form.watch("meetingType");
 
-  const { server, loggedInUser, userEmail } = useHook();
+  const { server, loggedInUser, userEmail, userName } = useHook();
   const [currentTab, setCurrentTab] = useState<string>("recurring");
   const navigate = useNavigate();
 
@@ -132,7 +132,8 @@ export default function CreateTeamForm() {
       },
       body: JSON.stringify({
         name: values.teamName,
-        admin: userEmail,
+        adminEmail: userEmail,
+        adminName: userName,
         coadmins: filteredCoadmins,
         currentTab: currentTab,
         recurringMeeting: values.schedule,

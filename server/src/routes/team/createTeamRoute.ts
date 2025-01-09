@@ -11,7 +11,8 @@ export const createTeamHandler: RequestHandler = async (
 ): Promise<void> => {
   const {
     name,
-    admin,
+    adminEmail,
+    adminName,
     coadmins,
     currentTab,
     recurringMeeting,
@@ -26,7 +27,8 @@ export const createTeamHandler: RequestHandler = async (
   try {
     if (
       !name ||
-      !admin ||
+      !adminEmail ||
+      !adminName ||
       !currentTab ||
       !recurringMeeting ||
       !oneTimeMeeting ||
@@ -44,19 +46,17 @@ export const createTeamHandler: RequestHandler = async (
     if (currentTab === "recurring") {
       availableTimes = [
         {
-          email: admin,
-          meeting: [
-            {
-              schedule: "recurring",
-              name: meetingName,
-              description: meetingDescription,
-              weekSchedule: recurringMeeting,
-              type: meetingType,
-              duration: meetingType === "oneOnOne" ? duration : null,
-              attendees: meetingType === "group" ? 0 : null,
-              zoomLink: meetingLink === "" ? "" : meetingLink,
-            },
-          ],
+          email: adminEmail,
+          meeting: {
+            schedule: "recurring",
+            name: meetingName,
+            description: meetingDescription,
+            weekSchedule: recurringMeeting,
+            type: meetingType,
+            duration: meetingType === "oneOnOne" ? duration : null,
+            attendees: meetingType === "group" ? 0 : undefined,
+            zoomLink: meetingLink === "" ? "" : meetingLink,
+          },
         },
       ];
     } else {
@@ -70,25 +70,23 @@ export const createTeamHandler: RequestHandler = async (
         oneTimeMeetingStartInfo[0].split("-")[0];
       availableTimes = [
         {
-          email: admin,
-          meeting: [
-            {
-              schedule: "one-time",
-              name: meetingName,
-              description: meetingDescription,
-              // fix this after
-              date: date,
-              time: {
-                start: oneTimeMeetingStartInfo[1],
-                end: oneTimeMeetingEndInfo[1],
-              },
-              //
-              type: meetingType,
-              duration: meetingType === "oneOnOne" ? duration : null,
-              attendees: meetingType === "group" ? 0 : null,
-              zoomLink: meetingLink === "" ? "" : meetingLink,
+          email: adminEmail,
+          meeting: {
+            schedule: "one-time",
+            name: meetingName,
+            description: meetingDescription,
+            // fix this after
+            date: date,
+            time: {
+              start: oneTimeMeetingStartInfo[1],
+              end: oneTimeMeetingEndInfo[1],
             },
-          ],
+            //
+            type: meetingType,
+            duration: meetingType === "oneOnOne" ? duration : null,
+            attendees: meetingType === "group" ? 0 : undefined,
+            zoomLink: meetingLink === "" ? "" : meetingLink,
+          },
         },
       ];
     }
@@ -104,7 +102,8 @@ export const createTeamHandler: RequestHandler = async (
     const newTeam = new Team({
       _id,
       name,
-      admin,
+      adminEmail,
+      adminName,
       coadmins,
       availableTimes: availableTimes, // Save as a Map
       duration,

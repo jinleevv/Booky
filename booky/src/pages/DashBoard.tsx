@@ -46,7 +46,7 @@ export default function DashBoard() {
         teams.forEach((team) => {
           const teamName = team.name;
           const teamId = team._id;
-          const teamAdmin = team.admin;
+          const teamAdmin = team.adminEmail;
           const teamAvailableTime = team.availableTime;
           team.appointments.forEach((appointment) => {
             const daysOfWeek = [

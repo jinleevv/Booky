@@ -98,7 +98,7 @@ export default function DashBoardTeams() {
                   <CardTitle className="flex text-lg font-bold justify-between">
                     {team.name}
                     <div className="flex space-x-1">
-                      {(team.admin === userEmail ||
+                      {(team.adminEmail === userEmail ||
                         team.coadmins.includes(userEmail)) && (
                         <Button
                           variant="ghost"
@@ -121,7 +121,7 @@ export default function DashBoardTeams() {
                       </Button>
                     </div>
                   </CardTitle>
-                  <CardDescription>Professor: {team.admin}</CardDescription>
+                  <CardDescription>Professor: {team.adminEmail}</CardDescription>
                 </CardHeader>
               </Card>
             ))}
