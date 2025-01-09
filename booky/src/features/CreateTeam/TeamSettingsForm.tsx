@@ -35,6 +35,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useHook } from "@/hooks";
 import { Label } from "@/components/ui/label";
+import CreateMeating from "./CreateMeeting";
 
 const days = [
   "Sunday",
@@ -250,11 +251,18 @@ export default function TeamSettings() {
             </div>
           </div>
           <div className="border rounded-lg p-4">
-            <Tabs defaultValue="modify">
+            <Tabs defaultValue="add">
               <TabsList>
+                <TabsTrigger value="add">Add</TabsTrigger>
                 <TabsTrigger value="modify">Modify</TabsTrigger>
                 <TabsTrigger value="cancel">Cancel</TabsTrigger>
               </TabsList>
+              <TabsContent value="add">
+                <CreateMeating
+                  form={form}
+                  meetingTypeSelection={meetingTypeSelection}
+                />
+              </TabsContent>
               <TabsContent value="modify" className="grid grid-cols-2">
                 <div>
                   <Select>
