@@ -44,7 +44,6 @@ export const updateAvailableTimeHandler: RequestHandler = async (
     }
 
     if (currentTab === "recurring") {
-      console.log("hello");
       team.availableTimes.push({
         email: hostEmail,
         meeting: {
