@@ -447,10 +447,10 @@ export default function DashBoard() {
               <Button
                 variant={"ghost"}
                 onClick={() => setShowUpcoming(true)}
-                className={`w-20 ${
+                className={`w-20 h-8 ${
                   showUpcoming
-                    ? " text-red-700 hover:text-red-700 hover:bg-white"
-                    : "text-black hover:bg-white"
+                    ? " text-red-700 hover:text-red-700 hover:bg-gray-100"
+                    : "text-black hover:bg-gray-100"
                 }`}
               >
                 Upcoming
@@ -458,10 +458,10 @@ export default function DashBoard() {
               <Button
                 variant={"ghost"}
                 onClick={() => setShowUpcoming(false)}
-                className={`w-12 ${
+                className={`w-12 h-8 ${
                   !showUpcoming
-                    ? " text-red-700 hover:text-red-700 hover:bg-white"
-                    : "text-black hover:bg-white"
+                    ? " text-red-700 hover:text-red-700 hover:bg-gray-100"
+                    : "text-black hover:bg-gray-100"
                 }`}
               >
                 Past
