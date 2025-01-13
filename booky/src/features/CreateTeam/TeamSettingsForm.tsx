@@ -26,6 +26,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { DateRangePicker } from "@nextui-org/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Trash } from "lucide-react";
@@ -49,6 +50,7 @@ const days = [
 ];
 
 const formSchema = z.object({
+  meetingSchedule: z.string(),
   duration: z.string(),
   schedule: z.array(
     z.object({
@@ -76,12 +78,14 @@ const formSchema = z.object({
     start: z.any(),
     end: z.any(),
   }),
+  oneTimeMeetingDate: z.string(),
   meetingName: z.string().min(1, "Please enter a name."),
   meetingDescription: z.string(),
   meetingType: z.enum(["oneOnOne", "group"], {
     required_error: "You need to select the type.",
   }),
   meetingLink: z.string(),
+  meetingId: z.string(),
 });
 
 const formatDateTime = (dateObject: any): string => {
@@ -97,6 +101,7 @@ export default function TeamSettings() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      meetingSchedule: "",
       duration: "",
       schedule: days.map((day) => ({
         day,
@@ -116,8 +121,10 @@ export default function TeamSettings() {
           )
         ),
       },
+      oneTimeMeetingDate: "",
       meetingDescription: "",
       meetingLink: "",
+      meetingId: "",
     },
   });
 
@@ -130,7 +137,7 @@ export default function TeamSettings() {
   const [currentTab, setCurrentTab] = useState<string>("add");
   const [currentMeetingTab, setCurrentMeetingTab] =
     useState<string>("recurring");
-
+  const [userMeetings, setUserMeetings] = useState<Array<any>>([]);
   const meetingTypeSelection = form.watch("meetingType");
 
   // Fetch team name on load
@@ -139,9 +146,13 @@ export default function TeamSettings() {
       const response = await fetch(`${server}/api/teams/${teamId}`);
       const data = await response.json();
       if (response.ok) {
-        setAvailableTime(data.availableTime);
+        const teamMeetings = data.availableTimes;
+        setAvailableTime(teamMeetings);
         setTeamName(data.name);
         setCurrentCoAdmins(data.coadmins);
+
+        const myMeetings = teamMeetings.filter((meeting) => meeting.email === userEmail);
+        setUserMeetings(myMeetings);
       } else {
         console.error("Failed to fetch team details");
         toast("Failed to fetch team details");
@@ -213,6 +224,57 @@ export default function TeamSettings() {
     return 0;
   }
 
+  async function handleModifyMeeting(
+    coadmins,
+    schedule,
+    oneTimeMeeting,
+    meetingName,
+    meetingDescription,
+    meetingType,
+    duration,
+    meetingLink,
+    meetingId,
+  ) {
+    const filteredCoadmins = coadmins.filter(
+      (email) => email && email.trim() !== ""
+    );
+
+    if (meetingType === "oneOnOne" && duration == "") {
+      toast("Please select duration");
+      return;
+    }
+
+    const response = await fetch(
+      `${server}/api/teams/${teamId}/modify-availableTime`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          hostEmail: userEmail,
+          coadmins: filteredCoadmins,
+          currentTab: currentMeetingTab,
+          recurringMeeting: schedule,
+          oneTimeMeeting: oneTimeMeeting,
+          meetingName: meetingName,
+          meetingDescription: meetingDescription,
+          meetingType: meetingType,
+          duration: duration,
+          meetingLink: meetingLink,
+          meetingId: meetingId,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      toast("Failed to modify meeting");
+      return -1;
+    }
+    toast("Successfully updated team settings");
+    return 0;
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!loggedInUser) {
       console.error("No user is logged in");
@@ -229,6 +291,20 @@ export default function TeamSettings() {
         values.meetingType,
         values.duration,
         values.meetingLink
+      );
+      return;
+    }
+    else if (currentTab == "modify") {
+      const response = await handleModifyMeeting(
+        values.coadmins,
+        values.schedule,
+        values.oneTimeMeeting,
+        values.meetingName,
+        values.meetingDescription,
+        values.meetingType,
+        values.duration,
+        values.meetingLink,
+        values.meetingId,
       );
       return;
     }
@@ -393,173 +469,228 @@ export default function TeamSettings() {
               </TabsContent>
               <TabsContent value="modify" className="grid grid-cols-2">
                 <div>
-                  <Select>
+                  <Select
+                    onValueChange={(selectedId) => {
+                      const selectedMeeting = userMeetings.find((meeting) => meeting._id === selectedId);
+                      if (selectedMeeting) {
+                        form.reset({
+                          ...form.getValues(),
+                          meetingSchedule: selectedMeeting.meeting.schedule,
+                          meetingName: selectedMeeting.meeting.name,
+                          schedule:
+                            selectedMeeting.meeting.schedule === "recurring"
+                              ? selectedMeeting.meeting.weekSchedule
+                              : [],
+                          oneTimeMeeting:
+                            selectedMeeting.meeting.schedule === "one-time"
+                              ? selectedMeeting.meeting.time
+                              : { start: "", end: "" },
+                          oneTimeMeetingDate:
+                            selectedMeeting.meeting.schedule === "one-time"
+                              ? selectedMeeting.meeting.date
+                              : "",
+                          meetingDescription: selectedMeeting.meeting.description,
+                          meetingLink: selectedMeeting.meeting.zoomLink,
+                          meetingId: selectedMeeting._id,
+                          
+                        });
+                      }
+                    }}>
                     <SelectTrigger className="w-[180px] mb-2">
                       <SelectValue placeholder="Select Meeting" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="m1">m1</SelectItem>
-                      <SelectItem value="m2">m2</SelectItem>
-                      <SelectItem value="m3">m3</SelectItem>
+                      {userMeetings.map((meeting) => (
+                        <SelectItem key={meeting._id} value={meeting._id}>
+                          {meeting.meeting.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
 
                   <div className="w-full border-b-1"></div>
 
                   {/* Schedule Section */}
-                  <FormField
-                    control={form.control}
-                    name="schedule"
-                    render={() => (
-                      <div className="space-y-4">
-                        {form.watch("schedule").map((day, dayIndex) => (
-                          <div
-                            key={day.day}
-                            className="flex items-center space-x-4"
-                          >
-                            <FormField
-                              control={form.control}
-                              name={`schedule.${dayIndex}.enabled`}
-                              render={({ field }) => (
-                                <FormItem className="flex w-32 items-center space-x-2">
-                                  <FormControl>
-                                    <Switch
-                                      checked={field.value}
-                                      onCheckedChange={field.onChange}
-                                      className="mt-2"
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-medium">
-                                    {day.day}
-                                  </FormLabel>
-                                </FormItem>
+                  {form.watch("meetingSchedule") === "recurring" ? (
+                    // Render Schedule Section for recurring meetings
+                    <FormField
+                      control={form.control}
+                      name="schedule"
+                      render={() => (
+                        <div className="space-y-4">
+                          {form.watch("schedule").map((day, dayIndex) => (
+                            <div key={day.day} className="flex items-center space-x-4">
+                              <FormField
+                                control={form.control}
+                                name={`schedule.${dayIndex}.enabled`}
+                                render={({ field }) => (
+                                  <FormItem className="flex w-32 items-center space-x-2">
+                                    <FormControl>
+                                      <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                        className="mt-2"
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-medium">{day.day}</FormLabel>
+                                  </FormItem>
+                                )}
+                              />
+
+                              {day.enabled && (
+                                <div className="flex flex-col space-y-2">
+                                  {day.times.map((time, timeIndex) => (
+                                    <div key={timeIndex} className="flex items-center space-x-2">
+                                      {/* Start Time */}
+                                      <FormField
+                                        control={form.control}
+                                        name={`schedule.${dayIndex}.times.${timeIndex}.start`}
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormControl>
+                                              <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                              >
+                                                <SelectTrigger className="w-28">
+                                                  <SelectValue placeholder="Start Time" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  {defaultAvailableTime.map((timeOption) => (
+                                                    <SelectItem
+                                                      key={timeOption}
+                                                      value={timeOption}
+                                                    >
+                                                      {timeOption}
+                                                    </SelectItem>
+                                                  ))}
+                                                </SelectContent>
+                                              </Select>
+                                            </FormControl>
+                                          </FormItem>
+                                        )}
+                                      />
+                                      {/* End Time */}
+                                      <FormField
+                                        control={form.control}
+                                        name={`schedule.${dayIndex}.times.${timeIndex}.end`}
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormControl>
+                                              <Select
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                              >
+                                                <SelectTrigger className="w-28">
+                                                  <SelectValue placeholder="End Time" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  {defaultAvailableTime.map((timeOption) => (
+                                                    <SelectItem
+                                                      key={timeOption}
+                                                      value={timeOption}
+                                                    >
+                                                      {timeOption}
+                                                    </SelectItem>
+                                                  ))}
+                                                </SelectContent>
+                                              </Select>
+                                            </FormControl>
+                                          </FormItem>
+                                        )}
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
                               )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    // Render One-Time Picker for one-time meetings
+                    <FormField
+                      control={form.control}
+                      name="oneTimeMeeting"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col p-1">
+                          <div className="w-full max-w-xl flex flex-row gap-4 bg-white">
+                            <DateRangePicker
+                              hideTimeZone
+                              value={{
+                                start: form.getValues("oneTimeMeetingDate") && form.getValues("oneTimeMeeting.start")
+                                  ? parseZonedDateTime(
+                                      `${form.getValues("oneTimeMeetingDate").replace(
+                                        /(\d{2})-(\d{2})-(\d{4})/,
+                                        "$3-$1-$2"
+                                      )}T${form.getValues("oneTimeMeeting.start")}[America/Toronto]`
+                                    )
+                                  : undefined,
+                                end: form.getValues("oneTimeMeetingDate") && form.getValues("oneTimeMeeting.end")
+                                  ? parseZonedDateTime(
+                                      `${form.getValues("oneTimeMeetingDate").replace(
+                                        /(\d{2})-(\d{2})-(\d{4})/,
+                                        "$3-$1-$2"
+                                      )}T${form.getValues("oneTimeMeeting.end")}[America/Toronto]`
+                                    )
+                                  : undefined,
+                              }}
+                              // defaultValue={{
+                              //   start: parseZonedDateTime(
+                              //     `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
+                              //   ),
+                              //   end: parseZonedDateTime(
+                              //     `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
+                              //   ),
+                              // }}
+                              label="Meeting / Event"
+                              visibleMonths={2}
+                              classNames={{
+                                base: "bg-white",
+                                calendar: "bg-white",
+                                calendarContent: "bg-white",
+                                popoverContent: "bg-white",
+                                inputWrapper: "bg-white shadow-none border",
+                                input: "text-black",
+                                bottomContent: "bg-white",
+                                label: "text-black",
+                              }}
+                              onChange={(value) => {
+                                const formattedStart = value.start
+                                  ? formatDateTime(value.start)
+                                  : "";
+                                const formattedEnd = value.end
+                                  ? formatDateTime(value.end)
+                                  : "";
+
+                                field.onChange({
+                                  start: formattedStart,
+                                  end: formattedEnd,
+                                });
+                              }}
                             />
-
-                            {/* Time Selects */}
-                            {day.enabled && (
-                              <div className="flex flex-col space-y-2">
-                                {day.times.map((time, timeIndex) => (
-                                  <div
-                                    key={timeIndex}
-                                    className="flex items-center space-x-2"
-                                  >
-                                    {/* Start Time */}
-                                    <FormField
-                                      control={form.control}
-                                      name={`schedule.${dayIndex}.times.${timeIndex}.start`}
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormControl>
-                                            <Select
-                                              value={field.value}
-                                              onValueChange={field.onChange}
-                                            >
-                                              <SelectTrigger className="w-28">
-                                                <SelectValue placeholder="Start Time" />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                {defaultAvailableTime.map(
-                                                  (timeOption) => (
-                                                    <SelectItem
-                                                      key={timeOption}
-                                                      value={timeOption}
-                                                    >
-                                                      {timeOption}
-                                                    </SelectItem>
-                                                  )
-                                                )}
-                                              </SelectContent>
-                                            </Select>
-                                          </FormControl>
-                                        </FormItem>
-                                      )}
-                                    />
-
-                                    <span className="text-gray-500">-</span>
-
-                                    {/* End Time */}
-                                    <FormField
-                                      control={form.control}
-                                      name={`schedule.${dayIndex}.times.${timeIndex}.end`}
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormControl>
-                                            <Select
-                                              value={field.value}
-                                              onValueChange={field.onChange}
-                                            >
-                                              <SelectTrigger className="w-28">
-                                                <SelectValue placeholder="End Time" />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                {defaultAvailableTime.map(
-                                                  (timeOption) => (
-                                                    <SelectItem
-                                                      key={timeOption}
-                                                      value={timeOption}
-                                                    >
-                                                      {timeOption}
-                                                    </SelectItem>
-                                                  )
-                                                )}
-                                              </SelectContent>
-                                            </Select>
-                                          </FormControl>
-                                        </FormItem>
-                                      )}
-                                    />
-
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() => {
-                                        const updatedSchedule =
-                                          form.getValues("schedule");
-                                        updatedSchedule[dayIndex].times.push({
-                                          start: "09:00 AM",
-                                          end: "05:00 PM",
-                                        });
-                                        form.setValue(
-                                          "schedule",
-                                          updatedSchedule
-                                        );
-                                      }}
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                    </Button>
-                                    {day.times.length > 1 && (
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => {
-                                          const updatedSchedule =
-                                            form.getValues("schedule");
-                                          updatedSchedule[
-                                            dayIndex
-                                          ].times.splice(timeIndex, 1);
-                                          form.setValue(
-                                            "schedule",
-                                            updatedSchedule
-                                          );
-                                        }}
-                                      >
-                                        <Trash className="w-4 h-4 text-red-500" />
-                                      </Button>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
                 <div className="h-full border-l-1 p-2.5">
+                  <FormField
+                    control={form.control}
+                    name="meetingName"
+                    render={({ field }) => (
+                      <FormItem className="flex w-1/2 mb-6">
+                        <div className="w-40 my-auto">
+                          <FormLabel>Meeting Name:</FormLabel>
+                        </div>
+                        <Input placeholder="Name" {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="meetingDescription"
@@ -605,18 +736,18 @@ export default function TeamSettings() {
                           >
                             <FormItem className="flex -mt-1 items-center space-x-1 space-y-0">
                               <FormControl>
-                                <RadioGroupItem value="appointment" />
+                                <RadioGroupItem value="oneOnOne" />
                               </FormControl>
                               <FormLabel className="font-normal">
-                                Appointment
+                                One on One
                               </FormLabel>
                             </FormItem>
                             <FormItem className="flex -mt-1 items-center space-x-1 space-y-0">
                               <FormControl>
-                                <RadioGroupItem value="event" />
+                                <RadioGroupItem value="group" />
                               </FormControl>
                               <FormLabel className="font-normal">
-                                Meeting / Event
+                                Group
                               </FormLabel>
                             </FormItem>
                           </RadioGroup>
