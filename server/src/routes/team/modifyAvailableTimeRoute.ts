@@ -75,48 +75,6 @@ export const modifyAvailableTimeHandler: RequestHandler = async (
         }
     }
 
-    // if (currentTab === "recurring") {
-    //   team.availableTimes.push({
-    //     email: hostEmail,
-    //     meeting: {
-    //       schedule: "recurring",
-    //       name: meetingName,
-    //       description: meetingDescription,
-    //       weekSchedule: recurringMeeting,
-    //       type: meetingType,
-    //       duration: meetingType === "oneOnOne" ? duration : null,
-    //       attendees: meetingType === "group" ? 0 : undefined,
-    //       zoomLink: meetingLink === "" ? "" : meetingLink,
-    //     },
-    //   });
-    // } else {
-    //   const oneTimeMeetingStartInfo = oneTimeMeeting.start.split("T"); // YYYY-MM-DD
-    //   const oneTimeMeetingEndInfo = oneTimeMeeting.end.split("T");
-    //   const date =
-    //     oneTimeMeetingStartInfo[0].split("-")[1] +
-    //     "-" +
-    //     oneTimeMeetingStartInfo[0].split("-")[2] +
-    //     "-" +
-    //     oneTimeMeetingStartInfo[0].split("-")[0];
-    //   team.availableTimes.push({
-    //     email: hostEmail,
-    //     meeting: {
-    //       schedule: "one-time",
-    //       name: meetingName,
-    //       description: meetingDescription,
-    //       date: date,
-    //       time: {
-    //         start: oneTimeMeetingStartInfo[1],
-    //         end: oneTimeMeetingEndInfo[1],
-    //       },
-    //       type: meetingType,
-    //       duration: meetingType === "oneOnOne" ? duration : null,
-    //       attendees: meetingType === "group" ? 0 : undefined,
-    //       zoomLink: meetingLink === "" ? "" : meetingLink,
-    //     },
-    //   });
-    // }
-
     await team.save();
 
     res.status(200).json({

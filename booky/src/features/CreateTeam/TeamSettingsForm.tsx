@@ -291,6 +291,34 @@ export default function TeamSettings() {
     return 0;
   }
 
+  async function handleCancelMeeting(meetingId) {
+    if (window.confirm("Are you sure you want to delete this meeting?")) {
+      const response = await fetch(
+        `${server}/api/teams/${teamId}/delete-availableTime`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            meetingId: meetingId,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        toast("Failed to modify meeting");
+        return -1;
+      }
+      const updatedMeetings = userMeetings.filter(
+        (meeting) => meeting._id !== meetingId
+      );
+      setUserMeetings(updatedMeetings);
+      toast("Successfully updated team settings");
+      return 0;
+    }
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!loggedInUser) {
       console.error("No user is logged in");
@@ -847,7 +875,31 @@ export default function TeamSettings() {
                 </div>
                 <div>
                   <Label>Meetings</Label>
-                  <ScrollArea className="h-[350px] w-full px-1"></ScrollArea>
+                  <ScrollArea className="h-[350px] w-full px-1">
+                    <ul className="space-y-2">
+                      {userMeetings.map((meeting) => (
+                        <li
+                          key={meeting._id}
+                          className="flex items-center justify-between border-b pb-2"
+                        >
+                          <div>
+                            <h3 className="text-sm font-medium">{meeting.meeting.name}</h3>
+                            <p className="text-xs text-gray-500">
+                              {meeting.meeting.schedule === "one-time"
+                                ? `One-time: ${meeting.meeting.date} ${meeting.meeting.time.start}-${meeting.meeting.time.end}`
+                                : "Recurring"}
+                            </p>
+                          </div>
+                          <button
+                            className="bg-red-500 text-white text-xs py-1 px-2 rounded hover:bg-red-600"
+                            onClick={() => handleCancelMeeting(meeting._id)}
+                          >
+                            Delete
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </ScrollArea>
                 </div>
               </TabsContent>
             </Tabs>
