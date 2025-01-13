@@ -633,8 +633,9 @@ export default function TeamSettings() {
                         <FormItem className="flex flex-col p-1">
                           <div className="w-full max-w-xl flex flex-row gap-4 bg-white">
                             <DateRangePicker
+                              key={form.watch("existingOneTimeMeeting")?.date + form.watch("existingOneTimeMeeting")?.start}
                               hideTimeZone
-                              value={{
+                              defaultValue={{
                                 start: parseZonedDateTime(
                                   formatZonedDateTime(
                                     form.getValues().existingOneTimeMeeting.date,
@@ -648,14 +649,6 @@ export default function TeamSettings() {
                                   )
                                 ),
                               }}
-                              // defaultValue={{
-                              //   start: parseZonedDateTime(
-                              //     `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
-                              //   ),
-                              //   end: parseZonedDateTime(
-                              //     `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
-                              //   ),
-                              // }}
                               label="Meeting / Event"
                               visibleMonths={2}
                               classNames={{

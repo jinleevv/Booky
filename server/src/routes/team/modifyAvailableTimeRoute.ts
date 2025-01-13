@@ -45,10 +45,9 @@ export const modifyAvailableTimeHandler: RequestHandler = async (
       return;
     }
 
-    const availableTimesWithId = team.availableTimes as (IAvailableTime & { _id: string })[];
-
-    
+    const availableTimesWithId = team.availableTimes as (IAvailableTime & { _id: string })[];    
     const meetingToModify = availableTimesWithId.find((meeting) => meeting._id.toString() === meetingId);
+    
     if (meetingToModify) {
         if (meetingToModify.meeting.schedule === "recurring") {
             meetingToModify.meeting.name = meetingName;
