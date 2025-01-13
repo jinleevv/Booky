@@ -618,32 +618,14 @@ export default function TeamSettings() {
                           <div className="w-full max-w-xl flex flex-row gap-4 bg-white">
                             <DateRangePicker
                               hideTimeZone
-                              value={{
-                                start: form.getValues("oneTimeMeetingDate") && form.getValues("oneTimeMeeting.start")
-                                  ? parseZonedDateTime(
-                                      `${form.getValues("oneTimeMeetingDate").replace(
-                                        /(\d{2})-(\d{2})-(\d{4})/,
-                                        "$3-$1-$2"
-                                      )}T${form.getValues("oneTimeMeeting.start")}[America/Toronto]`
-                                    )
-                                  : undefined,
-                                end: form.getValues("oneTimeMeetingDate") && form.getValues("oneTimeMeeting.end")
-                                  ? parseZonedDateTime(
-                                      `${form.getValues("oneTimeMeetingDate").replace(
-                                        /(\d{2})-(\d{2})-(\d{4})/,
-                                        "$3-$1-$2"
-                                      )}T${form.getValues("oneTimeMeeting.end")}[America/Toronto]`
-                                    )
-                                  : undefined,
+                              defaultValue={{
+                                start: parseZonedDateTime(
+                                  `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
+                                ),
+                                end: parseZonedDateTime(
+                                  `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
+                                ),
                               }}
-                              // defaultValue={{
-                              //   start: parseZonedDateTime(
-                              //     `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
-                              //   ),
-                              //   end: parseZonedDateTime(
-                              //     `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
-                              //   ),
-                              // }}
                               label="Meeting / Event"
                               visibleMonths={2}
                               classNames={{
