@@ -47,6 +47,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<SignIn />} />
           <Route path="/register" element={<SignUp />} />
+          <Route path="/poll" element={<AvailabilityScheduler />} />
           {/* <Route path="/search/:searchCode" element={<Search />} /> */}
           <Route path="/schedule/:code" element={<Schedule />} />
           {/* <Route path="/team/:teamId" element={<RegisterTeam />} />  */}
@@ -88,14 +89,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <TeamSettings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/poll"
-            element={
-              <ProtectedRoute>
-                <AvailabilityScheduler />
               </ProtectedRoute>
             }
           />
