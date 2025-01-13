@@ -78,7 +78,11 @@ const formSchema = z.object({
     start: z.any(),
     end: z.any(),
   }),
-  oneTimeMeetingDate: z.string(),
+  existingOneTimeMeeting: z.object({
+    date: z.any(),
+    start: z.any(),
+    end: z.any(),
+  }),
   meetingName: z.string().min(1, "Please enter a name."),
   meetingDescription: z.string(),
   meetingType: z.enum(["oneOnOne", "group"], {
@@ -96,6 +100,14 @@ const formatDateTime = (dateObject: any): string => {
 
   return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
 };
+
+function formatZonedDateTime(date, time) {
+  const [month, day, year] = date.split('-').map((value) => value.padStart(2, '0'));
+
+  const [hour, minute] = time.split(':').map((value) => value.padStart(2, '0'));
+
+  return `${year}-${month}-${day}T${hour}:${minute}[America/Toronto]`;
+}
 
 export default function TeamSettings() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -121,7 +133,11 @@ export default function TeamSettings() {
           )
         ),
       },
-      oneTimeMeetingDate: "",
+      existingOneTimeMeeting: {
+        date: "01-01-2025",
+        start: "09:00",
+        end: "17:00",
+      },
       meetingDescription: "",
       meetingLink: "",
       meetingId: "",
@@ -485,10 +501,10 @@ export default function TeamSettings() {
                             selectedMeeting.meeting.schedule === "one-time"
                               ? selectedMeeting.meeting.time
                               : { start: "", end: "" },
-                          oneTimeMeetingDate:
+                          existingOneTimeMeeting:
                             selectedMeeting.meeting.schedule === "one-time"
-                              ? selectedMeeting.meeting.date
-                              : "",
+                              ? { date: selectedMeeting.meeting.date, start: selectedMeeting.meeting.time.start, end: selectedMeeting.meeting.time.end }
+                              : { date: "01-01-2025", start: "09:00", end: "17:00" },
                           meetingDescription: selectedMeeting.meeting.description,
                           meetingLink: selectedMeeting.meeting.zoomLink,
                           meetingId: selectedMeeting._id,
@@ -618,14 +634,28 @@ export default function TeamSettings() {
                           <div className="w-full max-w-xl flex flex-row gap-4 bg-white">
                             <DateRangePicker
                               hideTimeZone
-                              defaultValue={{
+                              value={{
                                 start: parseZonedDateTime(
-                                  `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
+                                  formatZonedDateTime(
+                                    form.getValues().existingOneTimeMeeting.date,
+                                    form.getValues().existingOneTimeMeeting.start
+                                  )
                                 ),
                                 end: parseZonedDateTime(
-                                  `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
+                                  formatZonedDateTime(
+                                    form.getValues().existingOneTimeMeeting.date,
+                                    form.getValues().existingOneTimeMeeting.end
+                                  )
                                 ),
                               }}
+                              // defaultValue={{
+                              //   start: parseZonedDateTime(
+                              //     `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
+                              //   ),
+                              //   end: parseZonedDateTime(
+                              //     `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
+                              //   ),
+                              // }}
                               label="Meeting / Event"
                               visibleMonths={2}
                               classNames={{
