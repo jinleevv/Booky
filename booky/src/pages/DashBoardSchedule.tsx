@@ -19,7 +19,7 @@ interface ICancelledDays {
 
 export default function DashBoardSchedule() {
   const { team: teamId } = useParams();
-  const { server, userEmail, loggedInUser } = useHook();
+  const { server } = useHook();
 
   const [teamName, setTeamName] = useState<string>("Loading...");
   const [adminName, setAdminName] = useState<string>("Loading...");
@@ -43,6 +43,7 @@ export default function DashBoardSchedule() {
       const data = await response.json();
 
       if (response.ok) {
+        console.log(data);
         setTeamName(data.name);
         setAdminName(data.adminName);
         setAdminEmail(data.adminEmail);
@@ -50,7 +51,6 @@ export default function DashBoardSchedule() {
         setTeamMembers(data.members);
 
         setAvailableTimes(data.availableTimes);
-        setDuration(parseInt(data.durations[0], 10));
         setExistingAppointments(data.appointments);
         setCancelledDays(data.cancelledMeetings);
         setSelectedHost(data.adminEmail);
@@ -87,7 +87,7 @@ export default function DashBoardSchedule() {
   };
 
   return (
-    <section className="h-screen w-screen bg-white">
+    <section className="h-screen w-screen bg-white font-outfit">
       <div className="absolute w-3/6 h-2/6 bg-red-200 blur-[600px] top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4"></div>
       <div className="flex">
         <DashboardNavBar />
@@ -135,7 +135,31 @@ export default function DashBoardSchedule() {
                   />
                 </TabsContent>
                 <TabsContent value="view">
-                  <ViewDetails />
+                  <ViewDetails
+                    teamId={teamId}
+                    teamName={teamName}
+                    setTeamName={setTeamName}
+                    adminName={adminName}
+                    setAdminName={setAdminName}
+                    adminEmail={adminEmail}
+                    setAdminEmail={setAdminEmail}
+                    teamCoAdmin={teamCoAdmin}
+                    setTeamCoAdmin={setTeamCoAdmin}
+                    teamMembers={teamMembers}
+                    setTeamMembers={setTeamMembers}
+                    availableTimes={availableTimes}
+                    setAvailableTimes={setAvailableTimes}
+                    duration={duration}
+                    setDuration={setDuration}
+                    existingAppointments={existingAppointments}
+                    setExistingAppointments={setExistingAppointments}
+                    cancelledDays={cancelledDays}
+                    setCancelledDays={setCancelledDays}
+                    selectedHost={selectedHost}
+                    setSelectedHost={setSelectedHost}
+                    enabledDays={enabledDays}
+                    setEnabledDays={setEnabledDays}
+                  />
                 </TabsContent>
               </Tabs>
             </div>

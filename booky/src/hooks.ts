@@ -4,6 +4,7 @@ import { atomWithImmer } from "jotai-immer";
 const loggedInUserAtom = atomWithImmer<boolean>(false);
 const userNameAtom = atomWithImmer<string>("");
 const userEmailAtom = atomWithImmer<string>("");
+const selectedMeetingDetailAtom = atomWithImmer<string>("");
 
 export function useHook() {
   const [loggedInUser, setLoggedInUser] = useAtom(loggedInUserAtom);
