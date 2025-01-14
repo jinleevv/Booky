@@ -107,7 +107,7 @@ export default function TeamSettings() {
 
   const navigate = useNavigate();
   const { team: teamId } = useParams();
-  const { server } = useHook(); // Use global state from the hook
+  const { server, userName } = useHook(); // Use global state from the hook
   const [teamName, setTeamName] = useState<string | null>(null);
   const [teamDescription, setTeamDescription] = useState<string | null>(null);
   const [teamMembers, setTeamMembers] = useState([]);
@@ -163,7 +163,7 @@ export default function TeamSettings() {
           <div className="w-1/2 border rounded-2xl p-4">
             <Label className="font-bold">
               Admin:
-              <Label className="ml-1">{teamName || "Loading..."}</Label>
+              <Label className="ml-1">{userName || "Loading..."}</Label>
             </Label>
           </div>
         </div>
