@@ -31,6 +31,7 @@ interface ICancelledDays {
 interface IJoinAMeetingProps {
   teamId: string;
   teamName: string;
+  teamDescription: string;
   setTeamName: React.Dispatch<React.SetStateAction<string>>;
   adminName: string;
   setAdminName: React.Dispatch<React.SetStateAction<string>>;
@@ -57,6 +58,7 @@ interface IJoinAMeetingProps {
 export default function ViewDetails({
   teamId,
   teamName,
+  teamDescription,
   setTeamName,
   adminName,
   setAdminName,
@@ -255,7 +257,7 @@ export default function ViewDetails({
                             Meeting Type: {meeting.meeting.schedule}
                           </Label>
                           <Label className="text-xs">
-                            Description: {meeting.meeting.description}
+                            Description: {teamDescription}
                           </Label>
                         </CardDescription>
                       </CardHeader>

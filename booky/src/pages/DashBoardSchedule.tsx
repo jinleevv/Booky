@@ -140,6 +140,7 @@ export default function DashBoardSchedule() {
                     teamId={teamId}
                     teamName={teamName}
                     setTeamName={setTeamName}
+                    teamDescription={teamDescription}
                     adminName={adminName}
                     setAdminName={setAdminName}
                     adminEmail={adminEmail}
