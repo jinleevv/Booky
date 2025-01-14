@@ -21,6 +21,7 @@ import DashBoardSchedule from "./pages/DashBoardSchedule.tsx";
 import TeamSettings from "./pages/TeamSettings.tsx";
 import AvailabilityScheduler from "./pages/AvailabilityScheduler.tsx";
 import MeetingDetails from "./pages/MeetingDetails.tsx";
+import CreateMeetingPage from "./pages/CreateMeetingPage.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -82,6 +83,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashBoardSchedule />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/:team/create-meeting"
+            element={
+              <ProtectedRoute>
+                <CreateMeetingPage />
               </ProtectedRoute>
             }
           />

@@ -14,9 +14,10 @@ import { Trash } from "lucide-react";
 import { TbEdit, TbCalendarCancel } from "react-icons/tb";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { useHook } from "@/hooks";
+import { IoIosAdd } from "react-icons/io";
 
 interface ITimeRange {
   start: string;
@@ -80,6 +81,7 @@ export default function JoinAMeeting({
   setEnabledDays,
 }: IJoinAMeetingProps) {
   const { server, userEmail, loggedInUser } = useHook();
+  const navigate = useNavigate();
 
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -434,7 +436,20 @@ export default function JoinAMeeting({
             <CardContent className="flex w-full border-b-[1px] md:w-3/6 md:border-r-[1px] py-2 border-gray-200">
               {selectedMeeting === null ? (
                 <div className="flex flex-col w-full mt-1.5 p-0 gap-2">
-                  <Label className="text-lg font-bold">Meetings</Label>
+                  <div className="flex w-full justify-between">
+                    <Label className="text-lg font-bold">Meetings</Label>
+                    <div>
+                      <Button
+                        onClick={() =>
+                          navigate(`/dashboard/${teamId}/create-meeting`)
+                        }
+                      >
+                        <IoIosAdd />
+                        New Meeting
+                      </Button>
+                    </div>
+                  </div>
+
                   {selectedHost ? (
                     <>
                       {availableTimes

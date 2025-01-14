@@ -49,7 +49,7 @@ export default function CreateMeating({
                 control={form.control}
                 name="meetingName"
                 render={({ field }) => (
-                  <FormItem className="flex w-1/2 mb-6">
+                  <FormItem className="flex w-1/3 mb-6">
                     <div className="w-40 my-auto">
                       <FormLabel>Meeting Name:</FormLabel>
                     </div>
@@ -62,11 +62,27 @@ export default function CreateMeating({
                 control={form.control}
                 name="meetingDescription"
                 render={({ field }) => (
-                  <FormItem className="flex w-1/2 mb-6">
+                  <FormItem className="flex w-1/3 mb-6">
                     <div className="w-32 my-auto">
                       <FormLabel>Description:</FormLabel>
                     </div>
                     <Input placeholder="Description" {...field} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="meetingLink"
+                render={({ field }) => (
+                  <FormItem className="flex w-1/3 mb-6">
+                    <div className="w-32 my-auto">
+                      <FormLabel>Meeting Link:</FormLabel>
+                    </div>
+                    <Input
+                      placeholder="Zoom Link, Teams Link, etc"
+                      {...field}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -281,23 +297,9 @@ export default function CreateMeating({
                 />
               </TabsContent>
             </Tabs>
-            <div className="h-fit border rounded-lg p-2.5">
-              <FormField
-                control={form.control}
-                name="meetingLink"
-                render={({ field }) => (
-                  <FormItem className="flex mb-6">
-                    <div className="w-32 my-auto">
-                      <FormLabel>Meeting Link:</FormLabel>
-                    </div>
-                    <Input
-                      placeholder="Zoom Link, Teams Link, etc"
-                      {...field}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          </div>
+          <div className="h-fit border-t-1 mt-6 p-2.5">
+            <div>
               <FormField
                 control={form.control}
                 name="meetingType"
@@ -332,16 +334,18 @@ export default function CreateMeating({
                   </FormItem>
                 )}
               />
+            </div>
+            <div>
               {meetingTypeSelection === "oneOnOne" ? (
                 <FormField
                   control={form.control}
                   name="duration"
                   render={({ field }) => (
-                    <FormItem className="flex p-4">
-                      <div className="flex w-28 space-x-2 mt-auto mb-auto">
-                        <FormLabel>Each Duration:</FormLabel>
+                    <FormItem className="flex">
+                      <div className="flex w-28 space-x-2 my-auto">
+                        <FormLabel className="">Each Duration:</FormLabel>
                       </div>
-                      <div className="flex border w-fit rounded-md py-1 px-0.5 gap-1">
+                      <div className="flex border w-fit h-10 rounded-md py-1 px-0.5 gap-1">
                         {["5m", "15m", "30m", "45m", "1h"].map((time) => {
                           const isSelected = field.value === time;
                           return (
@@ -352,7 +356,7 @@ export default function CreateMeating({
                               onClick={() => {
                                 field.onChange(time);
                               }}
-                              className={`${
+                              className={`h-full ${
                                 isSelected
                                   ? "text-red-700 border border-red-700"
                                   : "text-gray-700 hover:text-gray-900"

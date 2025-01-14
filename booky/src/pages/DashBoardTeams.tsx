@@ -67,11 +67,11 @@ export default function DashBoardTeams() {
   }
 
   return (
-    <section className="h-screen w-screen bg-white font-outfit">
+    <section className="h-screen w-screen bg-white">
       <div className="absolute w-3/6 h-2/6 bg-red-200 blur-[600px] top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4"></div>
       <div className="flex">
         <DashboardNavBar />
-        <div className="w-full px-3 py-4 relative z-20">
+        <div className="w-full px-3 py-4 relative z-20 font-outfit">
           <div className="flex w-full">
             <div className="grid w-full">
               <Label className="text-2xl font-bold text-black">Teams</Label>{" "}

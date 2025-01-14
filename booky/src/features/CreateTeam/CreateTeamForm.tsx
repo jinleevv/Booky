@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { parseZonedDateTime } from "@internationalized/date";
-import { Plus, Trash } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHook } from "@/hooks";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import CreateMeating from "./CreateMeeting";
 import { useState } from "react";
+import { Label } from "@/components/ui/label";
 
 const days = [
   "Sunday",
@@ -31,6 +32,7 @@ const days = [
 
 const formSchema = z.object({
   teamName: z.string().min(1).max(50),
+  teamDescription: z.string(),
   duration: z.string(),
   schedule: z.array(
     z.object({
@@ -172,20 +174,56 @@ export default function CreateTeamForm() {
     <section className="grid mt-10 bg-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="border rounded-lg p-4">
+          <div className="flex w-full gap-2">
+            <div className="w-1/2 h-full border rounded-2xl p-3">
+              <FormField
+                control={form.control}
+                name="teamName"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <div className="flex w-full gap-2">
+                      <FormLabel className="w-24 mt-auto mb-auto">
+                        Team Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="w-full"
+                          placeholder="Team Name"
+                          {...field}
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-1/2 border rounded-2xl p-3">
+              <div className="flex w-full h-full">
+                <Label className="my-auto">Admin: {userName}</Label>
+              </div>
+            </div>
+            <div>
+              <Button variant="outline" className="w-full h-full rounded-2xl">
+                <Plus />
+                Co-Admin
+              </Button>
+            </div>
+          </div>
+          <div className="w-full h-fit border rounded-2xl p-3">
             <FormField
               control={form.control}
-              name="teamName"
+              name="teamDescription"
               render={({ field }) => (
-                <FormItem>
-                  <div className="flex w-full">
-                    <FormLabel className="w-24 mt-auto mb-auto">
-                      Team Name
+                <FormItem className="w-full">
+                  <div className="flex w-full gap-2">
+                    <FormLabel className="w-32 mt-auto mb-auto">
+                      Team Description
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className="w-1/3"
-                        placeholder="Team Name"
+                        className="w-full"
+                        placeholder="Team Description"
                         {...field}
                       />
                     </FormControl>
@@ -194,57 +232,6 @@ export default function CreateTeamForm() {
                 </FormItem>
               )}
             />
-          </div>
-          <div className="border rounded-lg p-4">
-            <div className="flex">
-              <div className="my-auto">
-                <FormLabel className="mb-2">Co-admins</FormLabel>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={handleAddCoadmin}
-              >
-                <Plus className="w-2 h-2" />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {(form.watch("coadmins") || []).map((coadmin, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <FormField
-                    control={form.control}
-                    name={`coadmins.${index}`}
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Coadmin Email"
-                            className={`mt-2 ${
-                              fieldState.invalid ? "border-red-400" : ""
-                            }`}
-                          />
-                        </FormControl>
-                        {fieldState.error && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {fieldState.error.message}
-                          </p>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveCoadmin(index)}
-                  >
-                    <Trash className="w-4 h-4 text-red-500" />
-                  </Button>
-                </div>
-              ))}
-            </div>
           </div>
           <CreateMeating
             form={form}
