@@ -24,6 +24,7 @@ export default function DashBoardSchedule() {
   const [teamName, setTeamName] = useState<string>("Loading...");
   const [adminName, setAdminName] = useState<string>("Loading...");
   const [adminEmail, setAdminEmail] = useState<string>("");
+  const [teamDescription, setTeamDescription] = useState<string>("");
   const [teamCoAdmin, setTeamCoAdmin] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<any[]>([]);
@@ -45,10 +46,10 @@ export default function DashBoardSchedule() {
       if (response.ok) {
         setTeamName(data.name);
         setAdminName(data.adminName);
+        setTeamDescription(data.teamDescription);
         setAdminEmail(data.adminEmail);
         setTeamCoAdmin(data.coadmins);
         setTeamMembers(data.members);
-
         setAvailableTimes(data.availableTimes);
         setExistingAppointments(data.appointments);
         setCancelledDays(data.cancelledMeetings);
@@ -111,6 +112,7 @@ export default function DashBoardSchedule() {
                     teamId={teamId}
                     teamName={teamName}
                     setTeamName={setTeamName}
+                    teamDescription={teamDescription}
                     adminName={adminName}
                     setAdminName={setAdminName}
                     adminEmail={adminEmail}

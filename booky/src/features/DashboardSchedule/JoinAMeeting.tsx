@@ -33,6 +33,7 @@ interface IJoinAMeetingProps {
   teamId: string;
   teamName: string;
   setTeamName: React.Dispatch<React.SetStateAction<string>>;
+  teamDescription: string;
   adminName: string;
   setAdminName: React.Dispatch<React.SetStateAction<string>>;
   adminEmail: string;
@@ -59,6 +60,7 @@ export default function JoinAMeeting({
   teamId,
   teamName,
   setTeamName,
+  teamDescription,
   adminName,
   setAdminName,
   adminEmail,
@@ -503,7 +505,7 @@ export default function JoinAMeeting({
                                   Meeting Type: {meeting.meeting.schedule}
                                 </Label>
                                 <Label className="text-xs">
-                                  Description: {meeting.meeting.description}
+                                  Description: {teamDescription}
                                 </Label>
                               </CardDescription>
                             </CardHeader>
