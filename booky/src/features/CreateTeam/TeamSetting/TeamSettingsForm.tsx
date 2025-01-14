@@ -3,7 +3,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Form } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Edit, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { parseZonedDateTime } from "@internationalized/date";
@@ -12,6 +19,7 @@ import { useHook } from "@/hooks";
 import { Label } from "@/components/ui/label";
 import { DataTable } from "./data-table";
 import { columns, TeamMembers } from "./columns";
+import InviteCoAdmin from "../InviteCoAdmin";
 
 const days = [
   "Sunday",
@@ -241,10 +249,22 @@ export default function TeamSettings() {
           </div>
         </div>
         <div>
-          <Button variant="outline" className="h-full rounded-2xl">
-            <Plus />
-            Co-Admin
-          </Button>
+          <Dialog>
+            <DialogTrigger className="h-full w-full">
+              <Button variant="outline" className="h-full rounded-2xl">
+                <Plus />
+                Co-Admin
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite Co-Admin</DialogTitle>
+                <DialogDescription>
+                  <InviteCoAdmin />
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       <div className="flex w-full justify-between border rounded-2xl p-4">

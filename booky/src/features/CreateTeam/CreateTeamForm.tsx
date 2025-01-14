@@ -9,6 +9,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { parseZonedDateTime } from "@internationalized/date";
 import { Plus } from "lucide-react";
@@ -19,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import CreateMeating from "./CreateMeeting";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
+import InviteCoAdmin from "./InviteCoAdmin";
 
 const days = [
   "Sunday",
@@ -204,10 +213,22 @@ export default function CreateTeamForm() {
               </div>
             </div>
             <div>
-              <Button variant="outline" className="w-full h-full rounded-2xl">
-                <Plus />
-                Co-Admin
-              </Button>
+              <Dialog>
+                <DialogTrigger className="h-full w-full">
+                  <Button variant="outline" className="h-full rounded-2xl">
+                    <Plus />
+                    Co-Admin
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Invite Co-Admin</DialogTitle>
+                    <DialogDescription>
+                      <InviteCoAdmin />
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
           <div className="w-full h-fit border rounded-2xl p-3">
