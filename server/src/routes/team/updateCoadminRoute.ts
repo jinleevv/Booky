@@ -3,14 +3,17 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-export const updateCoadminsHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const updateCoadminsHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { teamId } = req.params;
-  const { coadmins } = req.body;
+  const { coadmin } = req.body;
 
   try {
-    if (!coadmins || !Array.isArray(coadmins)) {
-        res.status(400).json({ message: "Invalid or missing coadmin data" });
-        return;
+    if (!coadmin || !Array.isArray(coadmin)) {
+      res.status(400).json({ message: "Invalid or missing coadmin data" });
+      return;
     }
 
     const team = await Team.findById(teamId);
@@ -19,10 +22,13 @@ export const updateCoadminsHandler: RequestHandler = async (req: Request, res: R
       return;
     }
 
-    team.coadmins = [...new Set([...team.coadmins, ...coadmins])];
+    team.coadmins = [...new Set([...team.coadmins, ...coadmin])];
     await team.save();
 
-    res.status(200).json({ message: "Coadmins updated successfully", availableTime: team.availableTimes });
+    res.status(200).json({
+      message: "Coadmins updated successfully",
+      availableTime: team.availableTimes,
+    });
   } catch (error) {
     console.error("Error updating coadmins:", error);
     res.status(500).json({ message: "Server error" });

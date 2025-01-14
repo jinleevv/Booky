@@ -260,7 +260,7 @@ export default function TeamSettings() {
               <DialogHeader>
                 <DialogTitle>Invite Co-Admin</DialogTitle>
                 <DialogDescription>
-                  <InviteCoAdmin />
+                  <InviteCoAdmin teamId={teamId}/>
                 </DialogDescription>
               </DialogHeader>
             </DialogContent>

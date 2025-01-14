@@ -119,6 +119,7 @@ export default function CreateTeamForm() {
 
   const { server, loggedInUser, userEmail, userName } = useHook();
   const [currentTab, setCurrentTab] = useState<string>("recurring");
+  const [pendingCoAdmin, setPendingCoAdmin] = useState<string[]>([]);
   const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -126,10 +127,6 @@ export default function CreateTeamForm() {
       console.error("No user is logged in");
       return;
     }
-
-    const filteredCoadmins = values.coadmins.filter(
-      (email) => email && email.trim() !== ""
-    );
 
     if (values.meetingType === "oneOnOne" && values.duration == "") {
       toast("Please select duration");
@@ -143,9 +140,10 @@ export default function CreateTeamForm() {
       },
       body: JSON.stringify({
         name: values.teamName,
+        teamDescription: values.teamDescription,
         adminEmail: userEmail,
         adminName: userName,
-        coadmins: filteredCoadmins,
+        coadmins: pendingCoAdmin,
         currentTab: currentTab,
         recurringMeeting: values.schedule,
         oneTimeMeeting: values.oneTimeMeeting,
@@ -156,35 +154,25 @@ export default function CreateTeamForm() {
         meetingLink: values.meetingLink,
       }),
     });
+
     const data = await response.json();
+
     if (!response.ok) {
       console.error("Failed to save team to database", data);
       return -1;
     }
+    setPendingCoAdmin([]);
     toast("Successfully Created Team");
     navigate("/dashboard/teams");
     return 0;
   }
 
-  const handleAddCoadmin = () => {
-    const currentCoadmins = form.getValues("coadmins");
-    form.setValue("coadmins", [...currentCoadmins, ""]);
-  };
-
-  const handleRemoveCoadmin = (index: number) => {
-    const currentCoadmins = form.getValues("coadmins");
-    form.setValue(
-      "coadmins",
-      currentCoadmins.filter((_, i) => i !== index)
-    );
-  };
-
   return (
-    <section className="grid mt-10 bg-white">
+    <section className="grid mt-4 bg-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="flex w-full gap-2">
-            <div className="w-1/2 h-full border rounded-2xl p-3">
+            <div className="w-1/3 h-full border rounded-2xl p-3">
               <FormField
                 control={form.control}
                 name="teamName"
@@ -207,15 +195,33 @@ export default function CreateTeamForm() {
                 )}
               />
             </div>
-            <div className="w-1/2 border rounded-2xl p-3">
+            <div className="w-1/3 border rounded-2xl p-3">
               <div className="flex w-full h-full">
                 <Label className="my-auto">Admin: {userName}</Label>
+              </div>
+            </div>
+            <div className="w-1/3 border rounded-2xl p-3">
+              <div className="flex flex-col w-full h-full">
+                <div className="flex w-full h-full">
+                  <Label className="my-auto">Co-Admin</Label>
+                  <div className="flex w-full overflow-auto gap-2 mt-2">
+                    {pendingCoAdmin.map((email) => (
+                      <div className="h-full w-fit px-2 rounded-full bg-gray-700 text-white">
+                        <Label>{email}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
             <div>
               <Dialog>
                 <DialogTrigger className="h-full w-full">
-                  <Button variant="outline" className="h-full rounded-2xl">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-full rounded-2xl"
+                  >
                     <Plus />
                     Co-Admin
                   </Button>
@@ -224,7 +230,12 @@ export default function CreateTeamForm() {
                   <DialogHeader>
                     <DialogTitle>Invite Co-Admin</DialogTitle>
                     <DialogDescription>
-                      <InviteCoAdmin />
+                      <InviteCoAdmin
+                        teamId={"CreateTeam"}
+                        onAddCoadmin={(email) =>
+                          setPendingCoAdmin((prev) => [...prev, email])
+                        }
+                      />
                     </DialogDescription>
                   </DialogHeader>
                 </DialogContent>

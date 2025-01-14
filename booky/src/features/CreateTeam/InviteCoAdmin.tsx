@@ -11,43 +11,70 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useHook } from "@/hooks";
+import { toast } from "sonner";
 
 const formSchema = z.object({
-  coadmin: z.string().min(2).max(50),
+  coadmin: z.string().min(1).max(50),
 });
 
-export default function InviteCoAdmin() {
+export default function InviteCoAdmin({
+  teamId,
+  onAddCoadmin,
+}: {
+  teamId: string;
+  onAddCoadmin: (email: string) => void;
+}) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       coadmin: "",
     },
   });
+  const { server } = useHook();
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (teamId !== "CreateTeam") {
+      const response = await fetch(`${server}/api/teams/${teamId}/coadmins`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ coadmins: values.coadmin }),
+      });
+
+      if (!response.ok) {
+        toast.error("Failed to update coadmins");
+        return;
+      }
+    } else {
+      onAddCoadmin(values.coadmin); // Use the callback to update coadmins
+    }
+
+    toast.success("Successfully updated coadmins");
+    form.reset();
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form className="space-y-4">
         <FormField
           control={form.control}
           name="coadmin"
           render={({ field }) => (
-            <FormItem className="flex w-full h-full my-auto">
-              <div className="flex w-24 mt-5">
-                <FormLabel>Co-Admin</FormLabel>
-              </div>
+            <FormItem className="flex gap-2">
+              <FormLabel className="w-24 mt-5">Co-Admin</FormLabel>
               <FormControl>
-                <Input placeholder="coadmin@mail.mcgill.ca" {...field} />
+                <Input placeholder="Enter co-admin email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div className="flex w-full justify-end">
-          <Button type="submit">Invite</Button>
+          <Button type="button" onClick={form.handleSubmit(onSubmit)}>
+            Invite
+          </Button>
         </div>
       </form>
     </Form>

@@ -3,10 +3,11 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { NextUIProvider } from "@nextui-org/react";
 import { AuthContext } from "./features/AuthContext.tsx";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import DashBoard from "./pages/DashBoard";
@@ -43,77 +44,75 @@ function App() {
   }
 
   return (
-    <Router>
-      <NextUIProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<SignIn />} />
-          <Route path="/register" element={<SignUp />} />
-          <Route path="/poll" element={<AvailabilityScheduler />} />
-          {/* <Route path="/search/:searchCode" element={<Search />} /> */}
-          <Route path="/schedule/:code" element={<Schedule />} />
-          {/* <Route path="/team/:teamId" element={<RegisterTeam />} />  */}
-          <Route path="/:team/:code" element={<Appointment />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashBoard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/teams"
-            element={
-              <ProtectedRoute>
-                <DashBoardTeams />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/teams/create-team"
-            element={
-              <ProtectedRoute>
-                <CreateTeam />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/:team"
-            element={
-              <ProtectedRoute>
-                <DashBoardSchedule />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/:team/create-meeting"
-            element={
-              <ProtectedRoute>
-                <CreateMeetingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/:team/:meeting"
-            element={
-              <ProtectedRoute>
-                <MeetingDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/:team/settings"
-            element={
-              <ProtectedRoute>
-                <TeamSettings />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-        <Toaster />
-      </NextUIProvider>
-    </Router>
+    <NextUIProvider>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<SignIn />} />
+        <Route path="/register" element={<SignUp />} />
+        <Route path="/poll" element={<AvailabilityScheduler />} />
+        {/* <Route path="/search/:searchCode" element={<Search />} /> */}
+        <Route path="/schedule/:code" element={<Schedule />} />
+        {/* <Route path="/team/:teamId" element={<RegisterTeam />} />  */}
+        <Route path="/:team/:code" element={<Appointment />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashBoard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/teams"
+          element={
+            <ProtectedRoute>
+              <DashBoardTeams />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/teams/create-team"
+          element={
+            <ProtectedRoute>
+              <CreateTeam />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/:team"
+          element={
+            <ProtectedRoute>
+              <DashBoardSchedule />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/:team/create-meeting"
+          element={
+            <ProtectedRoute>
+              <CreateMeetingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/:team/:meeting"
+          element={
+            <ProtectedRoute>
+              <MeetingDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/:team/settings"
+          element={
+            <ProtectedRoute>
+              <TeamSettings />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+      <Toaster />
+    </NextUIProvider>
   );
 }
 

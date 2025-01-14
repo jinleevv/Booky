@@ -43,7 +43,6 @@ export default function DashBoardSchedule() {
       const data = await response.json();
 
       if (response.ok) {
-        console.log(data);
         setTeamName(data.name);
         setAdminName(data.adminName);
         setAdminEmail(data.adminEmail);

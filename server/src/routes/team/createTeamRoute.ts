@@ -11,6 +11,7 @@ export const createTeamHandler: RequestHandler = async (
 ): Promise<void> => {
   const {
     name,
+    teamDescription,
     adminEmail,
     adminName,
     coadmins,
@@ -102,6 +103,7 @@ export const createTeamHandler: RequestHandler = async (
     const newTeam = new Team({
       _id,
       name,
+      teamDescription,
       adminEmail,
       adminName,
       coadmins,

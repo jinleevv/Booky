@@ -42,7 +42,7 @@ export default function CreateMeating({
       control={form.control}
       name="schedule"
       render={() => (
-        <div className="border rounded-lg p-4">
+        <div className="border w-full h-[590px] rounded-lg p-4 overflow-auto">
           <div className="border-b-1 mb-4">
             <div className="flex w-full space-x-6">
               <FormField
