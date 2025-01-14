@@ -6,6 +6,17 @@ interface ITimeRange {
   end: string; // HH:mm format
 }
 
+interface IDateRange {
+  start: {
+    date: string; // YYYY-MM-DD format
+    day: number;
+  };
+  end: {
+    date: string; // YYYY-MM-DD format
+    day: number;
+  };
+}
+
 // Interface for daily schedule
 interface IDaySchedule {
   date: string; // YYYY-MM-DD format
@@ -24,28 +35,33 @@ interface IPoll extends Document {
   _id: string;
   pollName: string;
   pollDescription?: string;
-  creatorEmail: string;
+  urlPath: string;
   dateRange: {
     start: string; // YYYY-MM-DD format
     end: string; // YYYY-MM-DD format
   };
-  timeRange: {
-    start: string; // HH:mm format
-    end: string; // HH:mm format
-  };
-  participants: Map<string, IDaySchedule[]>; // Map of email to their schedule
+  time: ITimeRange;
+  participants?: Map<string, IDaySchedule[]>; // Map of email to their schedule
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 // Schema for time ranges (e.g., 9:00-10:00)
-const TimeRangeSchema = new Schema<ITimeRange>(
-  {
-    start: { type: String, required: true }, // HH:mm format
-    end: { type: String, required: true }, // HH:mm format
+const TimeRangeSchema = new Schema<ITimeRange>({
+  start: { type: String, required: true }, // HH:mm format
+  end: { type: String, required: true }, // HH:mm format
+});
+
+const DateRangeSchema = new Schema<IDateRange>({
+  start: {
+    date: { type: String, required: true },
+    day: { type: Number, required: true },
   },
-  { _id: false }
-);
+  end: {
+    date: { type: String, required: true },
+    day: { type: Number, required: true },
+  },
+});
 
 // Schema for daily schedule
 const DayScheduleSchema = new Schema<IDaySchedule>(
@@ -72,15 +88,9 @@ const PollSchema = new Schema<IPoll>(
     _id: { type: String, required: true },
     pollName: { type: String, required: true },
     pollDescription: { type: String },
-    creatorEmail: { type: String, required: true },
-    dateRange: {
-      start: { type: String, required: true }, // YYYY-MM-DD format
-      end: { type: String, required: true }, // YYYY-MM-DD format
-    },
-    timeRange: {
-      start: { type: String, required: true }, // HH:mm format
-      end: { type: String, required: true }, // HH:mm format
-    },
+    urlPath: { type: String, required: true },
+    dateRange: { type: DateRangeSchema, required: true },
+    time: { type: TimeRangeSchema, required: true },
     participants: {
       type: Map,
       of: [DayScheduleSchema],
@@ -95,6 +105,7 @@ const PollSchema = new Schema<IPoll>(
 );
 
 // Indexes for better query performance
+PollSchema.index({ urlPath: 1 }, { unique: true });
 PollSchema.index({ creatorEmail: 1 });
 PollSchema.index({ createdAt: -1 });
 
@@ -118,11 +129,6 @@ PollSchema.methods.getOverlappingTimes = function (): IDaySchedule[] {
   return overlappingSchedule;
 };
 
-// Static methods
-PollSchema.statics.findByCreator = function (creatorEmail: string) {
-  return this.find({ creatorEmail });
-};
-
 PollSchema.statics.findActivePolls = function () {
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
@@ -131,7 +137,6 @@ PollSchema.statics.findActivePolls = function () {
 
 // Create interfaces for the model with static methods
 interface IPollModel extends Model<IPoll> {
-  findByCreator(creatorEmail: string): Promise<IPoll[]>;
   findActivePolls(): Promise<IPoll[]>;
 }
 

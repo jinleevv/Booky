@@ -32,6 +32,8 @@ import { useNavigate } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { v4 as uuid } from "uuid";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   pollName: z.string().min(2, { message: "Poll name is required" }).max(50),
@@ -82,18 +84,40 @@ export default function CreatePollForm() {
     },
   });
 
-  const { server, loggedInUser, userEmail } = useHook();
+  const { server } = useHook();
+
   const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!loggedInUser) {
-      console.error("No user is logged in");
-      return;
-    }
-
     values.startTime = convertTo24Hour(values.startTime);
     values.endTime = convertTo24Hour(values.endTime);
+
+    const urlPath = uuid();
     console.log(values);
+    console.log(urlPath);
+
+    const response = await fetch(`${server}/api/polls/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pollName: values.pollName,
+        pollDescription: values.pollDescription,
+        urlPath: urlPath,
+        range: values.range,
+        startTime: values.startTime,
+        endTime: values.endTime,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Failed to save poll to server", data);
+      return -1;
+    }
+    toast("Successfully Created Poll");
+    navigate(`/poll/${urlPath}`);
   }
 
   return (

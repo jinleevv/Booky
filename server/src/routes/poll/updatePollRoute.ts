@@ -26,9 +26,9 @@ export const updatePollHandler: RequestHandler = async (
     }
 
     // Update or add user's schedule
-    const availableTime = poll.availableTime;
-    availableTime.set(userEmail, schedule);
-    poll.availableTime = availableTime;
+    // const availableTime = poll.availableTime;
+    // availableTime.set(userEmail, schedule);
+    // poll.availableTime = availableTime;
 
     await poll.save();
 

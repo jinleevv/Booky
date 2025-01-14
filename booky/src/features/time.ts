@@ -74,3 +74,8 @@ export const formatTime = (time) => {
   const displayHour = hourNum > 12 ? hourNum - 12 : hourNum;
   return `${displayHour}:${minute} ${period}`;
 };
+
+export const parseStringTimeToInt = (time: string): number => {
+  const [hour] = time.split(":");
+  return parseInt(hour);
+};

@@ -1,5 +1,5 @@
 // createPollRoute.ts
-import express, { Request, Response, RequestHandler } from "express";
+import express, { Request, RequestHandler, Response } from "express";
 import ShortUniqueId from "short-uuid";
 import Poll from "../../models/poll";
 
@@ -9,17 +9,13 @@ export const createPollHandler: RequestHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const {
-    pollName,
-    pollDescription,
-    range,
-    startTime,
-    endTime,
-    creatorEmail,
-  } = req.body;
+  const { pollName, pollDescription, urlPath, range, startTime, endTime } =
+    req.body;
+
+  console.log(req.body);
 
   try {
-    if (!pollName || !range || !startTime || !endTime || !creatorEmail) {
+    if (!pollName || !urlPath || !range || !startTime || !endTime) {
       res.status(400).json({
         message: "Missing required fields",
       });
@@ -37,16 +33,20 @@ export const createPollHandler: RequestHandler = async (
       _id,
       pollName,
       pollDescription,
-      availableTime: new Map([[creatorEmail, []]]), // Initialize with creator's empty schedule
-      durations: [`${startTime}-${endTime}`],
+      urlPath,
+      dateRange: range,
+      time: {
+        start: startTime,
+        end: endTime,
+      },
       createdAt: new Date(),
     });
 
     await newPoll.save();
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: "Poll created successfully",
-      pollId: _id 
+      pollId: _id,
     });
   } catch (error) {
     console.error("Error creating poll:", error);

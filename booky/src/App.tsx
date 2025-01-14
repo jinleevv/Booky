@@ -20,6 +20,7 @@ import Schedule from "./pages/Schedule";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import TeamSettings from "./pages/TeamSettings.tsx";
+import ParticipatePoll from "./pages/ParticipatePoll.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -91,14 +92,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/poll"
-            element={
-              <ProtectedRoute>
-                <CreatePoll />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/poll" element={<CreatePoll />} />
+          <Route path="/poll/:id" element={<ParticipatePoll/>} />
         </Routes>
         <Toaster />
       </NextUIProvider>

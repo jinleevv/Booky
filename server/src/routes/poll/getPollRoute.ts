@@ -8,10 +8,10 @@ export const getPollHandler: RequestHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { pollId } = req.params;
+  const { urlPath } = req.params;
 
   try {
-    const poll = await Poll.findById(pollId);
+    const poll = await Poll.findOne({ urlPath: urlPath });
     if (!poll) {
       res.status(404).json({ message: "Poll not found" });
       return;
@@ -24,6 +24,6 @@ export const getPollHandler: RequestHandler = async (
   }
 };
 
-router.get("/:pollId", getPollHandler);
+router.get("/:urlPath", getPollHandler);
 
 export default router;
