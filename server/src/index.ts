@@ -14,6 +14,8 @@ import updateCoadminRoute from "./routes/team/updateCoadminRoute";
 import getAppointmentRoute from "./routes/team/getAppointmentRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
+import updatePermissionRoute from "./routes/team/updatePermissionRoute";
+import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
 
 dotenv.config();
 
@@ -41,6 +43,8 @@ app.use("/api/teams", updateTeamMembersRoute);
 app.use("/api/teams", updateCancellationRoute);
 app.use("/api/teams", updateAvailableTimeRoute);
 app.use("/api/teams", updateCoadminRoute);
+app.use("/api/teams", updatePermissionRoute);
+app.use("/api/teams", updateTeamDescriptionRoute);
 app.use("/api/teams/", getTeamRoute);
 app.use("/api/appointment/get-appointment", getAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);

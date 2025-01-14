@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { DataTable } from "./data-table";
 import { columns, TeamMembers } from "./columns";
 import InviteCoAdmin from "../InviteCoAdmin";
+import UpdateDescription from "./UpdateDescription";
 
 const days = [
   "Sunday",
@@ -106,15 +107,11 @@ export default function TeamSettings() {
 
   const navigate = useNavigate();
   const { team: teamId } = useParams();
-  const { server, loggedInUser, userEmail } = useHook(); // Use global state from the hook
+  const { server } = useHook(); // Use global state from the hook
   const [teamName, setTeamName] = useState<string | null>(null);
-  const [currentCoAdmins, setCurrentCoAdmins] = useState<Array<string>>([]);
-  const [availableTime, setAvailableTime] = useState<Record<string, any>>({});
-  const [currentTab, setCurrentTab] = useState<string>("add");
-  const [currentMeetingTab, setCurrentMeetingTab] =
-    useState<string>("recurring");
-
-  const meetingTypeSelection = form.watch("meetingType");
+  const [teamDescription, setTeamDescription] = useState<string | null>(null);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Fetch team name on load
   useEffect(() => {
@@ -122,9 +119,22 @@ export default function TeamSettings() {
       const response = await fetch(`${server}/api/teams/${teamId}`);
       const data = await response.json();
       if (response.ok) {
-        setAvailableTime(data.availableTime);
+        const dataTeamMembers: [string, string][] = [
+          ...data.coadmins.map(
+            (email) => [email, "co-admin"] as [string, string]
+          ),
+          ...data.members.map((email) => [email, "member"] as [string, string]),
+        ];
+
+        const teamMembersList = dataTeamMembers.map(([email, role]) => ({
+          teamId: teamId,
+          email,
+          role,
+        }));
+
         setTeamName(data.name);
-        setCurrentCoAdmins(data.coadmins);
+        setTeamDescription(data.teamDescription);
+        setTeamMembers(teamMembersList);
       } else {
         console.error("Failed to fetch team details");
         toast("Failed to fetch team details");
@@ -134,101 +144,10 @@ export default function TeamSettings() {
     fetchTeam();
   }, [teamId, server, navigate]);
 
-  const handleAddCoadmin = () => {
-    const currentCoadmins = form.getValues("coadmins");
-    form.setValue("coadmins", [...currentCoadmins, ""]);
+  const handleFormSubmitSuccess = () => {
+    setIsDialogOpen(false);
+    window.location.reload();
   };
-
-  const handleRemoveCoadmin = (index: number) => {
-    const currentCoadmins = form.getValues("coadmins");
-    form.setValue(
-      "coadmins",
-      currentCoadmins.filter((_, i) => i !== index)
-    );
-  };
-
-  async function handleAddMeeting(
-    coadmins,
-    schedule,
-    oneTimeMeeting,
-    meetingName,
-    meetingDescription,
-    meetingType,
-    duration,
-    meetingLink
-  ) {
-    const filteredCoadmins = coadmins.filter(
-      (email) => email && email.trim() !== ""
-    );
-
-    if (meetingType === "oneOnOne" && duration == "") {
-      toast("Please select duration");
-      return;
-    }
-
-    const response = await fetch(
-      `${server}/api/teams/${teamId}/availableTime`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          hostEmail: userEmail,
-          coadmins: filteredCoadmins,
-          currentTab: currentMeetingTab,
-          recurringMeeting: schedule,
-          oneTimeMeeting: oneTimeMeeting,
-          meetingName: meetingName,
-          meetingDescription: meetingDescription,
-          meetingType: meetingType,
-          duration: duration,
-          meetingLink: meetingLink,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      toast("Failed to add meeting to database");
-      return -1;
-    }
-    toast("Successfully Created Team");
-    return 0;
-  }
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!loggedInUser) {
-      console.error("No user is logged in");
-      return;
-    }
-
-    if (currentTab == "add") {
-      const response = await handleAddMeeting(
-        values.coadmins,
-        values.schedule,
-        values.oneTimeMeeting,
-        values.meetingName,
-        values.meetingDescription,
-        values.meetingType,
-        values.duration,
-        values.meetingLink
-      );
-      return;
-    }
-  }
-
-  const data: TeamMembers[] = [
-    {
-      id: "asdfasd",
-      name: "Jin Won Lee",
-      email: "jinwon.lee@mail.mcgill.ca",
-    },
-    {
-      id: "asdfasd",
-      name: "Jin Won Lee",
-      email: "jinwon.lee@mail.mcgill.ca",
-    },
-  ];
 
   return (
     <section className="h-5/6 flex flex-col mt-10 bg-white font-outfit space-y-2">
@@ -260,7 +179,7 @@ export default function TeamSettings() {
               <DialogHeader>
                 <DialogTitle>Invite Co-Admin</DialogTitle>
                 <DialogDescription>
-                  <InviteCoAdmin teamId={teamId}/>
+                  <InviteCoAdmin teamId={teamId} onAddCoadmin={() => null} />
                 </DialogDescription>
               </DialogHeader>
             </DialogContent>
@@ -270,19 +189,37 @@ export default function TeamSettings() {
       <div className="flex w-full justify-between border rounded-2xl p-4">
         <Label className="font-bold my-auto">
           Description:
-          <Label className="ml-1">{teamName || "Loading..."}</Label>
+          <Label className="ml-1">{teamDescription || "Loading..."}</Label>
         </Label>
         <div>
-          <Button variant="ghost" className="w-5">
-            <Edit size={15} />
-          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger className="h-full w-full">
+              <Button variant="ghost" className="w-5">
+                <Edit size={15} />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Update Description</DialogTitle>
+                <DialogDescription>
+                  <UpdateDescription
+                    teamId={teamId}
+                    onSuccess={handleFormSubmitSuccess}
+                  />
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       <div className="w-full h-full border rounded-2xl p-4">
         <Label className="font-bold">
-          Members <Label className="text-xs text-gray-500">Total:</Label>
+          Members{" "}
+          <Label className="text-xs text-gray-500">
+            Total: {teamMembers.length}
+          </Label>
         </Label>
-        <DataTable columns={columns} data={data} />
+        <DataTable columns={columns} data={teamMembers} />
       </div>
     </section>
   );

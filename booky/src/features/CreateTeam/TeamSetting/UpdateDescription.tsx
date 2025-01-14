@@ -15,43 +15,38 @@ import { useHook } from "@/hooks";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  coadmin: z.string().min(1).max(50),
+  description: z.string().min(1),
 });
 
-export default function InviteCoAdmin({
-  teamId,
-  onAddCoadmin,
-}: {
-  teamId: string;
-  onAddCoadmin: (email: string) => void;
-}) {
+export default function UpdateDescription({ teamId, onSuccess }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      coadmin: "",
+      description: "",
     },
   });
   const { server } = useHook();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (teamId !== "CreateTeam") {
-      const response = await fetch(`${server}/api/teams/${teamId}/coadmins`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ coadmin: values.coadmin }),
-      });
+    if (teamId) {
+      const response = await fetch(
+        `${server}/api/teams/${teamId}/teamDescription`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ teamDescription: values.description }),
+        }
+      );
 
       if (!response.ok) {
-        toast.error("Failed to update coadmins");
+        toast.error("Failed to update team description");
         return;
       }
-    } else {
-      onAddCoadmin(values.coadmin); // Use the callback to update coadmins
     }
-
-    toast.success("Successfully updated coadmins");
+    toast.success("Successfully updated team description");
+    onSuccess();
     form.reset();
   }
 
@@ -60,12 +55,12 @@ export default function InviteCoAdmin({
       <form className="space-y-4">
         <FormField
           control={form.control}
-          name="coadmin"
+          name="description"
           render={({ field }) => (
             <FormItem className="flex gap-2">
-              <FormLabel className="w-24 mt-5">Co-Admin</FormLabel>
+              <FormLabel className="w-24 mt-5">Description</FormLabel>
               <FormControl>
-                <Input placeholder="Enter co-admin email" {...field} />
+                <Input placeholder="Update team description" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -73,7 +68,7 @@ export default function InviteCoAdmin({
         />
         <div className="flex w-full justify-end">
           <Button type="button" onClick={form.handleSubmit(onSubmit)}>
-            Invite
+            Update
           </Button>
         </div>
       </form>
