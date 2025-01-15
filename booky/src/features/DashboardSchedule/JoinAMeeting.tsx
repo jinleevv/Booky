@@ -5,6 +5,15 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -91,6 +100,7 @@ export default function JoinAMeeting({
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
   const [selectedMeeting, setSelectedMeeting] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     if (selectedHost && availableTimes) {
@@ -319,6 +329,25 @@ export default function JoinAMeeting({
       toast("An error occurred while trying to join the team.");
     }
   };
+
+  const handleDeleteMeeting = async (meetingId: string) => {
+    try {
+      const response = await fetch(`${server}/api/teams/${teamId}/meetings/${meetingId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (response.ok) {
+        toast("Meeting deleted successfully!");
+      } else {
+        toast("Failed to delete the meeting");
+      }
+    } catch (error) {
+      console.error("Error deleting meeting:", error);
+      toast("An error occurred while deleting the meeting.");
+    }
+  };
+
   return (
     <div className="flex relative w-full md:h-[800px] md:mt-24 sm:h-full">
       {teamName === "Not Found" ? (
@@ -459,7 +488,7 @@ export default function JoinAMeeting({
                         .map((meeting) => (
                           <Card
                             className="w-1/2 border rounded-3xl shadow-md cursor-pointer"
-                            onClick={() => setSelectedMeeting("")}
+                            onClick={() => setSelectedMeeting(meeting._id)}
                           >
                             <CardHeader className="pt-4">
                               <CardTitle className="flex justify-between">
@@ -490,12 +519,45 @@ export default function JoinAMeeting({
                                       >
                                         <TbCalendarCancel size={10} />
                                       </Button>
-                                      <Button
-                                        variant="ghost"
-                                        className="text-red-700 hover:text-red-700 w-5 h-5"
-                                      >
-                                        <Trash size={10} />
-                                      </Button>
+                                      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                        <DialogTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            className="text-red-700 hover:text-red-700 w-5 h-5"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setIsDialogOpen(true);
+                                            }}
+                                          >
+                                            <Trash size={10} />
+                                          </Button>
+                                        </DialogTrigger>
+                                        <DialogContent onClick={(e) => e.stopPropagation()}>
+                                          <DialogHeader>
+                                            <DialogTitle>Delete Meeting</DialogTitle>
+                                            <DialogDescription>
+                                              Are you sure you want to delete this meeting? This action cannot be undone.
+                                            </DialogDescription>
+                                          </DialogHeader>
+                                          <DialogFooter>
+                                            <Button variant="outline" onClick={(e) =>{
+                                              setIsDialogOpen(false)
+                                              }}
+                                            >
+                                              Cancel
+                                            </Button>
+                                            <Button
+                                              variant="destructive"
+                                              onClick={(e) => {
+                                                handleDeleteMeeting(meeting._id);
+                                                setIsDialogOpen(false);
+                                              }}
+                                            >
+                                              Delete
+                                            </Button>
+                                          </DialogFooter>
+                                        </DialogContent>
+                                      </Dialog>
                                     </>
                                   )}
                                 </div>

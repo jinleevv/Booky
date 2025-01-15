@@ -13,6 +13,7 @@ import updateAvailableTimeRoute from "./routes/team/updateAvailableTimeRoute";
 import updateCoadminRoute from "./routes/team/updateCoadminRoute";
 import getAppointmentRoute from "./routes/team/getAppointmentRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
+import deleteMeetingRoute from "./routes/team/deleteMeetingRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 import updatePermissionRoute from "./routes/team/updatePermissionRoute";
 import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
@@ -26,7 +27,7 @@ const PORT = 5001;
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST", "PATCH"],
+    methods: ["GET", "POST", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // If cookies or credentials are involved
   })
@@ -42,6 +43,7 @@ app.use("/api/teams", updateAppointmentRoute);
 app.use("/api/teams", updateTeamMembersRoute);
 app.use("/api/teams", updateCancellationRoute);
 app.use("/api/teams", updateAvailableTimeRoute);
+app.use("/api/teams", deleteMeetingRoute);
 app.use("/api/teams", updateCoadminRoute);
 app.use("/api/teams", updatePermissionRoute);
 app.use("/api/teams", updateTeamDescriptionRoute);
