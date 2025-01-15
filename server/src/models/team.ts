@@ -88,7 +88,7 @@ const ScheduleSchema: Schema = new Schema<ISchedule>({
 const meetingScheduleSchema: Schema = new Schema<IMeetingSchedule>({
   schedule: { type: String, required: true },
   name: { type: String, required: true },
-  description: { type: String },
+  description: { type: String, required: false },
   weekSchedule: { type: [ScheduleSchema], required: false },
   date: { type: String, required: false },
   time: { type: TimeRangeSchema, required: false },

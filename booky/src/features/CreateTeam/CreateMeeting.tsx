@@ -40,7 +40,7 @@ export default function CreateMeating({
   return (
     <FormField
       control={form.control}
-      name="schedule"
+      name="recurringMeetingSchedule"
       render={() => (
         <div className="border w-full h-[590px] rounded-lg p-4 overflow-auto">
           <div className="border-b-1 mb-4">
@@ -107,11 +107,11 @@ export default function CreateMeating({
               </TabsList>
               <TabsContent value="recurring">
                 <div className="space-y-4">
-                  {form.watch("schedule").map((day, dayIndex) => (
+                  {form.watch("recurringMeetingSchedule").map((day, dayIndex) => (
                     <div key={day.day} className="flex items-center space-x-4">
                       <FormField
                         control={form.control}
-                        name={`schedule.${dayIndex}.enabled`}
+                        name={`recurringMeetingSchedule.${dayIndex}.enabled`}
                         render={({ field }) => (
                           <FormItem className="flex w-32 items-center space-x-2">
                             <FormControl>
@@ -139,7 +139,7 @@ export default function CreateMeating({
                               {/* Start Time */}
                               <FormField
                                 control={form.control}
-                                name={`schedule.${dayIndex}.times.${timeIndex}.start`}
+                                name={`recurringMeetingSchedule.${dayIndex}.times.${timeIndex}.start`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
@@ -173,7 +173,7 @@ export default function CreateMeating({
                               {/* End Time */}
                               <FormField
                                 control={form.control}
-                                name={`schedule.${dayIndex}.times.${timeIndex}.end`}
+                                name={`recurringMeetingSchedule.${dayIndex}.times.${timeIndex}.end`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
@@ -207,12 +207,12 @@ export default function CreateMeating({
                                 size="icon"
                                 onClick={() => {
                                   const updatedSchedule =
-                                    form.getValues("schedule");
+                                    form.getValues("recurringMeetingSchedule");
                                   updatedSchedule[dayIndex].times.push({
                                     start: "09:00 AM",
                                     end: "05:00 PM",
                                   });
-                                  form.setValue("schedule", updatedSchedule);
+                                  form.setValue("recurringMeetingSchedule", updatedSchedule);
                                 }}
                               >
                                 <Plus className="w-4 h-4" />
@@ -224,12 +224,12 @@ export default function CreateMeating({
                                   size="icon"
                                   onClick={() => {
                                     const updatedSchedule =
-                                      form.getValues("schedule");
+                                      form.getValues("recurringMeetingSchedule");
                                     updatedSchedule[dayIndex].times.splice(
                                       timeIndex,
                                       1
                                     );
-                                    form.setValue("schedule", updatedSchedule);
+                                    form.setValue("recurringMeetingSchedule", updatedSchedule);
                                   }}
                                 >
                                   <Trash className="w-4 h-4 text-red-500" />
@@ -246,7 +246,7 @@ export default function CreateMeating({
               <TabsContent value="one-time">
                 <FormField
                   control={form.control}
-                  name="oneTimeMeeting"
+                  name="oneTimeMeetingSchedule"
                   render={({ field }) => (
                     <FormItem className="flex flex-col p-1">
                       <div className="w-full max-w-xl flex flex-row gap-4 bg-white">

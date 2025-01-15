@@ -10,7 +10,6 @@ export const deleteMeetingHandler: RequestHandler = async (
 ): Promise<void> => {
   const { teamId, meetingId } = req.params;
   try {
-    console.log("hi");
     if (!teamId || !meetingId) {
       res
         .status(400)
@@ -26,7 +25,7 @@ export const deleteMeetingHandler: RequestHandler = async (
 
     const availableTimesWithId = team.availableTimes as (IAvailableTime & { _id: string })[];
     team.availableTimes = availableTimesWithId.filter((meeting) => meeting._id.toString() !== meetingId);
-    console.log(team.availableTimes);
+    
     await team.save();
 
     res.status(200).json({
