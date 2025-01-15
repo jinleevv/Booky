@@ -21,11 +21,9 @@ export const createMeetingHandler: RequestHandler = async (req: Request, res: Re
         if(
             !hostEmail ||
             !meetingName ||
-            !meetingDescription ||
             !recurringMeetingSchedule ||
             !oneTimeMeetingSchedule ||
             !meetingType ||
-            !meetingLink ||
             !currentTab ||
             !teamId
         ) {
