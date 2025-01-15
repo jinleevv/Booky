@@ -5,12 +5,22 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { IoPersonCircle } from "react-icons/io5";
 import { TbCalendarCancel, TbEdit } from "react-icons/tb";
+import { toast } from "sonner";
 import { Trash } from "lucide-react";
 import { useHook } from "@/hooks";
 import { DataTable } from "./data-table";
@@ -82,8 +92,9 @@ export default function ViewDetails({
   setEnabledDays,
 }: IJoinAMeetingProps) {
   const navigate = useNavigate();
-  const { userEmail } = useHook();
+  const { server, userEmail } = useHook();
   const [selectedMeeting, setSelectedMeeting] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Load the initial value from local storage on component mount
   useEffect(() => {
@@ -151,6 +162,24 @@ export default function ViewDetails({
   ];
 
   const columns = MeetingColumns();
+
+  const handleDeleteMeeting = async (meetingId: string) => {
+    try {
+      const response = await fetch(`${server}/api/teams/${teamId}/meetings/${meetingId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (response.ok) {
+        toast("Meeting deleted successfully!");
+      } else {
+        toast("Failed to delete the meeting");
+      }
+    } catch (error) {
+      console.error("Error deleting meeting:", error);
+      toast("An error occurred while deleting the meeting.");
+    }
+  };
 
   return (
     <div className="flex w-full h-full gap-2">
@@ -242,13 +271,46 @@ export default function ViewDetails({
                                 <Button variant="ghost" className="w-5 h-5">
                                   <TbCalendarCancel size={10} />
                                 </Button>
-                                <Button
-                                  variant="ghost"
-                                  className="text-red-700 hover:text-red-700 w-5 h-5"
-                                >
-                                  <Trash size={10} />
-                                </Button>
-                              </>
+                                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      className="text-red-700 hover:text-red-700 w-5 h-5"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsDialogOpen(true);
+                                      }}
+                                    >
+                                      <Trash size={10} />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent onClick={(e) => e.stopPropagation()}>
+                                    <DialogHeader>
+                                      <DialogTitle>Delete Meeting</DialogTitle>
+                                      <DialogDescription>
+                                        Are you sure you want to delete this meeting? This action cannot be undone.
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                      <Button variant="outline" onClick={(e) =>{
+                                        setIsDialogOpen(false)
+                                        }}
+                                      >
+                                        Cancel
+                                      </Button>
+                                      <Button
+                                        variant="destructive"
+                                        onClick={(e) => {
+                                          handleDeleteMeeting(meeting._id);
+                                          setIsDialogOpen(false);
+                                        }}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+                        </>
                             )}
                           </div>
                         </CardTitle>
