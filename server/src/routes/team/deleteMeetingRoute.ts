@@ -10,7 +10,6 @@ export const deleteMeetingHandler: RequestHandler = async (
 ): Promise<void> => {
   const { teamId, meetingId } = req.params;
   try {
-    console.log("hi");
     if (!teamId || !meetingId) {
       res
         .status(400)
