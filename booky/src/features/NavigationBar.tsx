@@ -13,7 +13,7 @@ import { useState } from "react";
 import { auth } from "../../firebase";
 import { Label } from "@/components/ui/label";
 import { signOut } from "firebase/auth";
-import { LayoutPanelLeft, LogOut } from "lucide-react";
+import { LayoutPanelLeft, LogOut, Vote } from "lucide-react";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { Input } from "@/components/ui/input";
 import { IoSearchOutline } from "react-icons/io5";
@@ -39,7 +39,11 @@ export default function NavigationBar() {
         className="flex items-center gap-2 cursor-pointer"
         onClick={() => navigate("/")}
       >
-        <img src="/booky_logo.png" alt="Booky Logo" className="w-26 h-14" />
+        <img
+          src="/booky_logo.png"
+          alt="Booky Logo"
+          className="w-26 h-14 cursor-pointer"
+        />
       </div>
 
       <div className="flex flex-1 max-w-[700px] h-11 border-2 border-red-700 rounded-full">
@@ -83,9 +87,10 @@ export default function NavigationBar() {
                   <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                     <LayoutPanelLeft /> <span>Dashboard</span>
                   </DropdownMenuItem>
-                  {/* <DropdownMenuItem onClick={() => navigate("/")}>
-                    <UserPen /> <span>Profile</span>
-                  </DropdownMenuItem> */}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/poll")}>
+                    <Vote /> <span>Poll</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => {
@@ -100,7 +105,13 @@ export default function NavigationBar() {
           </>
         ) : (
           <>
-            {" "}
+            <Button
+              variant="ghost"
+              className="bg-white hover:text-red-700 border-none"
+              onClick={() => navigate("/poll")}
+            >
+              Poll
+            </Button>
             <Button
               variant="ghost"
               className="bg-white hover:text-red-700 border-none"

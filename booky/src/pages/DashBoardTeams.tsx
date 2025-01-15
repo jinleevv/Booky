@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useHook } from "@/hooks";
-import { Trash, Settings } from "lucide-react";
+import { Trash, Settings, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 export default function DashBoardTeams() {
@@ -71,7 +71,7 @@ export default function DashBoardTeams() {
       <div className="absolute w-3/6 h-2/6 bg-red-200 blur-[600px] top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4"></div>
       <div className="flex">
         <DashboardNavBar />
-        <div className="w-full px-3 py-4 relative z-20">
+        <div className="w-full px-3 py-4 relative z-20 font-outfit">
           <div className="flex w-full">
             <div className="grid w-full">
               <Label className="text-2xl font-bold text-black">Teams</Label>{" "}
@@ -91,37 +91,67 @@ export default function DashBoardTeams() {
             {teams.map((team) => (
               <Card
                 key={team._id}
-                className="border rounded shadow-md cursor-pointer"
+                className="border rounded-3xl shadow-md cursor-pointer"
                 onClick={() => handleCardClick(team._id)}
               >
-                <CardHeader>
-                  <CardTitle className="flex text-lg font-bold justify-between">
-                    {team.name}
-                    <div className="flex space-x-1">
-                      {(team.adminEmail === userEmail ||
-                        team.coadmins.includes(userEmail)) && (
+                <CardHeader className="pt-4">
+                  <CardTitle className="flex justify-between">
+                    <div className="flex my-auto gap-1">
+                      <Label className="text-lg font-bold">{team.name}</Label>
+                      <div className="my-auto">
                         <Button
                           variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/dashboard/${team._id}/settings`);
+                            const el = document.createElement("textarea");
+                            el.value = team._id;
+                            el.style.position = "absolute";
+                            el.style.left = "-9999px";
+                            document.body.appendChild(el);
+
+                            el.select();
+                            document.execCommand("copy");
+                            document.body.removeChild(el);
+
+                            toast("Team Code copied to clipboard!");
                           }}
+                          className="w-5 h-5"
                         >
-                          <Settings size={20} />
+                          <Copy size={5} />
                         </Button>
-                      )}
+                        {(team.adminEmail === userEmail ||
+                          team.coadmins.includes(userEmail)) && (
+                          <Button
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/dashboard/${team._id}/settings`);
+                            }}
+                            className="w-5 h-5"
+                          >
+                            <Settings size={10} />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="my-auto">
                       <Button
                         variant="ghost"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveTeam(team._id);
                         }}
+                        className="text-red-700 w-5 h-5"
                       >
-                        <Trash size={20} />
+                        <Trash size={10} />
                       </Button>
                     </div>
                   </CardTitle>
-                  <CardDescription>Professor: {team.adminEmail}</CardDescription>
+                  <CardDescription className="grid space-y-1">
+                    <Label className="text-xs">ID: {team._id}</Label>
+                    <Label className="text-xs">Admin: {team.adminEmail}</Label>
+                  </CardDescription>
                 </CardHeader>
               </Card>
             ))}

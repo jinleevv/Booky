@@ -440,7 +440,7 @@ export default function DashBoard() {
       <div className="absolute w-3/6 h-2/6 bg-red-200 blur-[600px] top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4"></div>
       <div className="flex">
         <DashboardNavBar />
-        <div className="w-full px-3 py-4 relative z-20">
+        <div className="w-full px-3 py-4 relative z-20 font-outfit">
           <Label className="text-2xl font-bold text-black">Meetings</Label>
           <div className="w-full h-5/6 mt-3 space-y-3">
             <div className="flex gap-1">

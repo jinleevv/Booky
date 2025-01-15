@@ -29,6 +29,7 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-switch": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.2",
+    "@tanstack/react-table": "^8.20.6",
     "@tanstack/react-virtual": "^3.10.9",
     "@types/nodemailer": "^6.4.17",
     "class-variance-authority": "^0.7.0",

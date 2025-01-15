@@ -5,6 +5,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 interface ITeam extends Document {
   _id: string;
   name: string;
+  teamDescription: string;
   adminEmail: string;
   adminName: string;
   coadmins: string[];
@@ -151,6 +152,7 @@ const CancelledMeetingsSchema: Schema = new Schema<ICancelledMeetings>({
 const TeamSchema: Schema = new Schema<ITeam>({
   _id: { type: String, required: true },
   name: { type: String, required: true },
+  teamDescription: { type: String, required: false },
   adminEmail: { type: String, required: true },
   adminName: { type: String, required: true },
   coadmins: [{ type: String, required: false }],

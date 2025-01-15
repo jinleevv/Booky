@@ -1,5 +1,5 @@
 import { Label } from "@/components/ui/label";
-import TeamSettingsForm from "@/features/CreateTeam/TeamSettingsForm";
+import TeamSettingsForm from "@/features/CreateTeam/TeamSetting/TeamSettingsForm";
 import DashboardNavBar from "@/features/DashboardNavBar";
 
 export default function TeamSettingsPage() {
