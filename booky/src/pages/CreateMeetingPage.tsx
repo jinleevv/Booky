@@ -5,6 +5,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { parseZonedDateTime } from "@internationalized/date";
+import { toast } from "sonner";
+import { useHook } from "@/hooks";
+import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -20,10 +24,10 @@ const days = [
 ];
 
 const formSchema = z.object({
-  teamName: z.string().min(1).max(50),
-  teamDescription: z.string(),
-  duration: z.string(),
-  schedule: z.array(
+  meetingName: z.string().min(1, "Please define name for the meeting"),
+  meetingDescription: z.string(),
+  meetingLink: z.string(),
+  recurringMeetingSchedule: z.array(
     z.object({
       day: z.string(),
       enabled: z.boolean(),
@@ -35,26 +39,14 @@ const formSchema = z.object({
       ),
     })
   ),
-  coadmins: z.array(
-    z
-      .string()
-      .refine(
-        (email) =>
-          email === "" ||
-          /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/.test(email),
-        "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
-      )
-  ),
-  oneTimeMeeting: z.object({
+  oneTimeMeetingSchedule: z.object({
     start: z.any(),
     end: z.any(),
   }),
-  meetingName: z.string().min(1, "Please define name for the meeting"),
-  meetingDescription: z.string(),
   meetingType: z.enum(["oneOnOne", "group"], {
     required_error: "You need to select the type.",
   }),
-  meetingLink: z.string(),
+  duration: z.string(),
 });
 
 const formatDateTime = (dateObject: any): string => {
@@ -70,15 +62,15 @@ export default function CreateMeetingPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      teamName: "",
-      duration: "",
-      schedule: days.map((day) => ({
+      meetingName: "",
+      meetingDescription: "",
+      meetingLink: "",
+      recurringMeetingSchedule: days.map((day) => ({
         day,
         enabled: day !== "Sunday" && day !== "Saturday",
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
-      })),
-      coadmins: [],
-      oneTimeMeeting: {
+      })),      
+      oneTimeMeetingSchedule: {
         start: formatDateTime(
           parseZonedDateTime(
             `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
@@ -90,14 +82,52 @@ export default function CreateMeetingPage() {
           )
         ),
       },
-      meetingDescription: "",
-      meetingLink: "",
+      duration: "",
     },
   });
+  
+  const { server, userEmail } = useHook();
+  const { team: teamId } = useParams();
   const [currentTab, setCurrentTab] = useState<string>("recurring");
+
+  const navigate = useNavigate();
   const meetingTypeSelection = form.watch("meetingType");
 
-  function onSubmit() {}
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (values.meetingType === "oneOnOne" && values.duration == "") {
+      toast("Please select duration");
+      return;
+    }
+
+    const response = await fetch(`${server}/api/teams/${teamId}/meetings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        hostEmail: userEmail,
+        meetingName: values.meetingName,
+        meetingDescription: values.meetingDescription,
+        recurringMeetingSchedule: values.recurringMeetingSchedule,
+        oneTimeMeetingSchedule: values.oneTimeMeetingSchedule,
+        meetingType: values.meetingType,
+        duration: values.duration,
+        meetingLink: values.meetingLink,
+        currentTab: currentTab,
+      })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error("Failed to create meeting", data);
+      return -1;
+    }
+    toast("Successfully Created Meeting");
+    navigate(`/dashboard/${teamId}`);
+    return 0;
+  }
+
   return (
     <section className="h-screen w-screen bg-white">
       <div className="absolute w-3/6 h-2/6 bg-red-200 blur-[600px] top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4"></div>
