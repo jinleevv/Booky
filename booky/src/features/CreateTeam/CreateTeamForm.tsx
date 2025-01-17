@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { useHook } from "@/hooks";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import CreateMeating from "./CreateMeeting";
+import CreateMeeting from "./CreateMeeting";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import InviteCoAdmin from "./InviteCoAdmin";
@@ -265,9 +265,8 @@ export default function CreateTeamForm() {
               )}
             />
           </div>
-          <CreateMeating
+          <CreateMeeting
             form={form}
-            meetingTypeSelection={meetingTypeSelection}
             currentTab={currentTab}
             setCurrentTab={setCurrentTab}
           />

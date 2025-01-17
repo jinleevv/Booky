@@ -22,9 +22,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 
-export default function CreateMeating({
+export default function CreateMeeting({
   form,
-  meetingTypeSelection,
   currentTab,
   setCurrentTab,
 }) {
@@ -90,7 +89,7 @@ export default function CreateMeating({
             </div>
           </div>
           <div className="grid grid-cols-2">
-            <Tabs defaultValue={currentTab}>
+            <Tabs defaultValue={currentTab} value={currentTab}>
               <TabsList>
                 <TabsTrigger
                   value="recurring"
@@ -254,15 +253,15 @@ export default function CreateMeating({
                           hideTimeZone
                           defaultValue={{
                             start: parseZonedDateTime(
-                              `${
-                                new Date().toISOString().split("T")[0]
-                              }T09:00[America/Toronto]`
+                              `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
                             ),
                             end: parseZonedDateTime(
-                              `${
-                                new Date().toISOString().split("T")[0]
-                              }T17:00[America/Toronto]`
+                              `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
                             ),
+                          }}
+                          value={{
+                            start: field.value.start ? parseZonedDateTime(`${field.value.start}[America/Toronto]`) : undefined,
+                            end: field.value.end ? parseZonedDateTime(`${field.value.end}[America/Toronto]`) : undefined,
                           }}
                           label="Meeting / Event"
                           visibleMonths={2}
@@ -310,6 +309,7 @@ export default function CreateMeating({
                     </div>
                     <FormControl>
                       <RadioGroup
+                        value={field.value}
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         className="flex h-full"
@@ -336,7 +336,7 @@ export default function CreateMeating({
               />
             </div>
             <div>
-              {meetingTypeSelection === "oneOnOne" ? (
+              {form.watch("meetingType") === "oneOnOne" ? (
                 <FormField
                   control={form.control}
                   name="duration"

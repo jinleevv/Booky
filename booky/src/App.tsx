@@ -90,6 +90,14 @@ function App() {
           }
         />
         <Route
+          path="/dashboard/:team/edit-meeting/:meeting"
+          element={
+            <ProtectedRoute>
+              <CreateMeetingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/dashboard/:team/:meeting"
           element={
             <ProtectedRoute>
