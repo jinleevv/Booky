@@ -1,10 +1,4 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { NextUIProvider } from "@nextui-org/react";
 import { AuthContext } from "./features/AuthContext.tsx";
 import { useContext, useEffect } from "react";
@@ -23,6 +17,7 @@ import TeamSettings from "./pages/TeamSettings.tsx";
 import AvailabilityScheduler from "./pages/AvailabilityScheduler.tsx";
 import MeetingDetails from "./pages/MeetingDetails.tsx";
 import CreateMeetingPage from "./pages/CreateMeetingPage.tsx";
+import MeetingMinutePage from "./pages/MeetingMinutePage.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -107,6 +102,14 @@ function App() {
           element={
             <ProtectedRoute>
               <TeamSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/document/:meeting/:user"
+          element={
+            <ProtectedRoute>
+              <MeetingMinutePage />
             </ProtectedRoute>
           }
         />

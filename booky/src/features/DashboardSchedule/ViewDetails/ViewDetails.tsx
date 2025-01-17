@@ -27,6 +27,7 @@ import { DataTable } from "./data-table";
 import { MeetingColumns, MeetingInformation } from "./columns";
 import { HiOutlineArrowNarrowLeft } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import { addDays, format, parseISO } from "date-fns";
 
 interface ITimeRange {
   start: string;
@@ -63,6 +64,7 @@ interface IJoinAMeetingProps {
   setSelectedHost: React.Dispatch<React.SetStateAction<string | null>>;
   enabledDays: Set<number>;
   setEnabledDays: React.Dispatch<React.SetStateAction<Set<number>>>;
+  createdAt: string;
 }
 
 export default function ViewDetails({
@@ -90,11 +92,13 @@ export default function ViewDetails({
   setSelectedHost,
   enabledDays,
   setEnabledDays,
+  createdAt,
 }: IJoinAMeetingProps) {
   const navigate = useNavigate();
   const { server, userEmail } = useHook();
   const [selectedMeeting, setSelectedMeeting] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [meetingData, setMeetingData] = useState<any>(null);
 
   // Load the initial value from local storage on component mount
   useEffect(() => {
@@ -146,26 +150,58 @@ export default function ViewDetails({
     }
   }, [selectedMeeting]); // Runs whenever selectedMeeting changes
 
-  const data: MeetingInformation[] = [
-    {
-      id: "asdfasd",
-      teamId: "amazing",
-      date: "Jaunary 1st 2025",
-      time: "1:00 PM - 2:00 PM",
-    },
-    {
-      id: "asdfasd",
-      teamId: "amazing2",
-      date: "Jaunary 2st 2025",
-      time: "2:00 PM - 3:00 PM",
-    },
-  ];
+  useEffect(() => {
+    if (availableTimes) {
+      if (availableTimes.length > 0) {
+        const weekSchedule = availableTimes[0].meeting.weekSchedule;
+        const generatedMeetings = generateMeetings(createdAt, weekSchedule);
+        setMeetingData(generatedMeetings);
+      }
+    }
+  }, [availableTimes]);
+
+  function generateMeetings(
+    createdAt: string,
+    weekSchedule: any[]
+  ): MeetingInformation[] {
+    const meetings: MeetingInformation[] = [];
+    const startDate = parseISO(createdAt); // Convert `createdAt` to a Date object
+    const today = new Date();
+    const endDate = addDays(today, 7); // One week into the future
+
+    for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
+      const dayName = format(date, "EEEE"); // Get the day name (e.g., "Monday")
+
+      // Find the matching schedule for the day
+      const daySchedule = weekSchedule.find(
+        (schedule) => schedule.day === dayName
+      );
+
+      if (daySchedule && daySchedule.enabled) {
+        daySchedule.times.forEach((time: any) => {
+          const startTime = time.start;
+          const endTime = time.end;
+          const formattedDate = format(date, "yyyy-MM-dd");
+
+          meetings.push({
+            id: `${formattedDate}-${startTime}-${endTime}`, // Unique ID
+            teamId: teamId,
+            date: formattedDate,
+            time: `${startTime} - ${endTime}`,
+          });
+        });
+      }
+    }
+
+    return meetings;
+  }
 
   const columns = MeetingColumns();
 
   const handleDeleteMeeting = async (meetingId: string) => {
     try {
-      const response = await fetch(`${server}/api/teams/${teamId}/meetings/${meetingId}`,
+      const response = await fetch(
+        `${server}/api/teams/${teamId}/meetings/${meetingId}`,
         {
           method: "DELETE",
         }
@@ -271,7 +307,10 @@ export default function ViewDetails({
                                 <Button variant="ghost" className="w-5 h-5">
                                   <TbCalendarCancel size={10} />
                                 </Button>
-                                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                <Dialog
+                                  open={isDialogOpen}
+                                  onOpenChange={setIsDialogOpen}
+                                >
                                   <DialogTrigger asChild>
                                     <Button
                                       variant="ghost"
@@ -284,16 +323,21 @@ export default function ViewDetails({
                                       <Trash size={10} />
                                     </Button>
                                   </DialogTrigger>
-                                  <DialogContent onClick={(e) => e.stopPropagation()}>
+                                  <DialogContent
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
                                     <DialogHeader>
                                       <DialogTitle>Delete Meeting</DialogTitle>
                                       <DialogDescription>
-                                        Are you sure you want to delete this meeting? This action cannot be undone.
+                                        Are you sure you want to delete this
+                                        meeting? This action cannot be undone.
                                       </DialogDescription>
                                     </DialogHeader>
                                     <DialogFooter>
-                                      <Button variant="outline" onClick={(e) =>{
-                                        setIsDialogOpen(false)
+                                      <Button
+                                        variant="outline"
+                                        onClick={(e) => {
+                                          setIsDialogOpen(false);
                                         }}
                                       >
                                         Cancel
@@ -310,7 +354,7 @@ export default function ViewDetails({
                                     </DialogFooter>
                                   </DialogContent>
                                 </Dialog>
-                        </>
+                              </>
                             )}
                           </div>
                         </CardTitle>
@@ -353,7 +397,7 @@ export default function ViewDetails({
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
-                  <DataTable columns={columns} data={data} />
+                  <DataTable columns={columns} data={meetingData} />
                 </TabsContent>
               </Tabs>
             </div>

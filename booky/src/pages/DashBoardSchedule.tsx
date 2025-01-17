@@ -33,6 +33,7 @@ export default function DashBoardSchedule() {
   const [cancelledDays, setCancelledDays] = useState<ICancelledDays[]>([]);
   const [selectedHost, setSelectedHost] = useState<string | null>(null);
   const [enabledDays, setEnabledDays] = useState<Set<number>>(new Set());
+  const [createdAt, setCreatedAt] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTeamDetails();
@@ -55,6 +56,7 @@ export default function DashBoardSchedule() {
         setCancelledDays(data.cancelledMeetings);
         setSelectedHost(data.adminEmail);
         updateEnabledDays(data.adminEmail);
+        setCreatedAt(data.createdAt);
       } else {
         setTeamName("Not Found");
         setAdminName("Not Found");
@@ -161,6 +163,7 @@ export default function DashBoardSchedule() {
                     setSelectedHost={setSelectedHost}
                     enabledDays={enabledDays}
                     setEnabledDays={setEnabledDays}
+                    createdAt={createdAt}
                   />
                 </TabsContent>
               </Tabs>
