@@ -43,7 +43,7 @@ const formSchema = z.object({
   teamName: z.string().min(1).max(50),
   teamDescription: z.string(),
   duration: z.string(),
-  schedule: z.array(
+  recurringMeetingSchedule: z.array(
     z.object({
       day: z.string(),
       enabled: z.boolean(),
@@ -65,7 +65,7 @@ const formSchema = z.object({
         "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
       )
   ),
-  oneTimeMeeting: z.object({
+  oneTimeMeetingSchedule: z.object({
     start: z.any(),
     end: z.any(),
   }),
@@ -92,13 +92,13 @@ export default function CreateTeamForm() {
     defaultValues: {
       teamName: "",
       duration: "",
-      schedule: days.map((day) => ({
+      recurringMeetingSchedule: days.map((day) => ({
         day,
         enabled: day !== "Sunday" && day !== "Saturday",
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
       })),
       coadmins: [],
-      oneTimeMeeting: {
+      oneTimeMeetingSchedule: {
         start: formatDateTime(
           parseZonedDateTime(
             `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
@@ -145,8 +145,8 @@ export default function CreateTeamForm() {
         adminName: userName,
         coadmins: pendingCoAdmin,
         currentTab: currentTab,
-        recurringMeeting: values.schedule,
-        oneTimeMeeting: values.oneTimeMeeting,
+        recurringMeeting: values.recurringMeetingSchedule,
+        oneTimeMeeting: values.oneTimeMeetingSchedule,
         meetingName: values.meetingName,
         meetingDescription: values.meetingDescription,
         meetingType: values.meetingType,
