@@ -29,7 +29,7 @@ const PORT = 5001;
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // If cookies or credentials are involved
   })

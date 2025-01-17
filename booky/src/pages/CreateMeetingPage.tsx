@@ -121,6 +121,14 @@ export default function CreateMeetingPage() {
           meetingDescription: meetingData.description || "",
           meetingLink: meetingData.zoomLink || "",
           recurringMeetingSchedule: meetingData.weekSchedule || [],
+          oneTimeMeetingSchedule: {
+            start: formatDateTime(
+              parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`)
+            ),
+            end: formatDateTime(
+              parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`)
+            ),
+          },
           meetingType: meetingData.type || "oneOnOne",
           duration: meetingData.duration || "",
         };
@@ -133,16 +141,20 @@ export default function CreateMeetingPage() {
           meetingDescription: meetingData.description || "",
           meetingLink: meetingData.zoomLink || "",
           oneTimeMeetingSchedule: {
-            start: parseZonedDateTime(
-              formatZonedDateTime(
-                meetingData.date,
-                meetingData.time.start
+            start: formatDateTime(
+              parseZonedDateTime(
+                formatZonedDateTime(
+                  meetingData.date,
+                  meetingData.time.start
+                )
               )
             ),
-            end: parseZonedDateTime(
-              formatZonedDateTime(
-                meetingData.date,
-                meetingData.time.end
+            end: formatDateTime(
+              parseZonedDateTime(
+                formatZonedDateTime(
+                  meetingData.date,
+                  meetingData.time.end
+                )
               )
             ),
           },
@@ -175,7 +187,7 @@ export default function CreateMeetingPage() {
     if (!meetingId) {
       requestBody.hostEmail = userEmail;
     }
-
+    
     const response = await fetch(`${server}/api/teams/${teamId}/meetings${meetingId ? `/${meetingId}` : ""}`, {
       method: meetingId ? "PUT" : "POST",
       headers: {

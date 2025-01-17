@@ -253,17 +253,16 @@ export default function CreateMeeting({
                           hideTimeZone
                           defaultValue={{
                             start: parseZonedDateTime(
-                              `${
-                                new Date().toISOString().split("T")[0]
-                              }T09:00[America/Toronto]`
+                              `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
                             ),
                             end: parseZonedDateTime(
-                              `${
-                                new Date().toISOString().split("T")[0]
-                              }T17:00[America/Toronto]`
+                              `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
                             ),
                           }}
-                          value={field.value}
+                          value={{
+                            start: field.value.start ? parseZonedDateTime(`${field.value.start}[America/Toronto]`) : undefined,
+                            end: field.value.end ? parseZonedDateTime(`${field.value.end}[America/Toronto]`) : undefined,
+                          }}
                           label="Meeting / Event"
                           visibleMonths={2}
                           classNames={{
