@@ -28,7 +28,6 @@ export const updateTeamDescriptionHandler: RequestHandler = async (
 
     res.status(200).json({
       message: "Team description updated successfully",
-      availableTime: team.availableTimes,
     });
   } catch (error) {
     console.error("Error updating team description:", error);

@@ -4,16 +4,41 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
+function isTimeInRange(time: string, startTime: string, endTime: string) {
+  // Helper function to parse time strings into Date objects
+  const parseTime = (timeString: string) => {
+    const [time, modifier] = timeString.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (modifier === "PM" && hours !== 12) {
+      hours += 12;
+    } else if (modifier === "AM" && hours === 12) {
+      hours = 0;
+    }
+
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  };
+
+  const timeDate = parseTime(time);
+  const startDate = parseTime(startTime);
+  const endDate = parseTime(endTime);
+
+  // Check if the time is in range
+  return timeDate >= startDate && timeDate <= endDate;
+}
+
 // Called when a user makes an appointment. Adds the appointment to the team appointments list.
 export const updateAppointmentsHandler: RequestHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   const { teamId } = req.params;
-  const { appointments } = req.body;
+  const { meetingTeamId, day, time, attend } = req.body;
 
   try {
-    if (!appointments || !Array.isArray(appointments)) {
+    if (!meetingTeamId || !attend || !day || !time) {
       res.status(400).json({ message: "Invalid or missing appointments data" });
       return;
     }
@@ -24,7 +49,20 @@ export const updateAppointmentsHandler: RequestHandler = async (
       return;
     }
 
-    team.appointments = [...team.appointments, ...appointments];
+    const findMeetingTeam: any = team.meetingTeam.find(
+      (meeting) => meeting._id.toString() === meetingTeamId
+    );
+
+    const updateMeeting = findMeetingTeam.meeting.map((m: any) => {
+      if (m.date === day && isTimeInRange(time, m.time.start, m.time.end)) {
+        if (m.attendees) {
+          m.attendees.push(attend);
+        } else {
+          m.attendees = [attend];
+        }
+      }
+    });
+
     await team.save();
 
     // Set up email components to send a confirmation email to the user about their appointment.
@@ -38,15 +76,15 @@ export const updateAppointmentsHandler: RequestHandler = async (
 
     const mailOptions = {
       from: `Booky <${process.env.EMAIL}>`,
-      to: appointments[0].email,
+      to: attend.email,
       subject: "Booky Confirmation",
-      text: `Booky Confirmation Email\n\n Cancel Link: http://10.140.17.108:3000/${team._id}/${appointments[0].token} \n\n Have a great day :) \n Booky`,
+      text: `Booky Confirmation Email\n\n Cancel Link: http://10.140.17.108:3000/${team._id}/${attend.token} \n\n Have a great day :) \n Booky`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Email sending failed:", error);
-      } 
+      }
     });
 
     res.status(200).json({ message: "Appointments updated successfully" });

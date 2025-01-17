@@ -139,7 +139,7 @@ export default function CreateTeamForm() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: values.teamName,
+        teamName: values.teamName,
         teamDescription: values.teamDescription,
         adminEmail: userEmail,
         adminName: userName,

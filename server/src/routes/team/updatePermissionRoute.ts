@@ -32,10 +32,10 @@ export const updatePermissionHandler: RequestHandler = async (
 
     await team.save();
 
-    res.status(200).json({
-      message: "Permission updated successfully",
-      availableTime: team.availableTimes,
-    });
+    // res.status(200).json({
+    //   message: "Permission updated successfully",
+    //   availableTime: team.availableTimes,
+    // });
   } catch (error) {
     console.error("Error updating permission:", error);
     res.status(500).json({ message: "Server error" });

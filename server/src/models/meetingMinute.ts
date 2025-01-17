@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-interface IMeetingMinute extends Document {
+export interface IMeetingMinute extends Document {
   _id: string;
   data: Object;
   createdAt: Date;
