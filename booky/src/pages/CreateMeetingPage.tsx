@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useHook } from "@/hooks";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 
@@ -58,7 +58,36 @@ const formatDateTime = (dateObject: any): string => {
   return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
 };
 
+function formatZonedDateTime(date, time) {
+  //const [month, day, year] = date.split('-').map((value) => value.padStart(2, '0'));
+
+  const [hour, minute] = time.split(':').map((value) => value.padStart(2, '0'));
+
+  return `${date}T${hour}:${minute}[America/Toronto]`;
+}
+
 export default function CreateMeetingPage() {
+  const { team: teamId, meeting: meetingId } = useParams();
+  const { server, userEmail } = useHook();
+  const [meetingData, setMeetingData] = useState<null | any>(null);
+  const [currentTab, setCurrentTab] = useState<string>("recurring");
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const fetchMeetingData = async () => {
+      if (!meetingId) return;
+      try {
+        const response = await fetch(`${server}/api/teams/${teamId}/meetings/${meetingId}`);
+        const data = await response.json();
+        setMeetingData(data);
+      } catch (error) {
+        console.error("Failed to fetch meeting data:", error);
+      }
+    }
+
+    fetchMeetingData();
+  }, [meetingId, teamId]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,31 +96,64 @@ export default function CreateMeetingPage() {
       meetingLink: "",
       recurringMeetingSchedule: days.map((day) => ({
         day,
-        enabled: day !== "Sunday" && day !== "Saturday",
+        enabled: false,
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
       })),      
       oneTimeMeetingSchedule: {
         start: formatDateTime(
-          parseZonedDateTime(
-            `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
-          )
+          parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`)
         ),
         end: formatDateTime(
-          parseZonedDateTime(
-            `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
-          )
+          parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`)
         ),
       },
       duration: "",
     },
   });
   
-  const { server, userEmail } = useHook();
-  const { team: teamId } = useParams();
-  const [currentTab, setCurrentTab] = useState<string>("recurring");
+  useEffect(() => {
+    if (meetingData) {
+      setCurrentTab(meetingData.schedule === "recurring" ? "recurring" : "one-time");
 
-  const navigate = useNavigate();
-  const meetingTypeSelection = form.watch("meetingType");
+      if (meetingData.schedule === "recurring") {
+        const formattedData = {
+          meetingName: meetingData.name || "",
+          meetingDescription: meetingData.description || "",
+          meetingLink: meetingData.zoomLink || "",
+          recurringMeetingSchedule: meetingData.weekSchedule || [],
+          meetingType: meetingData.type || "oneOnOne",
+          duration: meetingData.duration || "",
+        };
+  
+        form.reset(formattedData);
+      }
+      else {
+        const formattedData = {
+          meetingName: meetingData.name || "",
+          meetingDescription: meetingData.description || "",
+          meetingLink: meetingData.zoomLink || "",
+          oneTimeMeetingSchedule: {
+            start: parseZonedDateTime(
+              formatZonedDateTime(
+                meetingData.date,
+                meetingData.time.start
+              )
+            ),
+            end: parseZonedDateTime(
+              formatZonedDateTime(
+                meetingData.date,
+                meetingData.time.end
+              )
+            ),
+          },
+          meetingType: meetingData.type || "oneOnOne",
+          duration: meetingData.duration || "",
+        };
+  
+        form.reset(formattedData);
+      }
+    }
+  }, [meetingData, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (values.meetingType === "oneOnOne" && values.duration == "") {
@@ -99,31 +161,36 @@ export default function CreateMeetingPage() {
       return;
     }
 
-    const response = await fetch(`${server}/api/teams/${teamId}/meetings`, {
-      method: "POST",
+    const requestBody: Record<string, any> = {
+      meetingName: values.meetingName,
+      meetingDescription: values.meetingDescription,
+      recurringMeetingSchedule: values.recurringMeetingSchedule,
+      oneTimeMeetingSchedule: values.oneTimeMeetingSchedule,
+      meetingType: values.meetingType,
+      duration: values.duration,
+      meetingLink: values.meetingLink,
+      currentTab: currentTab,
+    };
+    
+    if (!meetingId) {
+      requestBody.hostEmail = userEmail;
+    }
+
+    const response = await fetch(`${server}/api/teams/${teamId}/meetings${meetingId ? `/${meetingId}` : ""}`, {
+      method: meetingId ? "PUT" : "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        hostEmail: userEmail,
-        meetingName: values.meetingName,
-        meetingDescription: values.meetingDescription,
-        recurringMeetingSchedule: values.recurringMeetingSchedule,
-        oneTimeMeetingSchedule: values.oneTimeMeetingSchedule,
-        meetingType: values.meetingType,
-        duration: values.duration,
-        meetingLink: values.meetingLink,
-        currentTab: currentTab,
-      })
+      body: JSON.stringify(requestBody)
     });
 
     const data = await response.json();
     
     if (!response.ok) {
-      console.error("Failed to create meeting", data);
+      console.error("Failed to save meeting", data);
       return -1;
     }
-    toast("Successfully Created Meeting");
+    toast(meetingId ? "Successfully Updated Meeting" : "Successfully Created Meeting");
     navigate(`/dashboard/${teamId}`);
     return 0;
   }
@@ -137,25 +204,21 @@ export default function CreateMeetingPage() {
           <div className="flex w-full">
             <div className="grid w-full">
               <Label className="text-2xl font-bold text-black">
-                New Meeting
+                {meetingId ? "Edit Meeting" : "New Meeting"}
               </Label>{" "}
               <Label className="text-xs text-gray-400">Teams Settings </Label>
             </div>
           </div>
           <div className="mt-4">
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <CreateMeeting
                   form={form}
-                  meetingTypeSelection={meetingTypeSelection}
                   currentTab={currentTab}
                   setCurrentTab={setCurrentTab}
                 />
                 <div className="flex w-full justify-end">
-                  <Button type="submit">Submit</Button>
+                  <Button type="submit">{meetingId ? "Update Meeting" : "Submit"}</Button>
                 </div>
               </form>
             </Form>

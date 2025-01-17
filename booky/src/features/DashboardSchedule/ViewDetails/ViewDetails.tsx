@@ -257,7 +257,13 @@ export default function ViewDetails({
                             <div className="my-auto">
                               {(adminEmail === userEmail ||
                                 teamCoAdmin.includes(userEmail)) && (
-                                <Button variant="ghost" className="w-5 h-5">
+                                <Button 
+                                  variant="ghost" 
+                                  className="w-5 h-5" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/dashboard/${teamId}/edit-meeting/${meeting._id}`);
+                                  }}>
                                   <TbEdit size={10} />
                                 </Button>
                               )}

@@ -22,9 +22,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 
-export default function CreateMeating({
+export default function CreateMeeting({
   form,
-  meetingTypeSelection,
   currentTab,
   setCurrentTab,
 }) {
@@ -90,7 +89,7 @@ export default function CreateMeating({
             </div>
           </div>
           <div className="grid grid-cols-2">
-            <Tabs defaultValue={currentTab}>
+            <Tabs defaultValue={currentTab} value={currentTab}>
               <TabsList>
                 <TabsTrigger
                   value="recurring"
@@ -264,6 +263,7 @@ export default function CreateMeating({
                               }T17:00[America/Toronto]`
                             ),
                           }}
+                          value={field.value}
                           label="Meeting / Event"
                           visibleMonths={2}
                           classNames={{
@@ -310,6 +310,7 @@ export default function CreateMeating({
                     </div>
                     <FormControl>
                       <RadioGroup
+                        value={field.value}
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         className="flex h-full"
@@ -336,7 +337,7 @@ export default function CreateMeating({
               />
             </div>
             <div>
-              {meetingTypeSelection === "oneOnOne" ? (
+              {form.watch("meetingType") === "oneOnOne" ? (
                 <FormField
                   control={form.control}
                   name="duration"
