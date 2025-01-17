@@ -30,30 +30,30 @@ const formSchema = z.object({
 });
 
 interface ScheduleFormProps {
+  selectedMeeting: any;
   selectedDate: string | null;
   selectedTime: string | null;
   teamId: string;
-  handleNewAppointment: (newAppointment: {
-    day: string;
-    time: string;
-    email: string;
-  }) => void;
+  timeSlots: any;
+  setTimeSlots: any;
 }
 
 export default function ScheduleForm({
+  selectedMeeting,
   selectedDate: selectedDay,
   selectedTime,
   teamId,
-  handleNewAppointment,
+  timeSlots,
+  setTimeSlots,
 }: ScheduleFormProps) {
   const { server, userName, userEmail, loggedInUser } = useHook();
 
   useEffect(() => {
-      if (loggedInUser) {
-        form.setValue("email", userEmail);
-        form.setValue("name", userName);
-      }
-    }, []);
+    if (loggedInUser) {
+      form.setValue("email", userEmail);
+      form.setValue("name", userName);
+    }
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,20 +65,14 @@ export default function ScheduleForm({
       return;
     }
 
-    const newAppointmentToken = {
-      day: selectedDay,
+    const newAttend = {
       time: selectedTime,
-      name: values.name,
-      email: values.email,
+
+      participantName: values.name,
+      participantEmail: values.email,
+
       token: generateRandomToken(),
       tokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    };
-
-    const newAppointment = {
-      day: selectedDay,
-      time: selectedTime,
-      name: values.name,
-      email: values.email,
     };
 
     try {
@@ -89,13 +83,28 @@ export default function ScheduleForm({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ appointments: [newAppointmentToken] }),
+          body: JSON.stringify({
+            meetingTeamId: selectedMeeting._id,
+            day: selectedDay,
+            time: selectedTime,
+            attend: newAttend,
+          }),
         }
       );
 
       if (response.ok) {
+        const updateTimeSlots = timeSlots.map((timeSlot) => {
+          if (timeSlot.day === selectedDay) {
+            return {
+              ...timeSlot,
+              slots: timeSlot.slots.filter((time) => time !== selectedTime),
+            };
+          }
+          return timeSlot;
+        });
+
+        setTimeSlots(updateTimeSlots);
         toast.success("Meeting submitted successfully!");
-        handleNewAppointment(newAppointment);
       } else {
         throw new Error("Failed to submit email");
       }

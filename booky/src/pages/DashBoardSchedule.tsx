@@ -27,12 +27,12 @@ export default function DashBoardSchedule() {
   const [teamDescription, setTeamDescription] = useState<string>("");
   const [teamCoAdmin, setTeamCoAdmin] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
-  const [availableTimes, setAvailableTimes] = useState<any[]>([]);
+  const [meetingTeam, setMeetingTeam] = useState<any[]>([]);
   const [duration, setDuration] = useState<number>(5);
   const [existingAppointments, setExistingAppointments] = useState<any[]>([]);
   const [cancelledDays, setCancelledDays] = useState<ICancelledDays[]>([]);
   const [selectedHost, setSelectedHost] = useState<string | null>(null);
-  const [enabledDays, setEnabledDays] = useState<Set<number>>(new Set());
+  const [createdAt, setCreatedAt] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTeamDetails();
@@ -44,17 +44,16 @@ export default function DashBoardSchedule() {
       const data = await response.json();
 
       if (response.ok) {
-        setTeamName(data.name);
+        setTeamName(data.teamName);
         setAdminName(data.adminName);
         setTeamDescription(data.teamDescription);
         setAdminEmail(data.adminEmail);
         setTeamCoAdmin(data.coadmins);
         setTeamMembers(data.members);
-        setAvailableTimes(data.availableTimes);
-        setExistingAppointments(data.appointments);
-        setCancelledDays(data.cancelledMeetings);
+        setMeetingTeam(data.meetingTeam);
         setSelectedHost(data.adminEmail);
         updateEnabledDays(data.adminEmail);
+        setCreatedAt(data.createdAt);
       } else {
         setTeamName("Not Found");
         setAdminName("Not Found");
@@ -76,14 +75,14 @@ export default function DashBoardSchedule() {
     };
 
     // Recalculate enabledDays based on the admin's availability
-    const enabled = availableTimes[email]?.reduce((acc: number[], day: any) => {
-      if (day.enabled && dayMap[day.day] !== undefined) {
-        acc.push(dayMap[day.day]);
-      }
-      return acc;
-    }, []);
+    // const enabled = availableTimes[email]?.reduce((acc: number[], day: any) => {
+    //   if (day.enabled && dayMap[day.day] !== undefined) {
+    //     acc.push(dayMap[day.day]);
+    //   }
+    //   return acc;
+    // }, []);
 
-    setEnabledDays(new Set(enabled)); // Update the enabledDays state
+    // setEnabledDays(new Set(enabled)); // Update the enabledDays state
   };
 
   return (
@@ -111,32 +110,21 @@ export default function DashBoardSchedule() {
                   <JoinAMeeting
                     teamId={teamId}
                     teamName={teamName}
-                    setTeamName={setTeamName}
                     teamDescription={teamDescription}
-                    adminName={adminName}
-                    setAdminName={setAdminName}
                     adminEmail={adminEmail}
-                    setAdminEmail={setAdminEmail}
                     teamCoAdmin={teamCoAdmin}
-                    setTeamCoAdmin={setTeamCoAdmin}
                     teamMembers={teamMembers}
                     setTeamMembers={setTeamMembers}
-                    availableTimes={availableTimes}
-                    setAvailableTimes={setAvailableTimes}
+                    meetingTeam={meetingTeam}
                     duration={duration}
-                    setDuration={setDuration}
                     existingAppointments={existingAppointments}
-                    setExistingAppointments={setExistingAppointments}
                     cancelledDays={cancelledDays}
-                    setCancelledDays={setCancelledDays}
                     selectedHost={selectedHost}
                     setSelectedHost={setSelectedHost}
-                    enabledDays={enabledDays}
-                    setEnabledDays={setEnabledDays}
                   />
                 </TabsContent>
                 <TabsContent value="view">
-                  <ViewDetails
+                  {/* <ViewDetails
                     teamId={teamId}
                     teamName={teamName}
                     setTeamName={setTeamName}
@@ -149,8 +137,8 @@ export default function DashBoardSchedule() {
                     setTeamCoAdmin={setTeamCoAdmin}
                     teamMembers={teamMembers}
                     setTeamMembers={setTeamMembers}
-                    availableTimes={availableTimes}
-                    setAvailableTimes={setAvailableTimes}
+                    meetingTeam={meetingTeam}
+                    setMeetingTeam={setMeetingTeam}
                     duration={duration}
                     setDuration={setDuration}
                     existingAppointments={existingAppointments}
@@ -161,7 +149,8 @@ export default function DashBoardSchedule() {
                     setSelectedHost={setSelectedHost}
                     enabledDays={enabledDays}
                     setEnabledDays={setEnabledDays}
-                  />
+                    createdAt={createdAt}
+                  /> */}
                 </TabsContent>
               </Tabs>
             </div>

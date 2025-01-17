@@ -17,16 +17,21 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
-import ScheduleForm from "@/features/CreateAppointment/ScheduleForm";
 import { IoPersonCircle } from "react-icons/io5";
 import { Trash } from "lucide-react";
 import { TbEdit, TbCalendarCancel } from "react-icons/tb";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useNavigate, useParams } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useHook } from "@/hooks";
 import { IoIosAdd } from "react-icons/io";
+import ScheduleForm from "../CreateAppointment/ScheduleForm";
+
+interface TimeSlot {
+  day: string;
+  slots: string[]; // You can replace `any` with a more specific type for slots if available
+}
 
 interface ITimeRange {
   start: string;
@@ -41,110 +46,103 @@ interface ICancelledDays {
 interface IJoinAMeetingProps {
   teamId: string;
   teamName: string;
-  setTeamName: React.Dispatch<React.SetStateAction<string>>;
   teamDescription: string;
-  adminName: string;
-  setAdminName: React.Dispatch<React.SetStateAction<string>>;
   adminEmail: string;
-  setAdminEmail: React.Dispatch<React.SetStateAction<string>>;
   teamCoAdmin: string[];
-  setTeamCoAdmin: React.Dispatch<React.SetStateAction<string[]>>;
   teamMembers: string[];
   setTeamMembers: React.Dispatch<React.SetStateAction<string[]>>;
-  availableTimes: any[];
-  setAvailableTimes: React.Dispatch<React.SetStateAction<any[]>>;
+  meetingTeam: any[];
   duration: number;
-  setDuration: React.Dispatch<React.SetStateAction<number>>;
   existingAppointments: any[];
-  setExistingAppointments: React.Dispatch<React.SetStateAction<any[]>>;
   cancelledDays: ICancelledDays[];
-  setCancelledDays: React.Dispatch<React.SetStateAction<ICancelledDays[]>>;
   selectedHost: string | null;
   setSelectedHost: React.Dispatch<React.SetStateAction<string | null>>;
-  enabledDays: Set<number>;
-  setEnabledDays: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
 export default function JoinAMeeting({
   teamId,
   teamName,
-  setTeamName,
   teamDescription,
-  adminName,
-  setAdminName,
   adminEmail,
-  setAdminEmail,
   teamCoAdmin,
-  setTeamCoAdmin,
   teamMembers,
   setTeamMembers,
-  availableTimes,
-  setAvailableTimes,
+  meetingTeam,
   duration,
-  setDuration,
-  existingAppointments,
-  setExistingAppointments,
-  cancelledDays,
-  setCancelledDays,
   selectedHost,
   setSelectedHost,
-  enabledDays,
-  setEnabledDays,
 }: IJoinAMeetingProps) {
   const { server, userEmail, loggedInUser } = useHook();
+
   const navigate = useNavigate();
 
-  const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [userSelectedDate, setUserSelectedDate] = useState<string>(""); //Kind of redundent
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
-  const [selectedMeeting, setSelectedMeeting] = useState<string | null>(null);
+  const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [enabledDays, setEnabledDays] = useState<Array<Date>>([]);
 
   useEffect(() => {
-    if (selectedHost && availableTimes) {
-      updateEnabledDays(selectedHost);
+    setTimeSlots([]);
+    
+    if (selectedHost && selectedMeeting) {
+      updateEnabledDaysAndDisabledDates(selectedHost);
     }
-  }, [selectedHost, availableTimes]);
+  }, [selectedHost, selectedMeeting]);
 
   // Generate time slots when the selected date changes.
   useEffect(() => {
-    if (!selectedDate || availableTimes.length === 0) return;
-    const month = selectedDate.getMonth() + 1;
-    const date = selectedDate.getDate();
+    if (!selectedDate) return;
+    const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0"); // Add leading zero if needed
+    const date = selectedDate.getDate().toString().padStart(2, "0"); // Add leading zero if needed
     const year = selectedDate.getFullYear();
 
-    setUserSelectedDate(month + "-" + date + "-" + year);
-
+    setUserSelectedDate(`${year}-${month}-${date}`);
     const dayOfWeek = selectedDate.toLocaleDateString("en-US", {
       weekday: "long",
     });
 
-    const dayAvailability = availableTimes[selectedHost].find(
+    const dayAvailability = selectedMeeting.weekSchedule.find(
       (day) => day.day === dayOfWeek
     );
-
     if (!dayAvailability || !dayAvailability.enabled) {
-      setTimeSlots([]);
+      const updateTimeSlots = [{ day: `${year}-${month}-${date}`, slots: [] }];
+      setTimeSlots([...timeSlots, ...updateTimeSlots]);
       return;
     }
 
-    let userOptionSlots = [];
+    let newTimeSlots = [...timeSlots];
+
     dayAvailability.times.forEach((time) => {
       const generatedTimeSlots = generateTimeSlots(
-        month + "-" + date + "-" + year,
+        year + "-" + month + "-" + date,
         time.start,
         time.end,
         duration
       );
-      userOptionSlots = userOptionSlots.concat(generatedTimeSlots);
-    });
-    setTimeSlots(userOptionSlots);
-  }, [selectedDate, availableTimes, duration, existingAppointments]);
 
-  const updateEnabledDays = (email: string) => {
-    const dayMap: { [key: string]: number } = {
+      const existingDate = timeSlots.find(
+        (slot) => slot.day === `${year}-${month}-${date}`
+      );
+
+      if (!existingDate) {
+        // If the date doesn't exist, add a new object for this date with the generated slots
+        newTimeSlots.push({
+          day: `${year}-${month}-${date}`,
+          slots: generatedTimeSlots,
+        });
+      }
+    });
+
+    setTimeSlots(newTimeSlots);
+  }, [selectedDate]);
+
+  function updateEnabledDaysAndDisabledDates(email: string) {
+    const dayMap = {
       Sunday: 0,
       Monday: 1,
       Tuesday: 2,
@@ -154,84 +152,75 @@ export default function JoinAMeeting({
       Saturday: 6,
     };
 
-    // Recalculate enabledDays based on the admin's availability
-    const enabled = availableTimes[email]?.reduce((acc: number[], day: any) => {
-      if (day.enabled && dayMap[day.day] !== undefined) {
-        acc.push(dayMap[day.day]);
-      }
-      return acc;
-    }, []);
-
-    setEnabledDays(new Set(enabled)); // Update the enabledDays state
-  };
-
-  const disableUnavailableDates = useCallback(
-    (date: Date) => {
+    const getDatesForDays = (enabledDays) => {
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const availableDates = [];
 
-      // Calculate the maximum allowed date (7 days from today)
-      const maxDate = new Date(today);
-      maxDate.setDate(today.getDate() + 7);
-
-      const dayIndex = date.getDay();
-
-      // Check if the date is beyond the range or not in enabledDays
-      if (date < today || date > maxDate || !enabledDays.has(dayIndex)) {
-        return true;
-      }
-
-      // If the date is today, check if there are any remaining slots
-      if (date.toDateString() === today.toDateString()) {
-        const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
-        const dayAvailability = availableTimes[adminEmail].find(
-          (day) => day.day === dayOfWeek
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(today);
+        currentDate.setDate(today.getDate() + i); // Add `i` days to today's date
+        const currentDayName = Object.keys(dayMap).find(
+          (day) => dayMap[day] === currentDate.getDay()
         );
 
-        if (dayAvailability?.enabled) {
-          const currentTime = new Date();
-          const currentTimeInMinutes =
-            currentTime.getHours() * 60 + currentTime.getMinutes();
-
-          // Check if any slots are still available today
-          return !dayAvailability.times.some((timeSlot: any) => {
-            const slotStartInMinutes = convertTimeToMinutes(timeSlot.start);
-            return slotStartInMinutes > currentTimeInMinutes;
-          });
+        if (enabledDays.includes(currentDayName)) {
+          availableDates.push(currentDate); // Add only enabled dates
         }
-        return true; // If no availability for today
       }
 
-      return false; // Allow selection otherwise
-    },
-    [selectedHost, availableTimes, enabledDays]
-  );
+      return { availableDates };
+    };
 
-  // Helper function: Convert time (e.g., "10:00 AM") to total minutes since midnight
-  const convertTimeToMinutes = (time: string) => {
-    const [hours, minutes, period] = time.match(/(\d+):(\d+) (\w+)/)!.slice(1);
-    let hours24 = parseInt(hours, 10);
-    if (period === "PM" && hours24 !== 12) hours24 += 12;
-    if (period === "AM" && hours24 === 12) hours24 = 0;
-    return hours24 * 60 + parseInt(minutes, 10);
-  };
+    // Recalculate enabledDays based on the admin's availability
+    const hostMeetingTeam = meetingTeam.filter(
+      (meeting) => meeting.hostName !== selectedHost
+    );
+
+    let enabled = [];
+
+    hostMeetingTeam.forEach((availableMeeting) => {
+      availableMeeting.weekSchedule.forEach((schedule) => {
+        if (schedule.enabled) {
+          enabled.push(schedule.day);
+        }
+      });
+    });
+
+    // Calculate available dates and all dates
+    const { availableDates } = getDatesForDays(enabled);
+
+    // Update the state
+    setEnabledDays(availableDates); // Update enabled days
+  }
 
   // Utility function to generate time slots
-  const generateTimeSlots = (
+  function generateTimeSlots(
     date: string,
     start: string,
     end: string,
     interval: number
-  ) => {
+  ) {
     const slots: string[] = [];
     const startTime = new Date(`1970-01-01T${convertTo24Hour(start)}`);
     const endTime = new Date(`1970-01-01T${convertTo24Hour(end)}`);
 
-    const bookedTimes = new Set(
-      existingAppointments
-        .filter((appointment) => appointment.day === date)
-        .map((appointment) => appointment.time)
-    );
+    // Check for booked times of the meeting
+    let bookedTimes = [];
+
+    if (selectedMeeting.meeting.length !== 0) {
+      selectedMeeting.meeting.map((m) => {
+        if (m.date === date && m.time.start === start && m.time.end) {
+          bookedTimes = m.attendees;
+        }
+      });
+    }
+
+    // Check for cancelled date
+    selectedMeeting.cancelledMeetings.map((m) => {
+      if (m.date === date && m.time === start) {
+        return [];
+      }
+    });
 
     while (startTime < endTime) {
       const timeSlot = startTime.toLocaleTimeString([], {
@@ -240,70 +229,25 @@ export default function JoinAMeeting({
         hour12: true,
       });
 
-      const cancelDays = cancelledDays.filter((item) => item.day === date);
-      let checkCancelTimes = [];
-      cancelDays.forEach((item) => {
-        if (isTimeWithinRange(timeSlot, item.meeting.start, item.meeting.end)) {
-          checkCancelTimes = checkCancelTimes.concat(timeSlot);
-        }
-      });
-
-      // Only add the slot if it's not already booked or not cancelled
-      if (!bookedTimes.has(timeSlot) && !checkCancelTimes.includes(timeSlot)) {
-        slots.push(timeSlot);
-      }
+      slots.push(timeSlot);
 
       startTime.setMinutes(startTime.getMinutes() + interval);
     }
-    return slots;
-  };
 
-  function isTimeWithinRange(
-    time: string,
-    start: string,
-    end: string
-  ): boolean {
-    const toMilitaryTime = (timeStr: string): number => {
-      const [_, hours, minutes, period] = timeStr.match(
-        /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
-      )!;
-      let militaryHours = parseInt(hours);
-      if ((period === "PM" || period === "p.m.") && hours !== "12") {
-        militaryHours += 12;
-      }
-      return militaryHours * 60 + parseInt(minutes);
-    };
-
-    const timeInMinutes = toMilitaryTime(time);
-    const startInMinutes = toMilitaryTime(start);
-    const endInMinutes = toMilitaryTime(end);
-
-    return timeInMinutes >= startInMinutes && timeInMinutes <= endInMinutes;
+    const finalSlots = slots.filter((item) => {
+      return !bookedTimes.some((booked) => booked.time === item);
+    });
+    return finalSlots;
   }
 
   // Utility to convert 12-hour time to 24-hour time format
-  const convertTo24Hour = (time: string) => {
+  function convertTo24Hour(time: string) {
     const [hours, minutes, period] = time.match(/(\d+):(\d+) (\w+)/)!.slice(1);
     let hours24 = parseInt(hours, 10);
     if (period === "PM" && hours24 !== 12) hours24 += 12;
     if (period === "AM" && hours24 === 12) hours24 = 0;
     return `${hours24.toString().padStart(2, "0")}:${minutes}`;
-  };
-
-  const handleTimeSlotClick = (time: string) => {
-    setSelectedTimeSlot(time);
-  };
-
-  const handleNewAppointment = (newAppointment: {
-    day: string;
-    time: string;
-    email: string;
-  }) => {
-    setExistingAppointments((prevAppointments) => {
-      const updatedAppointments = [...prevAppointments, newAppointment];
-      return updatedAppointments;
-    });
-  };
+  }
 
   const isUserMember = teamMembers.includes(userEmail);
   const isUserAdmin = userEmail === adminEmail;
@@ -333,7 +277,8 @@ export default function JoinAMeeting({
 
   const handleDeleteMeeting = async (meetingId: string) => {
     try {
-      const response = await fetch(`${server}/api/teams/${teamId}/meetings/${meetingId}`,
+      const response = await fetch(
+        `${server}/api/teams/${teamId}/meetings/${meetingId}`,
         {
           method: "DELETE",
         }
@@ -484,37 +429,19 @@ export default function JoinAMeeting({
 
                   {selectedHost ? (
                     <>
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-3 w-full">
-                        {availableTimes
-                          .filter((meeting) => meeting.email === selectedHost)
-                          .map((meeting) => (
-                            <Card
-                              className="w-full border rounded-3xl shadow-md cursor-pointer"
-                              onClick={() => setSelectedMeeting(meeting._id)}
-                            >
-                              <CardHeader className="pt-4">
-                                <CardTitle className="flex flex-wrap justify-between">
-                                  <div className="flex flex-wrap my-auto gap-1">
-                                    <Label className="text-lg font-bold">
-                                      {meeting.meeting.name}
-                                    </Label>
-                                    <div className="my-auto">
-                                      {(adminEmail === userEmail ||
-                                        teamCoAdmin.includes(userEmail)) && (
-                                        <Button
-                                          variant="ghost"
-                                          className="w-5 h-5"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/dashboard/${teamId}/edit-meeting/${meeting._id}`);
-                                          }}
-                                        >
-                                          <TbEdit size={10} />
-                                        </Button>
-                                      )}
-                                    </div>
-                                  </div>
-
+                      {meetingTeam
+                        .filter((meeting) => meeting.hostEmail === selectedHost)
+                        .map((meeting) => (
+                          <Card
+                            className="w-1/2 border rounded-3xl shadow-md cursor-pointer"
+                            onClick={() => setSelectedMeeting(meeting)}
+                          >
+                            <CardHeader className="pt-4">
+                              <CardTitle className="flex justify-between">
+                                <div className="flex my-auto gap-1">
+                                  <Label className="text-lg font-bold">
+                                    {meeting.meetingName}
+                                  </Label>
                                   <div className="my-auto">
                                     {(adminEmail === userEmail ||
                                       teamCoAdmin.includes(userEmail)) && (
@@ -567,19 +494,85 @@ export default function JoinAMeeting({
                                       </>
                                     )}
                                   </div>
-                                </CardTitle>
-                                <CardDescription className="grid space-y-1">
-                                  <Label className="text-xs">
-                                    Meeting Type: {meeting.meeting.schedule}
-                                  </Label>
-                                  <Label className="text-xs">
-                                    Description: {teamDescription}
-                                  </Label>
-                                </CardDescription>
-                              </CardHeader>
-                            </Card>
-                          ))}
-                      </div>
+                                </div>
+
+                                <div className="my-auto">
+                                  {(adminEmail === userEmail ||
+                                    teamCoAdmin.includes(userEmail)) && (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        className="w-5 h-5"
+                                      >
+                                        <TbCalendarCancel size={10} />
+                                      </Button>
+                                      <Dialog
+                                        open={isDialogOpen}
+                                        onOpenChange={setIsDialogOpen}
+                                      >
+                                        <DialogTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            className="text-red-700 hover:text-red-700 w-5 h-5"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setIsDialogOpen(true);
+                                            }}
+                                          >
+                                            <Trash size={10} />
+                                          </Button>
+                                        </DialogTrigger>
+                                        <DialogContent
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <DialogHeader>
+                                            <DialogTitle>
+                                              Delete Meeting
+                                            </DialogTitle>
+                                            <DialogDescription>
+                                              Are you sure you want to delete
+                                              this meeting? This action cannot
+                                              be undone.
+                                            </DialogDescription>
+                                          </DialogHeader>
+                                          <DialogFooter>
+                                            <Button
+                                              variant="outline"
+                                              onClick={(e) => {
+                                                setIsDialogOpen(false);
+                                              }}
+                                            >
+                                              Cancel
+                                            </Button>
+                                            <Button
+                                              variant="destructive"
+                                              onClick={(e) => {
+                                                handleDeleteMeeting(
+                                                  meeting._id
+                                                );
+                                                setIsDialogOpen(false);
+                                              }}
+                                            >
+                                              Delete
+                                            </Button>
+                                          </DialogFooter>
+                                        </DialogContent>
+                                      </Dialog>
+                                    </>
+                                  )}
+                                </div>
+                              </CardTitle>
+                              <CardDescription className="grid space-y-1">
+                                <Label className="text-xs">
+                                  Meeting Type: {meeting.schedule}
+                                </Label>
+                                <Label className="text-xs">
+                                  Description: {teamDescription}
+                                </Label>
+                              </CardDescription>
+                            </CardHeader>
+                          </Card>
+                        ))}
                     </>
                   ) : (
                     <></>
@@ -590,7 +583,12 @@ export default function JoinAMeeting({
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
-                  disabled={disableUnavailableDates}
+                  disabled={(date) =>
+                    !enabledDays.some(
+                      (enabledDate) =>
+                        enabledDate.toDateString() === date.toDateString()
+                    )
+                  }
                   showOutsideDays={false}
                   className="flex-1 max-h-[461px] overflow-y-auto mt-3 p-0"
                   classNames={{
@@ -623,31 +621,37 @@ export default function JoinAMeeting({
               <CardContent className="max-md:max-h-[27vh] h-1/2 w-full flex-1 py-2 border-b-[1px] border-gray-200 overflow-auto">
                 <div className="grid grid-cols-2 gap-2">
                   {timeSlots.length > 0 ? (
-                    timeSlots.map((time) => (
-                      <Button
-                        key={time}
-                        variant="outline"
-                        className={cn(
-                          "p-4 text-center rounded-lg",
-                          selectedTimeSlot === time
-                            ? "bg-black text-white"
-                            : "bg-white"
-                        )}
-                        onClick={() => handleTimeSlotClick(time)}
-                      >
-                        {time}
-                      </Button>
-                    ))
+                    timeSlots
+                      .filter((timeSlot) => timeSlot.day === userSelectedDate) // Filter slots for the selected date
+                      .map((timeSlot) =>
+                        timeSlot.slots.map((time) => (
+                          <Button
+                            key={`${timeSlot.day}-${time}`} // Combine day and time for a unique key
+                            variant="outline"
+                            className={cn(
+                              "p-4 text-center rounded-lg",
+                              selectedTimeSlot === time
+                                ? "bg-black text-white"
+                                : "bg-white"
+                            )}
+                            onClick={() => setSelectedTimeSlot(time)} // Set the selected time slot
+                          >
+                            {time}
+                          </Button>
+                        ))
+                      )
                   ) : (
                     <p className="col-span-2 text-center">No available slots</p>
                   )}
                 </div>
               </CardContent>
               <ScheduleForm
+                selectedMeeting={selectedMeeting}
                 selectedDate={userSelectedDate}
                 selectedTime={selectedTimeSlot}
                 teamId={teamId!}
-                handleNewAppointment={handleNewAppointment}
+                timeSlots={timeSlots}
+                setTimeSlots={setTimeSlots}
               />
             </div>
           </Card>

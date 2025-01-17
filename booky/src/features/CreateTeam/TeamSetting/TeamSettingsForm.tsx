@@ -47,11 +47,10 @@ export default function TeamSettings() {
           role,
         }));
         setTeamAdmin(data.adminEmail);
-        setTeamName(data.name);
+        setTeamName(data.teamName);
         setTeamDescription(data.teamDescription);
         setTeamMembers(teamMembersList);
       } else {
-        console.error("Failed to fetch team details");
         toast("Failed to fetch team details");
         navigate("/dashboard/teams");
       }

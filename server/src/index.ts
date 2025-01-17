@@ -19,11 +19,20 @@ import deleteMeetingRoute from "./routes/team/deleteMeetingRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 import updatePermissionRoute from "./routes/team/updatePermissionRoute";
 import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
+import { Server } from "socket.io";
+import MeetingMinute from "./models/meetingMinute";
+import { startScheduler } from "./meetingCreateScheduler";
 
 dotenv.config();
 
 const app = express();
 const PORT = 5001;
+const io = new Server(5002, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
 // Middleware
 app.use(
@@ -56,6 +65,14 @@ app.use("/api/appointment/get-appointment", getAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
 app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
 
+async function findOrCreateMeetingMinute(id: any) {
+  if (id === null) return;
+
+  const meetingMinute = await MeetingMinute.findById(id);
+  if (meetingMinute) return meetingMinute;
+  return await MeetingMinute.create({ _id: id, data: "" });
+}
+
 // MongoDB connection
 mongoose
   .connect(process.env.MONGODB_URI!, {
@@ -69,6 +86,29 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+startScheduler();
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+io.on("connection", (socket) => {
+  console.log("Socket Connected");
+  socket.on("get-document", async (meeting) => {
+    const meetingMinute = await findOrCreateMeetingMinute(meeting);
+    if (meetingMinute === undefined) {
+      console.log("meeting minute is undefined");
+      return;
+    }
+    socket.join(meeting);
+    socket.emit("load-document", meetingMinute.data);
+
+    socket.on("send-changes", (delta) => {
+      socket.broadcast.to(meeting).emit("receive-changes", delta);
+    });
+
+    socket.on("save-document", async (data) => {
+      await MeetingMinute.findByIdAndUpdate(meeting, { data });
+    });
+  });
 });

@@ -1,5 +1,5 @@
 import express, { Request, Response, RequestHandler } from "express";
-import Team, {IAvailableTime} from "../../models/team";
+import Team from "../../models/team";
 
 const router = express.Router();
 
@@ -23,9 +23,9 @@ export const deleteMeetingHandler: RequestHandler = async (
       return;
     }
 
-    const availableTimesWithId = team.availableTimes as (IAvailableTime & { _id: string })[];
-    team.availableTimes = availableTimesWithId.filter((meeting) => meeting._id.toString() !== meetingId);
-    
+    // const availableTimesWithId = team.availableTimes as (IAvailableTime & { _id: string })[];
+    // team.availableTimes = availableTimesWithId.filter((meeting) => meeting._id.toString() !== meetingId);
+
     await team.save();
 
     res.status(200).json({

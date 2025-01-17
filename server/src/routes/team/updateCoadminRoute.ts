@@ -27,7 +27,6 @@ export const updateCoadminsHandler: RequestHandler = async (
 
     res.status(200).json({
       message: "Coadmins updated successfully",
-      availableTime: team.availableTimes,
     });
   } catch (error) {
     console.error("Error updating coadmins:", error);
