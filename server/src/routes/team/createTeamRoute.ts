@@ -10,7 +10,7 @@ export const createTeamHandler: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const {
-    name,
+    teamName,
     teamDescription,
     adminEmail,
     adminName,
@@ -27,7 +27,7 @@ export const createTeamHandler: RequestHandler = async (
 
   try {
     if (
-      !name ||
+      !teamName ||
       !adminEmail ||
       !adminName ||
       !currentTab ||
@@ -42,22 +42,25 @@ export const createTeamHandler: RequestHandler = async (
       return;
     }
 
-    let availableTimes = [];
+    let meetingTeam = [];
 
     if (currentTab === "recurring") {
-      availableTimes = [
+      meetingTeam = [
         {
-          email: adminEmail,
-          meeting: {
-            schedule: "recurring",
-            name: meetingName,
-            description: meetingDescription,
-            weekSchedule: recurringMeeting,
-            type: meetingType,
-            duration: meetingType === "oneOnOne" ? duration : null,
-            attendees: meetingType === "group" ? 0 : undefined,
-            zoomLink: meetingLink === "" ? "" : meetingLink,
-          },
+          schedule: "recurring",
+          hostName: adminName,
+          hostEmail: adminEmail,
+
+          meetingName: meetingName,
+          meetingDescription: meetingDescription,
+          meeting: [],
+
+          weekSchedule: recurringMeeting,
+
+          type: meetingType,
+          duration: meetingType === "oneOnOne" ? duration : null,
+          zoomLink: meetingLink,
+          cancelledMeetings: [],
         },
       ];
     } else {
@@ -69,31 +72,32 @@ export const createTeamHandler: RequestHandler = async (
         oneTimeMeetingStartInfo[0].split("-")[2] +
         "-" +
         oneTimeMeetingStartInfo[0].split("-")[0];
-      availableTimes = [
+      meetingTeam = [
         {
-          email: adminEmail,
-          meeting: {
-            schedule: "one-time",
-            name: meetingName,
-            description: meetingDescription,
-            // fix this after
-            date: date,
-            time: {
-              start: oneTimeMeetingStartInfo[1],
-              end: oneTimeMeetingEndInfo[1],
-            },
-            //
-            type: meetingType,
-            duration: meetingType === "oneOnOne" ? duration : null,
-            attendees: meetingType === "group" ? 0 : undefined,
-            zoomLink: meetingLink === "" ? "" : meetingLink,
+          schedule: "one-time",
+          hostName: adminName,
+          hostEmail: adminEmail,
+
+          meetingName: meetingName,
+          meetingDescription: meetingDescription,
+          meeting: [],
+
+          date: date,
+          time: {
+            start: oneTimeMeetingStartInfo[1],
+            end: oneTimeMeetingEndInfo[1],
           },
+
+          type: meetingType,
+          duration: meetingType === "oneOnOne" ? duration : null,
+          zoomLink: meetingLink,
+          cancelledMeetings: [],
         },
       ];
     }
 
     // Generate unique teamId
-    const _id = `team-${name.replaceAll(
+    const _id = `team-${teamName.replaceAll(
       /\s/g,
       "-"
     )}-${ShortUniqueId().generate()}`;
@@ -102,12 +106,13 @@ export const createTeamHandler: RequestHandler = async (
     // Unitialized attributes are set to their default values.
     const newTeam = new Team({
       _id,
-      name,
+      teamName,
       teamDescription,
       adminEmail,
       adminName,
       coadmins,
-      availableTimes: availableTimes, // Save as a Map
+      members: [],
+      meetingTeam: meetingTeam,
       duration,
     });
     await newTeam.save();

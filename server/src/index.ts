@@ -19,6 +19,7 @@ import updatePermissionRoute from "./routes/team/updatePermissionRoute";
 import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
 import { Server } from "socket.io";
 import MeetingMinute from "./models/meetingMinute";
+import { startScheduler } from "./meetingCreateScheduler";
 
 dotenv.config();
 
@@ -80,6 +81,8 @@ mongoose
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
+
+startScheduler();
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -1,6 +1,5 @@
 import express, { Request, Response, RequestHandler } from "express";
 import Team from "../../models/team";
-import User from "../../models/user";
 
 const router = express.Router();
 
