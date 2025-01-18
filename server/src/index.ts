@@ -55,7 +55,7 @@ app.use("/api/teams", updateTeamMembersRoute);
 app.use("/api/teams", updateCancellationRoute);
 app.use("/api/teams", getMeetingRoute);
 app.use("/api/teams", createMeetingRoute);
-// app.use("/api/teams", editMeetingRoute);
+app.use("/api/teams", editMeetingRoute);
 app.use("/api/teams", deleteMeetingRoute);
 app.use("/api/teams", updateCoadminRoute);
 app.use("/api/teams", updatePermissionRoute);

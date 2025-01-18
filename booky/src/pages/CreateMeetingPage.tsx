@@ -190,7 +190,7 @@ export default function CreateMeetingPage() {
     }
     
     const response = await fetch(`${server}/api/teams/${teamId}/meetings${meetingId ? `/${meetingId}` : ""}`, {
-      method: meetingId ? "PUT" : "POST",
+      method: meetingId ? "PATCH" : "POST",
       headers: {
         "Content-Type": "application/json",
       },

@@ -17,14 +17,14 @@ export const getMeetingHandler: RequestHandler = async (req: Request, res: Respo
       return;
     }
 
-    const fetchedMeeting = team.meetingTeam.find((meeting) => meeting._id.toString() === meetingId);
+    const meetingToReturn = team.meetingTeam.find((meeting) => meeting._id.toString() === meetingId);
     
-    if (!fetchedMeeting) {
+    if (!meetingToReturn) {
         res.status(404).json({ message: "Meeting not found" });
         return;
     }
 
-    res.status(200).json( fetchedMeeting );
+    res.status(200).json( meetingToReturn );
   } catch (error) {
     console.error("Error updating availableTimes:", error);
     res.status(500).json({ message: "Server error" });
