@@ -3,12 +3,24 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export type MeetingInformation = {
-  id: string;
+export interface MeetingInformation {
+  _id: string; // Unique meeting ID
   teamId: string;
-  date: string;
-  time: string;
-};
+  meetingTeamId: string;
+  date: string; // Meeting date in "YYYY-MM-DD" format
+  time: {
+    start: string; // Start time in "HH:MM AM/PM" format
+    end: string; // End time in "HH:MM AM/PM" format
+  };
+  attendees: Attendee[]; // Array of attendees
+}
+
+export interface Attendee {
+  participantName?: string; // Optional name of the attendee
+  participantEmail: string; // Email of the attendee
+  token: string; // Unique token for the attendee
+  tokenExpiry: Date; // Token expiration date
+}
 
 export function MeetingColumns(): ColumnDef<MeetingInformation>[] {
   const navigate = useNavigate();
@@ -18,21 +30,23 @@ export function MeetingColumns(): ColumnDef<MeetingInformation>[] {
       header: "Date",
     },
     {
-      accessorKey: "time",
+      accessorFn: (row) => `${row.time.start} - ${row.time.end}`,
+      id: "time",
       header: "Time",
     },
     {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const meetingId = row.original.id;
-
+        const meetingId = row.original._id;
+        const teamId = row.original.teamId;
+        const meetingTeamId = row.original.meetingTeamId;
         return (
           <div className="flex justify-end items-center">
             <Button
               onClick={(e) => {
                 e.preventDefault();
-                navigate(`/dashboard/${meetingId}/${meetingId}/`);
+                navigate(`/dashboard/${teamId}/${meetingTeamId}/${meetingId}`);
               }}
             >
               Details

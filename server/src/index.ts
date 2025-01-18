@@ -19,6 +19,7 @@ import deleteMeetingRoute from "./routes/team/deleteMeetingRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 import updatePermissionRoute from "./routes/team/updatePermissionRoute";
 import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
+import getMeetingMinuteRoute from "./routes/document/getMeetingMinuteRoute";
 import { Server } from "socket.io";
 import MeetingMinute from "./models/meetingMinute";
 import { startScheduler } from "./meetingCreateScheduler";
@@ -60,10 +61,11 @@ app.use("/api/teams", deleteMeetingRoute);
 app.use("/api/teams", updateCoadminRoute);
 app.use("/api/teams", updatePermissionRoute);
 app.use("/api/teams", updateTeamDescriptionRoute);
-app.use("/api/teams/", getTeamRoute);
+app.use("/api/teams", getTeamRoute);
 app.use("/api/appointment/get-appointment", getAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
 app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
+app.use("/api/document/", getMeetingMinuteRoute);
 
 async function findOrCreateMeetingMinute(id: any) {
   if (id === null) return;

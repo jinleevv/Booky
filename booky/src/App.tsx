@@ -98,7 +98,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/:team/:meeting"
+          path="/dashboard/:teamId/:meetingTeamId/:meetingId"
           element={
             <ProtectedRoute>
               <MeetingDetails />
@@ -114,7 +114,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/document/:meeting/:user"
+          path="/dashboard/document/:meetingId/"
           element={
             <ProtectedRoute>
               <MeetingMinutePage />

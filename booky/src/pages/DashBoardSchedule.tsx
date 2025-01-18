@@ -3,9 +3,10 @@ import DashboardNavBar from "@/features/DashboardNavBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import JoinAMeeting from "@/features/DashboardSchedule/JoinAMeeting";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHook } from "@/hooks";
 import ViewDetails from "@/features/DashboardSchedule/ViewDetails/ViewDetails";
+import { useLocation } from "react-router-dom";
 
 interface ITimeRange {
   start: string;
@@ -34,9 +35,21 @@ export default function DashBoardSchedule() {
   const [selectedHost, setSelectedHost] = useState<string | null>(null);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
 
+  const [displayTabs, setDisplayTabs] = useState<string>("join");
+
   useEffect(() => {
     fetchTeamDetails();
   }, [teamId]);
+
+  useEffect(() => {
+    const tab = localStorage.getItem("DisplayDashboardSchedule");
+    if (tab === "view") {
+      setDisplayTabs("view");
+    } else {
+      setDisplayTabs("join");
+    }
+    localStorage.removeItem("DisplayDashboardSchedule");
+  }, []);
 
   async function fetchTeamDetails() {
     try {
@@ -52,7 +65,6 @@ export default function DashBoardSchedule() {
         setTeamMembers(data.members);
         setMeetingTeam(data.meetingTeam);
         setSelectedHost(data.adminEmail);
-        updateEnabledDays(data.adminEmail);
         setCreatedAt(data.createdAt);
       } else {
         setTeamName("Not Found");
@@ -62,28 +74,6 @@ export default function DashBoardSchedule() {
       console.error("Error fetching team details:", error);
     }
   }
-
-  const updateEnabledDays = (email: string) => {
-    const dayMap: { [key: string]: number } = {
-      Sunday: 0,
-      Monday: 1,
-      Tuesday: 2,
-      Wednesday: 3,
-      Thursday: 4,
-      Friday: 5,
-      Saturday: 6,
-    };
-
-    // Recalculate enabledDays based on the admin's availability
-    // const enabled = availableTimes[email]?.reduce((acc: number[], day: any) => {
-    //   if (day.enabled && dayMap[day.day] !== undefined) {
-    //     acc.push(dayMap[day.day]);
-    //   }
-    //   return acc;
-    // }, []);
-
-    // setEnabledDays(new Set(enabled)); // Update the enabledDays state
-  };
 
   return (
     <section className="h-screen w-screen bg-white">
@@ -101,7 +91,10 @@ export default function DashBoardSchedule() {
               </div>
             </div>
             <div>
-              <Tabs defaultValue="join">
+              <Tabs
+                value={displayTabs}
+                onValueChange={(value) => setDisplayTabs(value)}
+              >
                 <TabsList>
                   <TabsTrigger value="join">Join a Meeting</TabsTrigger>
                   <TabsTrigger value="view">View</TabsTrigger>
@@ -124,33 +117,21 @@ export default function DashBoardSchedule() {
                   />
                 </TabsContent>
                 <TabsContent value="view">
-                  {/* <ViewDetails
+                  <ViewDetails
                     teamId={teamId}
                     teamName={teamName}
-                    setTeamName={setTeamName}
                     teamDescription={teamDescription}
-                    adminName={adminName}
-                    setAdminName={setAdminName}
                     adminEmail={adminEmail}
-                    setAdminEmail={setAdminEmail}
                     teamCoAdmin={teamCoAdmin}
-                    setTeamCoAdmin={setTeamCoAdmin}
                     teamMembers={teamMembers}
                     setTeamMembers={setTeamMembers}
                     meetingTeam={meetingTeam}
-                    setMeetingTeam={setMeetingTeam}
                     duration={duration}
-                    setDuration={setDuration}
                     existingAppointments={existingAppointments}
-                    setExistingAppointments={setExistingAppointments}
                     cancelledDays={cancelledDays}
-                    setCancelledDays={setCancelledDays}
                     selectedHost={selectedHost}
                     setSelectedHost={setSelectedHost}
-                    enabledDays={enabledDays}
-                    setEnabledDays={setEnabledDays}
-                    createdAt={createdAt}
-                  /> */}
+                  />
                 </TabsContent>
               </Tabs>
             </div>

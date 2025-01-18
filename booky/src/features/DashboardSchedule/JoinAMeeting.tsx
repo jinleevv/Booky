@@ -275,24 +275,24 @@ export default function JoinAMeeting({
     }
   };
 
-  const handleDeleteMeeting = async (meetingId: string) => {
-    try {
-      const response = await fetch(
-        `${server}/api/teams/${teamId}/meetings/${meetingId}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (response.ok) {
-        toast("Meeting deleted successfully!");
-      } else {
-        toast("Failed to delete the meeting");
-      }
-    } catch (error) {
-      console.error("Error deleting meeting:", error);
-      toast("An error occurred while deleting the meeting.");
-    }
-  };
+  // const handleDeleteMeeting = async (meetingId: string) => {
+  //   try {
+  //     const response = await fetch(
+  //       `${server}/api/teams/${teamId}/meetings/${meetingId}`,
+  //       {
+  //         method: "DELETE",
+  //       }
+  //     );
+  //     if (response.ok) {
+  //       toast("Meeting deleted successfully!");
+  //     } else {
+  //       toast("Failed to delete the meeting");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting meeting:", error);
+  //     toast("An error occurred while deleting the meeting.");
+  //   }
+  // };
 
   return (
     <div className="flex relative w-full md:h-[800px] md:mt-24 sm:h-full">
@@ -504,7 +504,7 @@ export default function JoinAMeeting({
                                               <Button
                                                 variant="destructive"
                                                 onClick={(e) => {
-                                                  handleDeleteMeeting(meeting._id);
+                                                  // handleDeleteMeeting(meeting._id);
                                                   setIsDialogOpen(false);
                                                 }}
                                               >

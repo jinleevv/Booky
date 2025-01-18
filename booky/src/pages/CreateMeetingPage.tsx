@@ -72,21 +72,6 @@ export default function CreateMeetingPage() {
   const [meetingData, setMeetingData] = useState<null | any>(null);
   const [currentTab, setCurrentTab] = useState<string>("recurring");
   const navigate = useNavigate();
-  
-  useEffect(() => {
-    const fetchMeetingData = async () => {
-      if (!meetingId) return;
-      try {
-        const response = await fetch(`${server}/api/teams/${teamId}/meetings/${meetingId}`);
-        const data = await response.json();
-        setMeetingData(data);
-      } catch (error) {
-        console.error("Failed to fetch meeting data:", error);
-      }
-    }
-
-    fetchMeetingData();
-  }, [meetingId, teamId]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

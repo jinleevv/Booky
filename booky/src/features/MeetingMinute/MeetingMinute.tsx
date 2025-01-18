@@ -20,7 +20,7 @@ const TOOLBAR_OPTIONS = [
 ];
 
 export default function MeetingMinute() {
-  const { meeting, user } = useParams();
+  const { meetingId } = useParams();
   const [socket, setSocket] = useState<any>(null);
   const [quill, setQuill] = useState<any>(null);
   useEffect(() => {
@@ -38,8 +38,8 @@ export default function MeetingMinute() {
       quill.setContents(document);
       quill.enable();
     });
-    socket.emit("get-document", meeting);
-  }, [socket, quill, meeting]);
+    socket.emit("get-document", meetingId);
+  }, [socket, quill, meetingId]);
 
   useEffect(() => {
     if (socket === null || quill === null) return;
