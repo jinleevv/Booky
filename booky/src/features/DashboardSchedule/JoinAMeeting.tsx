@@ -522,7 +522,7 @@ export default function JoinAMeeting({
                                     Meeting Type: {meeting.schedule}
                                   </Label>
                                   <Label className="text-xs">
-                                    Description: {teamDescription}
+                                    Description: {meeting.meetingDescription}
                                   </Label>
                                 </CardDescription>
                               </CardHeader>
