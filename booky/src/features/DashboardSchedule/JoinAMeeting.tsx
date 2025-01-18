@@ -445,57 +445,15 @@ export default function JoinAMeeting({
                                   <div className="my-auto">
                                     {(adminEmail === userEmail ||
                                       teamCoAdmin.includes(userEmail)) && (
-                                      <>
-                                        <Button
-                                          variant="ghost"
-                                          className="w-5 h-5"
-                                        >
-                                          <TbCalendarCancel size={10} />
-                                        </Button>
-                                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                                          <DialogTrigger asChild>
-                                            <Button
-                                              variant="ghost"
-                                              className="text-red-700 hover:text-red-700 w-5 h-5"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                setIsDialogOpen(true);
-                                              }}
-                                            >
-                                              <Trash size={10} />
-                                            </Button>
-                                          </DialogTrigger>
-                                          <DialogContent onClick={(e) => e.stopPropagation()}>
-                                            <DialogHeader>
-                                              <DialogTitle>Delete Meeting</DialogTitle>
-                                              <DialogDescription>
-                                                Are you sure you want to delete this meeting? This action cannot be undone.
-                                              </DialogDescription>
-                                            </DialogHeader>
-                                            <DialogFooter>
-                                              <Button variant="outline" onClick={(e) =>{
-                                                setIsDialogOpen(false)
-                                                }}
-                                              >
-                                                Cancel
-                                              </Button>
-                                              <Button
-                                                variant="destructive"
-                                                onClick={(e) => {
-                                                  handleDeleteMeeting(meeting._id);
-                                                  setIsDialogOpen(false);
-                                                }}
-                                              >
-                                                Delete
-                                              </Button>
-                                            </DialogFooter>
-                                          </DialogContent>
-                                        </Dialog>
-                                      </>
+                                      <Button
+                                        variant="ghost"
+                                        className="w-5 h-5"
+                                      >
+                                        <TbEdit size={10} />
+                                      </Button>
                                     )}
                                   </div>
                                 </div>
-
                                 <div className="my-auto">
                                   {(adminEmail === userEmail ||
                                     teamCoAdmin.includes(userEmail)) && (
@@ -506,8 +464,8 @@ export default function JoinAMeeting({
                                       >
                                         <TbCalendarCancel size={10} />
                                       </Button>
-                                      <Dialog
-                                        open={isDialogOpen}
+                                      <Dialog 
+                                        open={isDialogOpen} 
                                         onOpenChange={setIsDialogOpen}
                                       >
                                         <DialogTrigger asChild>
@@ -522,24 +480,18 @@ export default function JoinAMeeting({
                                             <Trash size={10} />
                                           </Button>
                                         </DialogTrigger>
-                                        <DialogContent
+                                        <DialogContent 
                                           onClick={(e) => e.stopPropagation()}
                                         >
                                           <DialogHeader>
-                                            <DialogTitle>
-                                              Delete Meeting
-                                            </DialogTitle>
+                                            <DialogTitle>Delete Meeting</DialogTitle>
                                             <DialogDescription>
-                                              Are you sure you want to delete
-                                              this meeting? This action cannot
-                                              be undone.
+                                              Are you sure you want to delete this meeting? This action cannot be undone.
                                             </DialogDescription>
                                           </DialogHeader>
                                           <DialogFooter>
-                                            <Button
-                                              variant="outline"
-                                              onClick={(e) => {
-                                                setIsDialogOpen(false);
+                                            <Button variant="outline" onClick={(e) =>{
+                                              setIsDialogOpen(false)
                                               }}
                                             >
                                               Cancel
@@ -547,9 +499,7 @@ export default function JoinAMeeting({
                                             <Button
                                               variant="destructive"
                                               onClick={(e) => {
-                                                handleDeleteMeeting(
-                                                  meeting._id
-                                                );
+                                                handleDeleteMeeting(meeting._id);
                                                 setIsDialogOpen(false);
                                               }}
                                             >
