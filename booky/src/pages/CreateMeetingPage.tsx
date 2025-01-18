@@ -68,7 +68,7 @@ function formatZonedDateTime(date, time) {
 
 export default function CreateMeetingPage() {
   const { team: teamId, meeting: meetingId } = useParams();
-  const { server, userEmail } = useHook();
+  const { server, userEmail, userName } = useHook();
   const [meetingData, setMeetingData] = useState<null | any>(null);
   const [currentTab, setCurrentTab] = useState<string>("recurring");
   const navigate = useNavigate();
@@ -186,6 +186,7 @@ export default function CreateMeetingPage() {
     
     if (!meetingId) {
       requestBody.hostEmail = userEmail;
+      requestBody.hostName = userName;
     }
     
     const response = await fetch(`${server}/api/teams/${teamId}/meetings${meetingId ? `/${meetingId}` : ""}`, {
