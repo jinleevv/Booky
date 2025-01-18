@@ -3,17 +3,11 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-// Update the availableTime map for a specific team.
-export const deleteMeetingHandler: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const deleteMeetingHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { teamId, meetingId } = req.params;
   try {
     if (!teamId || !meetingId) {
-      res
-        .status(400)
-        .json({ message: "Invalid or missing teamId or meetingId" });
+      res.status(400).json({ message: "Invalid or missing teamId or meetingId" });
       return;
     }
 
@@ -23,14 +17,13 @@ export const deleteMeetingHandler: RequestHandler = async (
       return;
     }
 
+    team.meetingTeam = team.meetingTeam.filter((meeting) => meeting._id.toString() !== meetingId);
     // const availableTimesWithId = team.availableTimes as (IAvailableTime & { _id: string })[];
     // team.availableTimes = availableTimesWithId.filter((meeting) => meeting._id.toString() !== meetingId);
 
     await team.save();
 
-    res.status(200).json({
-      message: "availableTimes updated successfully",
-    });
+    res.status(200).json({ message: "availableTimes updated successfully" });
   } catch (error) {
     console.error("Error updating availableTimes:", error);
     res.status(500).json({ message: "Server error" });

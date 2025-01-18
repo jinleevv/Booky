@@ -1,5 +1,5 @@
 import express, { Request, Response, RequestHandler } from "express";
-import Team, {IAvailableTime} from "../../models/team";
+import Team, { IMeetingTeam } from "../../models/team";
 
 const router = express.Router();
 
@@ -17,15 +17,14 @@ export const getMeetingHandler: RequestHandler = async (req: Request, res: Respo
       return;
     }
 
-    const availableTimesWithId = team.availableTimes as (IAvailableTime & { _id: string })[];
-    const meeting = availableTimesWithId.find((meeting) => meeting._id.toString() === meetingId);
+    const meetingToReturn = team.meetingTeam.find((meeting) => meeting._id.toString() === meetingId);
     
-    if (!meeting) {
+    if (!meetingToReturn) {
         res.status(404).json({ message: "Meeting not found" });
         return;
     }
 
-    res.status(200).json( meeting.meeting );
+    res.status(200).json( meetingToReturn );
   } catch (error) {
     console.error("Error updating availableTimes:", error);
     res.status(500).json({ message: "Server error" });

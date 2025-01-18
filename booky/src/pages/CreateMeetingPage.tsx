@@ -59,16 +59,16 @@ const formatDateTime = (dateObject: any): string => {
 };
 
 function formatZonedDateTime(date, time) {
-  //const [month, day, year] = date.split('-').map((value) => value.padStart(2, '0'));
+  const [month, day, year] = date.split('-').map((value) => value.padStart(2, '0'));
 
   const [hour, minute] = time.split(':').map((value) => value.padStart(2, '0'));
 
-  return `${date}T${hour}:${minute}[America/Toronto]`;
+  return `${year}-${month}-${day}T${hour}:${minute}[America/Toronto]`;
 }
 
 export default function CreateMeetingPage() {
   const { team: teamId, meeting: meetingId } = useParams();
-  const { server, userEmail } = useHook();
+  const { server, userEmail, userName } = useHook();
   const [meetingData, setMeetingData] = useState<null | any>(null);
   const [currentTab, setCurrentTab] = useState<string>("recurring");
   const navigate = useNavigate();
@@ -117,8 +117,8 @@ export default function CreateMeetingPage() {
 
       if (meetingData.schedule === "recurring") {
         const formattedData = {
-          meetingName: meetingData.name || "",
-          meetingDescription: meetingData.description || "",
+          meetingName: meetingData.meetingName || "",
+          meetingDescription: meetingData.meetingDescription || "",
           meetingLink: meetingData.zoomLink || "",
           recurringMeetingSchedule: meetingData.weekSchedule || [],
           oneTimeMeetingSchedule: {
@@ -137,8 +137,8 @@ export default function CreateMeetingPage() {
       }
       else {
         const formattedData = {
-          meetingName: meetingData.name || "",
-          meetingDescription: meetingData.description || "",
+          meetingName: meetingData.meetingName || "",
+          meetingDescription: meetingData.meetingDescription || "",
           meetingLink: meetingData.zoomLink || "",
           oneTimeMeetingSchedule: {
             start: formatDateTime(
@@ -186,10 +186,11 @@ export default function CreateMeetingPage() {
     
     if (!meetingId) {
       requestBody.hostEmail = userEmail;
+      requestBody.hostName = userName;
     }
     
     const response = await fetch(`${server}/api/teams/${teamId}/meetings${meetingId ? `/${meetingId}` : ""}`, {
-      method: meetingId ? "PUT" : "POST",
+      method: meetingId ? "PATCH" : "POST",
       headers: {
         "Content-Type": "application/json",
       },

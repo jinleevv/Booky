@@ -1,15 +1,14 @@
 import express, { Request, Response, RequestHandler } from "express";
-import Team from "../../models/team";
+import Team, { IMeetingTeam } from "../../models/team";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
-export const createMeetingHandler: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createMeetingHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { teamId } = req.params;
   const {
     hostEmail,
+    hostName,
     meetingName,
     meetingDescription,
     recurringMeetingSchedule,
@@ -23,6 +22,7 @@ export const createMeetingHandler: RequestHandler = async (
   try {
     if (
       !hostEmail ||
+      !hostName ||
       !meetingName ||
       !recurringMeetingSchedule ||
       !oneTimeMeetingSchedule ||
@@ -40,52 +40,63 @@ export const createMeetingHandler: RequestHandler = async (
       return;
     }
 
-    // if (currentTab === "recurring") {
-    //   team.meetingTeam.push({
-    //     schedule: "recurring",
-    //     hostName: host
-    //     hostEmail: hostEmail,
-    //     meeting: {
-    //       name: meetingName,
-    //       description: meetingDescription,
-    //       weekSchedule: recurringMeetingSchedule,
-    //       type: meetingType,
-    //       duration: meetingType === "oneOnOne" ? duration : null,
-    //       attendees: meetingType === "group" ? 0 : undefined,
-    //       zoomLink: meetingLink,
-    //     },
-    //   });
-    // }
-    // else {
-    //     const oneTimeMeetingStartInfo = oneTimeMeetingSchedule.start.split("T"); // YYYY-MM-DD
-    //     const oneTimeMeetingEndInfo = oneTimeMeetingSchedule.end.split("T");
-    //     const date =
-    //         oneTimeMeetingStartInfo[0].split("-")[0] +
-    //         "-" +
-    //         oneTimeMeetingStartInfo[0].split("-")[1] +
-    //         "-" +
-    //         oneTimeMeetingStartInfo[0].split("-")[2];
+    let newMeeting: IMeetingTeam;
 
-    //     team.availableTimes.push({
-    //         email: hostEmail,
-    //         meeting: {
-    //             schedule: "one-time",
-    //             name: meetingName,
-    //             description: meetingDescription,
-    //             date: date,
-    //             time: {
-    //                 start: oneTimeMeetingStartInfo[1],
-    //                 end: oneTimeMeetingEndInfo[1],
-    //             },
-    //             type: meetingType,
-    //             duration: meetingType === "oneOnOne" ? duration : null,
-    //             attendees: meetingType === "group" ? 0 : undefined,
-    //             zoomLink: meetingLink
-    //         }
-    //     });
-    // }
+    if (currentTab === "recurring") {
+      newMeeting = 
+        {
+          _id: new mongoose.Types.ObjectId().toString(),
+          schedule: "recurring",
+          hostName: hostName,
+          hostEmail: hostEmail,
 
+          meetingName: meetingName,
+          meetingDescription: meetingDescription,
+          meeting: [],
+
+          weekSchedule: recurringMeetingSchedule,
+
+          type: meetingType,
+          duration: meetingType === "oneOnOne" ? duration : null,
+          zoomLink: meetingLink,
+          cancelledMeetings: []
+        };
+    } else {
+      const oneTimeMeetingStartInfo = oneTimeMeetingSchedule.start.split("T"); // YYYY-MM-DD
+      const oneTimeMeetingEndInfo = oneTimeMeetingSchedule.end.split("T");
+      const date =
+        oneTimeMeetingStartInfo[0].split("-")[1] +
+        "-" +
+        oneTimeMeetingStartInfo[0].split("-")[2] +
+        "-" +
+        oneTimeMeetingStartInfo[0].split("-")[0];
+      newMeeting = 
+        {
+          _id: new mongoose.Types.ObjectId().toString(),
+          schedule: "one-time",
+          hostName: hostName,
+          hostEmail: hostEmail,
+
+          meetingName: meetingName,
+          meetingDescription: meetingDescription,
+          meeting: [],
+
+          date: date,
+          time: {
+            start: oneTimeMeetingStartInfo[1],
+            end: oneTimeMeetingEndInfo[1],
+          },
+
+          type: meetingType,
+          duration: meetingType === "oneOnOne" ? duration : null,
+          zoomLink: meetingLink,
+          cancelledMeetings: [],
+        };
+    }
+
+    team.meetingTeam.push(newMeeting);
     await team.save();
+    
     res.status(200).json({ message: "Meeting created successfully" });
   } catch (error) {
     console.error("Error creating meeting", error);
