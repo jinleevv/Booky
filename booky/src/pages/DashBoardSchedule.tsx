@@ -109,6 +109,7 @@ export default function DashBoardSchedule() {
                     teamMembers={teamMembers}
                     setTeamMembers={setTeamMembers}
                     meetingTeam={meetingTeam}
+                    setMeetingTeam={setMeetingTeam}
                     duration={duration}
                     existingAppointments={existingAppointments}
                     cancelledDays={cancelledDays}
@@ -126,6 +127,7 @@ export default function DashBoardSchedule() {
                     teamMembers={teamMembers}
                     setTeamMembers={setTeamMembers}
                     meetingTeam={meetingTeam}
+                    setMeetingTeam={setMeetingTeam}
                     duration={duration}
                     existingAppointments={existingAppointments}
                     cancelledDays={cancelledDays}

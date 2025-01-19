@@ -52,6 +52,7 @@ interface IJoinAMeetingProps {
   teamMembers: string[];
   setTeamMembers: React.Dispatch<React.SetStateAction<string[]>>;
   meetingTeam: any[];
+  setMeetingTeam: React.Dispatch<React.SetStateAction<any>>;
   duration: number;
   existingAppointments: any[];
   cancelledDays: ICancelledDays[];
@@ -68,6 +69,7 @@ export default function JoinAMeeting({
   teamMembers,
   setTeamMembers,
   meetingTeam,
+  setMeetingTeam,
   duration,
   selectedHost,
   setSelectedHost,
@@ -82,17 +84,17 @@ export default function JoinAMeeting({
 
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
-  const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
+  const [selectedMeetingTeam, setSelectedMeetingTeam] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [enabledDays, setEnabledDays] = useState<Array<Date>>([]);
 
   useEffect(() => {
     setTimeSlots([]);
     
-    if (selectedHost && selectedMeeting) {
+    if (selectedHost && selectedMeetingTeam) {
       updateEnabledDaysAndDisabledDates(selectedHost);
     }
-  }, [selectedHost, selectedMeeting]);
+  }, [selectedHost, selectedMeetingTeam]);
 
   // Generate time slots when the selected date changes.
   useEffect(() => {
@@ -106,7 +108,7 @@ export default function JoinAMeeting({
       weekday: "long",
     });
 
-    const dayAvailability = selectedMeeting.weekSchedule.find(
+    const dayAvailability = selectedMeetingTeam.weekSchedule.find(
       (day) => day.day === dayOfWeek
     );
     if (!dayAvailability || !dayAvailability.enabled) {
@@ -207,8 +209,8 @@ export default function JoinAMeeting({
     // Check for booked times of the meeting
     let bookedTimes = [];
 
-    if (selectedMeeting.meeting.length !== 0) {
-      selectedMeeting.meeting.map((m) => {
+    if (selectedMeetingTeam.meeting.length !== 0) {
+      selectedMeetingTeam.meeting.map((m) => {
         if (m.date === date && m.time.start === start && m.time.end) {
           bookedTimes = m.attendees;
         }
@@ -216,7 +218,7 @@ export default function JoinAMeeting({
     }
 
     // Check for cancelled date
-    selectedMeeting.cancelledMeetings.map((m) => {
+    selectedMeetingTeam.cancelledMeetings.map((m) => {
       if (m.date === date && m.time === start) {
         return [];
       }
@@ -252,47 +254,52 @@ export default function JoinAMeeting({
   const isUserMember = teamMembers.includes(userEmail);
   const isUserAdmin = userEmail === adminEmail;
 
-  const handleJoinTeam = async () => {
+  async function handleJoinTeam() {
     try {
-      const response = await fetch(`${server}/api/teams/${teamId}/members`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ members: userEmail }),
-      });
+        const response = await fetch(`${server}/api/teams/${teamId}/members`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ members: userEmail }),
+        });
 
-      if (response.ok) {
-        toast("Successfully joined the team!");
-        setTeamMembers([...teamMembers, userEmail]);
-      } else {
-        const errorData = await response.json();
-        toast(errorData.message || "Failed to join the team");
-      }
+        if (response.ok) {
+            toast("Successfully joined the team!");
+            setTeamMembers([...teamMembers, userEmail]);
+        } else {
+            const errorData = await response.json();
+            toast(errorData.message || "Failed to join the team");
+        }
     } catch (error) {
-      console.error("Error joining team:", error);
-      toast("An error occurred while trying to join the team.");
+        console.error("Error joining team:", error);
+        toast("An error occurred while trying to join the team.");
     }
-  };
+  }
 
-  // const handleDeleteMeeting = async (meetingId: string) => {
-  //   try {
-  //     const response = await fetch(
-  //       `${server}/api/teams/${teamId}/meetings/${meetingId}`,
-  //       {
-  //         method: "DELETE",
-  //       }
-  //     );
-  //     if (response.ok) {
-  //       toast("Meeting deleted successfully!");
-  //     } else {
-  //       toast("Failed to delete the meeting");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting meeting:", error);
-  //     toast("An error occurred while deleting the meeting.");
-  //   }
-  // };
+  async function handleRemoveMeetingTeam(meetingTeamId: string) {
+    try {
+      const response = await fetch(
+        `${server}/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
+        { 
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        }
+      );
+      if (!response.ok) {
+        toast("Failed to delete the team meeting");
+        return;
+      }
+
+      setMeetingTeam((prevMeetings) => prevMeetings.filter(meeting => meeting._id !== meetingTeamId));
+      toast("Team meeting deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting team meeting:", error);
+      toast("An error occurred while deleting the team meeting.");
+    }
+  }
 
   return (
     <div className="flex relative w-full md:h-[800px] md:mt-24 sm:h-full">
@@ -346,7 +353,7 @@ export default function JoinAMeeting({
                           className="flex w-full justify-start"
                           onClick={() => {
                             setSelectedHost(email);
-                            setSelectedMeeting(null);
+                            setSelectedMeetingTeam(null);
                           }}
                         >
                           <Label
@@ -411,7 +418,7 @@ export default function JoinAMeeting({
               </div>
             </CardHeader>
             <CardContent className="flex w-full border-b-[1px] md:w-3/6 md:border-r-[1px] py-2 border-gray-200">
-              {selectedMeeting === null ? (
+              {selectedMeetingTeam === null ? (
                 <div className="flex flex-col w-full mt-1.5 p-0 gap-2">
                   <div className="flex w-full justify-between">
                     <Label className="text-lg font-bold">Meetings</Label>
@@ -431,17 +438,17 @@ export default function JoinAMeeting({
                     <>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-3 w-full">
                         {meetingTeam
-                          .filter((meeting) => meeting.hostEmail === selectedHost)
-                          .map((meeting) => (
+                          .filter((meetingTeam) => meetingTeam.hostEmail === selectedHost)
+                          .map((meetingTeam) => (
                             <Card
                               className="w-full border rounded-3xl shadow-md cursor-pointer"
-                              onClick={() => setSelectedMeeting(meeting)}
+                              onClick={() => setSelectedMeetingTeam(meetingTeam)}
                             >
                               <CardHeader className="pt-4">
                                 <CardTitle className="flex flex-wrap justify-between">
                                   <div className="flex flex-wrap my-auto gap-1">
                                     <Label className="text-lg font-bold">
-                                      {meeting.meetingName}
+                                      {meetingTeam.meetingName}
                                     </Label>
                                     <div className="my-auto">
                                       {(adminEmail === userEmail ||
@@ -451,7 +458,7 @@ export default function JoinAMeeting({
                                           className="w-5 h-5"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(`/dashboard/${teamId}/edit-meeting/${meeting._id}`);
+                                            navigate(`/dashboard/${teamId}/edit-meeting/${meetingTeam._id}`);
                                           }}
                                         >
                                           <TbEdit size={10} />
@@ -504,7 +511,7 @@ export default function JoinAMeeting({
                                               <Button
                                                 variant="destructive"
                                                 onClick={(e) => {
-                                                  // handleDeleteMeeting(meeting._id);
+                                                  handleRemoveMeetingTeam(meetingTeam._id);
                                                   setIsDialogOpen(false);
                                                 }}
                                               >
@@ -519,10 +526,10 @@ export default function JoinAMeeting({
                                 </CardTitle>
                                 <CardDescription className="grid space-y-1">
                                   <Label className="text-xs">
-                                    Meeting Type: {meeting.schedule}
+                                    Meeting Type: {meetingTeam.schedule}
                                   </Label>
                                   <Label className="text-xs">
-                                    Description: {meeting.meetingDescription}
+                                    Description: {meetingTeam.meetingDescription}
                                   </Label>
                                 </CardDescription>
                               </CardHeader>
@@ -603,7 +610,7 @@ export default function JoinAMeeting({
                 </div>
               </CardContent>
               <ScheduleForm
-                selectedMeeting={selectedMeeting}
+                selectedMeetingTeam={selectedMeetingTeam}
                 selectedDate={userSelectedDate}
                 selectedTime={selectedTimeSlot}
                 teamId={teamId!}

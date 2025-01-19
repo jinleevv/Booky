@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { IoPersonCircle } from "react-icons/io5";
 import { TbCalendarCancel, TbEdit } from "react-icons/tb";
+import { toast } from "sonner";
 import { Trash } from "lucide-react";
 import { useHook } from "@/hooks";
 import { DataTable } from "./data-table";
@@ -45,6 +46,7 @@ interface IViewDetailsProps {
   teamMembers: string[];
   setTeamMembers: React.Dispatch<React.SetStateAction<string[]>>;
   meetingTeam: any[];
+  setMeetingTeam: React.Dispatch<React.SetStateAction<any>>;
   duration: number;
   existingAppointments: any[];
   cancelledDays: ICancelledDays[];
@@ -61,6 +63,7 @@ export default function ViewDetails({
   teamMembers,
   setTeamMembers,
   meetingTeam,
+  setMeetingTeam,
   duration,
   selectedHost,
   setSelectedHost,
@@ -78,28 +81,33 @@ export default function ViewDetails({
       );
       setMeetingData(displayMeetingTeams);
     }
-  }, [selectedHost]);
+  }, [selectedHost, meetingTeam]);
 
   const columns = MeetingColumns();
 
-  // const handleDeleteMeeting = async (meetingId: string) => {
-  //   try {
-  //     const response = await fetch(
-  //       `${server}/api/teams/${teamId}/meetings/${meetingId}`,
-  //       {
-  //         method: "DELETE",
-  //       }
-  //     );
-  //     if (response.ok) {
-  //       toast("Meeting deleted successfully!");
-  //     } else {
-  //       toast("Failed to delete the meeting");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting meeting:", error);
-  //     toast("An error occurred while deleting the meeting.");
-  //   }
-  // };
+  async function handleRemoveMeetingTeam(meetingTeamId: string) {
+    try {
+      const response = await fetch(
+        `${server}/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
+        { 
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        }
+      );
+      if (!response.ok) {
+        toast("Failed to delete the team meeting");
+        return;
+      }
+
+      setMeetingTeam((prevMeetings) => prevMeetings.filter(meeting => meeting._id !== meetingTeamId));
+      toast("Team meeting deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting team meeting:", error);
+      toast("An error occurred while deleting the team meeting.");
+    }
+  }
 
   return (
     <div className="flex w-full h-full gap-2">
@@ -236,7 +244,7 @@ export default function ViewDetails({
                                     <Button
                                       variant="destructive"
                                       onClick={(e) => {
-                                        // handleDeleteMeeting(meeting._id);
+                                        handleRemoveMeetingTeam(meeting._id);
                                         setIsDialogOpen(false);
                                       }}
                                     >

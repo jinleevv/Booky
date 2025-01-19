@@ -12,7 +12,7 @@ import updatePollRoute from "./routes/poll/updatePollRoute";
 import createMeetingRoute from "./routes/team/createMeetingRoute";
 import createTeamRoute from "./routes/team/createTeamRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
-import deleteMeetingRoute from "./routes/team/deleteMeetingRoute";
+import removeMeetingFromMeetingTeamRoute from "./routes/team/removeMeetingFromMeetingTeamRoute";
 import editMeetingRoute from "./routes/team/editMeetingRoute";
 import getAppointmentRoute from "./routes/team/getAppointmentRoute";
 import getMeetingRoute from "./routes/team/getMeetingRoute";
@@ -42,7 +42,7 @@ const io = new Server(5002, {
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // If cookies or credentials are involved
   })
@@ -60,7 +60,7 @@ app.use("/api/teams", updateCancellationRoute);
 app.use("/api/teams", getMeetingRoute);
 app.use("/api/teams", createMeetingRoute);
 app.use("/api/teams", editMeetingRoute);
-app.use("/api/teams", deleteMeetingRoute);
+app.use("/api/teams", removeMeetingFromMeetingTeamRoute);
 app.use("/api/teams", updateCoadminRoute);
 app.use("/api/teams", updatePermissionRoute);
 app.use("/api/teams", updateTeamDescriptionRoute);
