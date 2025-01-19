@@ -42,7 +42,7 @@ const io = new Server(5002, {
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST", "PUT", "PATCH"],
+    methods: ["GET", "POST", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // If cookies or credentials are involved
   })
