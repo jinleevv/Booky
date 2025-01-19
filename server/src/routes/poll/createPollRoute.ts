@@ -1,4 +1,3 @@
-// createPollRoute.ts
 import express, { Request, RequestHandler, Response } from "express";
 import ShortUniqueId from "short-uuid";
 import Poll from "../../models/poll";
@@ -11,8 +10,6 @@ export const createPollHandler: RequestHandler = async (
 ): Promise<void> => {
   const { pollName, pollDescription, urlPath, range, startTime, endTime } =
     req.body;
-
-  console.log(req.body);
 
   try {
     if (!pollName || !urlPath || !range || !startTime || !endTime) {

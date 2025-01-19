@@ -1,4 +1,3 @@
-// getPollRoute.ts
 import express, { Request, RequestHandler, Response } from "express";
 import Poll from "../../models/poll";
 
@@ -9,7 +8,6 @@ export const getPollHandler: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const { urlPath } = req.params;
-
   try {
     const poll = await Poll.findOne({ urlPath: urlPath });
     if (!poll) {
@@ -17,7 +15,10 @@ export const getPollHandler: RequestHandler = async (
       return;
     }
 
-    res.status(200).json(poll);
+    res.status(200).json({
+      ...poll.toObject(),
+      participants: poll.participants!,
+    });
   } catch (error) {
     console.error("Error fetching poll:", error);
     res.status(500).json({ message: "Server error" });

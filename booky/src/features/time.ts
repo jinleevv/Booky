@@ -1,3 +1,6 @@
+export const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+
 export const availableTime = [
   "12:00 AM",
   "12:30 AM",

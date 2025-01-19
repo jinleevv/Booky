@@ -1,44 +1,25 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { formatTime } from "@/features/time";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-type AvailabilityCalendarProps = {
-  urlPath: string;
-  userEmail?: string;
+type Props = {
   timeSlots: string[];
   selectedDays: string[];
+  userEmail?: string;
   groupAvailability?: Map<string, Set<string>>;
-  handleTimeSlots?: (selectedTimeSlots: Set<string>) => void;
 };
 
-const AvailabilityCalendar = ({
+const AvailabilityGrid = ({
   timeSlots,
   selectedDays,
   userEmail,
   groupAvailability = new Map(),
-  handleTimeSlots,
-}: AvailabilityCalendarProps) => {
+}: Props) => {
   const [selectedCells, setSelectedCells] = useState(new Set<string>());
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isSelecting, setIsSelecting] = useState(true);
 
-  // fetching group availability
-  useEffect(() => {});
-
-  // update backend when user's selection change
-  // useEffect(() => {
-  //   if (userEmail && handleTimeSlots) {
-  //     updateAvailability();
-  //   }
-  // }, [
-  //   handleTimeSlots,
-  //   server,
-  //   selectedTimeSlots,
-  //   selectedCells,
-  //   urlPath,
-  //   userEmail,
-  // ]);
-
+  console.log(selectedCells);
   const getCellId = (day: string, time: string) => `${day}-${time}`;
 
   const handleMouseDown = (day: string, time: string) => {
@@ -53,7 +34,6 @@ const AvailabilityCalendar = ({
       newSelected.delete(cellId);
     }
     setSelectedCells(newSelected);
-    handleTimeSlots(newSelected);
   };
 
   const handleMouseEnter = (day: string, time: string) => {
@@ -67,7 +47,6 @@ const AvailabilityCalendar = ({
         newSelected.delete(cellId);
       }
       setSelectedCells(newSelected);
-      handleTimeSlots(newSelected);
     }
   };
 
@@ -91,26 +70,27 @@ const AvailabilityCalendar = ({
   };
 
   return (
-    <>
-      {userEmail ? (
+    <div className="grid grid-cols-2 gap-8">
+      {/* User's Availability Calendar */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">
+          {userEmail}'s Availability
+        </h2>
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-pink-200"></div>
+            <span>Unavailable</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-500"></div>
+            <span>Available</span>
+          </div>
+        </div>
         <Card
           className="border-none shadow-none"
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
-          <h2 className="text-md font-semibold mb-4">
-            {userEmail}'s Availability
-          </h2>
-          <div className="flex items-center gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-100"></div>
-              <span>Unavailable</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-500"></div>
-              <span>Available</span>
-            </div>
-          </div>
           <CardContent className="p-4">
             <TimeGrid
               timeSlots={timeSlots}
@@ -124,12 +104,15 @@ const AvailabilityCalendar = ({
             />
           </CardContent>
         </Card>
-      ) : (
+      </div>
+
+      {/* Group's Availability Calendar */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Group's Availability</h2>
+        <div className="text-sm mb-4">
+          Mouseover the Calendar to See Who Is Available
+        </div>
         <Card className="border-none shadow-none">
-          <h2 className="text-md font-semibold mb-4">Group's Availability</h2>
-          <div className="text-sm mb-4">
-            Mouseover the Calendar to See Who Is Available
-          </div>
           <CardContent className="p-4">
             <TimeGrid
               timeSlots={timeSlots}
@@ -143,8 +126,8 @@ const AvailabilityCalendar = ({
             />
           </CardContent>
         </Card>
-      )}
-    </>
+      </div>
+    </div>
   );
 };
 
@@ -167,14 +150,14 @@ const TimeGrid = ({
           const isHalfHour = time.endsWith("30");
           if (!isHalfHour) {
             return (
-              <div key={time} className="h-8 relative">
+              <div key={time} className="h-12 relative">
                 <span className="absolute right-2 top-0 text-sm whitespace-nowrap">
                   {formatTime(time)}
                 </span>
               </div>
             );
           }
-          return <div key={time} className="h-8" />;
+          return <div key={time} className="h-12" />;
         })}
       </div>
 
@@ -190,15 +173,15 @@ const TimeGrid = ({
                 const isSelected = selectedCells.has(cellId);
 
                 // Calculate cell color based on whether it's user or group grid
-                let cellColor = "bg-gray-100";
+                let cellColor = "bg-gray-100 hover:bg-blue-100";
                 if (isUserGrid) {
-                  cellColor = isSelected ? "bg-red-500" : "bg-gray-100";
+                  cellColor = isSelected ? "bg-green-500" : "bg-pink-200";
                 } else if (groupAvailability) {
                   const { availableCount, totalParticipants } =
                     getCellAvailability(day, time);
                   if (availableCount > 0) {
                     const opacity = (availableCount / totalParticipants) * 100;
-                    cellColor = `bg-red-500 opacity-${opacity}`;
+                    cellColor = `bg-green-500 opacity-${opacity}`;
                   }
                 }
 
@@ -206,16 +189,14 @@ const TimeGrid = ({
                   <div
                     key={`${day}-${time}`}
                     className={`
-                        h-8
-                        border-l border-r
-                        ${
-                          !isHalfHour ? "border-t" : "border-t border-t-dotted"
-                        } 
-                        ${index === timeSlots.length - 1 ? "border-b" : ""}
-                        cursor-pointer
-                        transition-colors
-                        ${cellColor}
-                      `}
+                      h-12 
+                      border-l border-r
+                      ${!isHalfHour ? "border-t" : "border-t border-t-dotted"} 
+                      ${index === timeSlots.length - 1 ? "border-b" : ""}
+                      cursor-pointer
+                      transition-colors
+                      ${cellColor}
+                    `}
                     onMouseDown={() => handleMouseDown?.(day, time)}
                     onMouseEnter={() => handleMouseEnter?.(day, time)}
                   />
@@ -229,4 +210,4 @@ const TimeGrid = ({
   );
 };
 
-export default AvailabilityCalendar;
+export default AvailabilityGrid;

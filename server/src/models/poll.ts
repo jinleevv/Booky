@@ -19,15 +19,15 @@ interface IDateRange {
 
 // Interface for daily schedule
 interface IDaySchedule {
+  day: Number;
   date: string; // YYYY-MM-DD format
-  times: ITimeRange[];
+  times: string[];
 }
 
 // Interface for participant availability
 interface IParticipantSchedule {
   email: string;
-  name?: string;
-  schedule: IDaySchedule[];
+  schedule: string[];
 }
 
 // Main Poll interface
@@ -41,7 +41,7 @@ interface IPoll extends Document {
     end: string; // YYYY-MM-DD format
   };
   time: ITimeRange;
-  participants?: Map<string, IDaySchedule[]>; // Map of email to their schedule
+  participants?: IParticipantSchedule[]; // Map of email to their schedule
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -66,8 +66,9 @@ const DateRangeSchema = new Schema<IDateRange>({
 // Schema for daily schedule
 const DayScheduleSchema = new Schema<IDaySchedule>(
   {
+    day: { type: Number, required: true }, // 0 - Sunday, 1 - Monday, ...
     date: { type: String, required: true }, // YYYY-MM-DD format
-    times: [TimeRangeSchema],
+    times: [{ type: String }],
   },
   { _id: false }
 );
@@ -75,9 +76,8 @@ const DayScheduleSchema = new Schema<IDaySchedule>(
 // Schema for participant availability
 const ParticipantScheduleSchema = new Schema<IParticipantSchedule>(
   {
-    email: { type: String, required: true },
-    name: { type: String },
-    schedule: [DayScheduleSchema],
+    email: { type: String, unique: true, required: true },
+    schedule: [{ type: String }],
   },
   { _id: false }
 );
@@ -91,11 +91,7 @@ const PollSchema = new Schema<IPoll>(
     urlPath: { type: String, required: true },
     dateRange: { type: DateRangeSchema, required: true },
     time: { type: TimeRangeSchema, required: true },
-    participants: {
-      type: Map,
-      of: [DayScheduleSchema],
-      default: new Map(),
-    },
+    participants: [ParticipantScheduleSchema],
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },
@@ -109,12 +105,11 @@ PollSchema.index({ urlPath: 1 }, { unique: true });
 PollSchema.index({ creatorEmail: 1 });
 PollSchema.index({ createdAt: -1 });
 
-// Instance methods
-PollSchema.methods.addParticipant = function (
-  email: string,
-  schedule: IDaySchedule[]
-) {
-  this.participants.set(email, schedule);
+PollSchema.methods.getGroupParticipants = function (): Map<
+  string,
+  IDaySchedule[]
+> {
+  return this.participants;
 };
 
 PollSchema.methods.removeParticipant = function (email: string) {

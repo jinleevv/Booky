@@ -1,4 +1,3 @@
-// updatePollRoute.ts
 import express, { Request, RequestHandler, Response } from "express";
 import Poll from "../../models/poll";
 
@@ -8,19 +7,36 @@ export const updatePollHandler: RequestHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { pollId } = req.params;
-  const { userEmail, schedule } = req.body;
+  const { urlPath } = req.params;
+  const { userEmail, selectedSlots } = req.body;
 
   try {
-    if (!userEmail || !schedule) {
+    if (!userEmail || !selectedSlots) {
       res.status(400).json({
         message: "Missing required fields",
       });
       return;
     }
 
-    const poll = await Poll.findById(pollId);
-    if (!poll) {
+    const updatedPoll = await Poll.findOneAndUpdate(
+      { urlPath: urlPath },
+      {
+        $addToSet: {
+          participants: {
+            email: userEmail,
+            schedule: selectedSlots,
+          },
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+
+    console.log(updatedPoll);
+
+    if (!updatedPoll) {
       res.status(404).json({ message: "Poll not found" });
       return;
     }
@@ -30,10 +46,11 @@ export const updatePollHandler: RequestHandler = async (
     // availableTime.set(userEmail, schedule);
     // poll.availableTime = availableTime;
 
-    await poll.save();
+    // transform map to object for json response
 
     res.status(200).json({
       message: "Poll schedule updated successfully",
+      groupAvailability: updatedPoll!.participants,
     });
   } catch (error) {
     console.error("Error updating poll:", error);
@@ -41,6 +58,6 @@ export const updatePollHandler: RequestHandler = async (
   }
 };
 
-router.patch("/:pollId/schedule", updatePollHandler);
+router.patch("/:urlPath/availability", updatePollHandler);
 
 export default router;
