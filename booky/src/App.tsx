@@ -11,6 +11,7 @@ import CreateTeam from "./pages/CreateTeam";
 import DashBoard from "./pages/DashBoard";
 import DashBoardSchedule from "./pages/DashBoardSchedule.tsx";
 import DashBoardTeams from "./pages/DashBoardTeams";
+import EditMeetingTeamPage from "./pages/EditMeetingTeamPage.tsx";
 import Home from "./pages/Home";
 import MeetingDetails from "./pages/MeetingDetails.tsx";
 import MeetingMinutePage from "./pages/MeetingMinutePage.tsx";
@@ -84,7 +85,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/:team/create-meeting"
+          path="/dashboard/:teamId/create-meeting"
           element={
             <ProtectedRoute>
               <CreateMeetingPage />
@@ -92,10 +93,10 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/:team/edit-meeting/:meeting"
+          path="/dashboard/:teamId/edit-meetingTeam/:meetingTeamId"
           element={
             <ProtectedRoute>
-              <CreateMeetingPage />
+              <EditMeetingTeamPage />
             </ProtectedRoute>
           }
         />

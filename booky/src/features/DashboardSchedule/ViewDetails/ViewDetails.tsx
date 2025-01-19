@@ -189,7 +189,7 @@ export default function ViewDetails({
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   navigate(
-                                    `/dashboard/${teamId}/edit-meeting/${meeting._id}`
+                                    `/dashboard/${teamId}/edit-meetingTeam/${meeting._id}`
                                   );
                                 }}
                               >

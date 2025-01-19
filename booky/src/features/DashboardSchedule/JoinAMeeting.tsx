@@ -458,7 +458,7 @@ export default function JoinAMeeting({
                                           className="w-5 h-5"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(`/dashboard/${teamId}/edit-meeting/${meetingTeam._id}`);
+                                            navigate(`/dashboard/${teamId}/edit-meetingTeam/${meetingTeam._id}`);
                                           }}
                                         >
                                           <TbEdit size={10} />
