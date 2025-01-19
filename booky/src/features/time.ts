@@ -1,3 +1,6 @@
+export const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+
 export const availableTime = [
   "12:00 AM",
   "12:30 AM",
@@ -49,3 +52,33 @@ export const availableTime = [
   "11:30 PM",
   "11:59 PM",
 ];
+
+// Time conversion helpers
+export const convertTo24Hour = (time12h) => {
+  // Parse the time components
+  const [time, period] = time12h.split(" ");
+  let [hours, minutes] = time.split(":");
+
+  hours = parseInt(hours);
+
+  if (hours === 12) {
+    hours = period === "PM" ? 12 : 0;
+  } else if (period === "PM") {
+    hours += 12;
+  }
+
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
+};
+
+export const formatTime = (time) => {
+  const [hour, minute] = time.split(":");
+  const hourNum = parseInt(hour);
+  const period = hourNum >= 12 ? "PM" : "AM";
+  const displayHour = hourNum > 12 ? hourNum - 12 : hourNum;
+  return `${displayHour}:${minute} ${period}`;
+};
+
+export const parseStringTimeToInt = (time: string): number => {
+  const [hour] = time.split(":");
+  return parseInt(hour);
+};

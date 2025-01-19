@@ -1,28 +1,31 @@
+import cors from "cors";
+import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
-import cors from "cors";
-import userRoute from "./routes/user/userRegistrationRoute";
+import { Server } from "socket.io";
+import { startScheduler } from "./meetingCreateScheduler";
+import MeetingMinute from "./models/meetingMinute";
+import getMeetingMinuteRoute from "./routes/document/getMeetingMinuteRoute";
+import createPollRoute from "./routes/poll/createPollRoute";
+import getPollRoute from "./routes/poll/getPollRoute";
+import updatePollRoute from "./routes/poll/updatePollRoute";
+import createMeetingRoute from "./routes/team/createMeetingRoute";
 import createTeamRoute from "./routes/team/createTeamRoute";
+import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
+import deleteMeetingRoute from "./routes/team/deleteMeetingRoute";
+import editMeetingRoute from "./routes/team/editMeetingRoute";
+import getAppointmentRoute from "./routes/team/getAppointmentRoute";
+import getMeetingRoute from "./routes/team/getMeetingRoute";
 import getTeamRoute from "./routes/team/getTeamRoute";
-import updateAppointmentRoute from "./routes/team/updateAppointmentRoute";
-import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
 import getUserTeamsRoute from "./routes/team/getUserTeamsRoute";
+import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
+import updateAppointmentRoute from "./routes/team/updateAppointmentRoute";
 import updateCancellationRoute from "./routes/team/updateCancellationRoute";
 import updateCoadminRoute from "./routes/team/updateCoadminRoute";
-import getAppointmentRoute from "./routes/team/getAppointmentRoute";
-import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
-import getMeetingRoute from "./routes/team/getMeetingRoute";
-import createMeetingRoute from "./routes/team/createMeetingRoute";
-import editMeetingRoute from "./routes/team/editMeetingRoute";
-import deleteMeetingRoute from "./routes/team/deleteMeetingRoute";
-import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 import updatePermissionRoute from "./routes/team/updatePermissionRoute";
 import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
-import getMeetingMinuteRoute from "./routes/document/getMeetingMinuteRoute";
-import { Server } from "socket.io";
-import MeetingMinute from "./models/meetingMinute";
-import { startScheduler } from "./meetingCreateScheduler";
+import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
+import userRoute from "./routes/user/userRegistrationRoute";
 
 dotenv.config();
 
@@ -65,6 +68,9 @@ app.use("/api/teams", getTeamRoute);
 app.use("/api/appointment/get-appointment", getAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
 app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
+app.use("/api/polls/create", createPollRoute);
+app.use("/api/polls", updatePollRoute);
+app.use("/api/polls", getPollRoute);
 app.use("/api/document/", getMeetingMinuteRoute);
 
 async function findOrCreateMeetingMinute(id: any) {
