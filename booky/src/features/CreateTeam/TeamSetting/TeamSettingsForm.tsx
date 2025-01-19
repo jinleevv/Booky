@@ -1,6 +1,3 @@
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
@@ -13,101 +10,19 @@ import {
 } from "@/components/ui/dialog";
 import { Edit, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { parseZonedDateTime } from "@internationalized/date";
 import { toast } from "sonner";
 import { useHook } from "@/hooks";
 import { Label } from "@/components/ui/label";
 import { DataTable } from "./data-table";
-import { columns, TeamMembers } from "./columns";
+import { columns } from "./columns";
 import InviteCoAdmin from "../InviteCoAdmin";
 import UpdateDescription from "./UpdateDescription";
 
-const days = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
-
-const formSchema = z.object({
-  duration: z.string(),
-  schedule: z.array(
-    z.object({
-      day: z.string(),
-      enabled: z.boolean(),
-      times: z.array(
-        z.object({
-          start: z.string(),
-          end: z.string(),
-        })
-      ),
-    })
-  ),
-  coadmins: z.array(
-    z
-      .string()
-      .refine(
-        (email) =>
-          email === "" ||
-          /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/.test(email),
-        "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
-      )
-  ),
-  oneTimeMeeting: z.object({
-    start: z.any(),
-    end: z.any(),
-  }),
-  meetingName: z.string().min(1, "Please enter a name."),
-  meetingDescription: z.string(),
-  meetingType: z.enum(["oneOnOne", "group"], {
-    required_error: "You need to select the type.",
-  }),
-  meetingLink: z.string(),
-});
-
-const formatDateTime = (dateObject: any): string => {
-  const { year, month, day, hour, minute } = dateObject;
-
-  // Pad month, day, hour, and minute with leading zeros if needed
-  const pad = (value: number) => value.toString().padStart(2, "0");
-
-  return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
-};
-
 export default function TeamSettings() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      duration: "",
-      schedule: days.map((day) => ({
-        day,
-        enabled: day !== "Sunday" && day !== "Saturday",
-        times: [{ start: "09:00 AM", end: "05:00 PM" }],
-      })),
-      coadmins: [],
-      oneTimeMeeting: {
-        start: formatDateTime(
-          parseZonedDateTime(
-            `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
-          )
-        ),
-        end: formatDateTime(
-          parseZonedDateTime(
-            `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
-          )
-        ),
-      },
-      meetingDescription: "",
-      meetingLink: "",
-    },
-  });
-
   const navigate = useNavigate();
   const { team: teamId } = useParams();
-  const { server } = useHook(); // Use global state from the hook
+  const { server, userName } = useHook(); // Use global state from the hook
+  const [teamAdmin, setTeamAdmin] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string | null>(null);
   const [teamDescription, setTeamDescription] = useState<string | null>(null);
   const [teamMembers, setTeamMembers] = useState([]);
@@ -131,12 +46,11 @@ export default function TeamSettings() {
           email,
           role,
         }));
-
-        setTeamName(data.name);
+        setTeamAdmin(data.adminEmail);
+        setTeamName(data.teamName);
         setTeamDescription(data.teamDescription);
         setTeamMembers(teamMembersList);
       } else {
-        console.error("Failed to fetch team details");
         toast("Failed to fetch team details");
         navigate("/dashboard/teams");
       }
@@ -163,7 +77,7 @@ export default function TeamSettings() {
           <div className="w-1/2 border rounded-2xl p-4">
             <Label className="font-bold">
               Admin:
-              <Label className="ml-1">{teamName || "Loading..."}</Label>
+              <Label className="ml-1">{teamAdmin || "Loading..."}</Label>
             </Label>
           </div>
         </div>

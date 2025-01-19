@@ -2,34 +2,47 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
+import { Server } from "socket.io";
+import { startScheduler } from "./meetingCreateScheduler";
+import MeetingMinute from "./models/meetingMinute";
+import getMeetingMinuteRoute from "./routes/document/getMeetingMinuteRoute";
 import createPollRoute from "./routes/poll/createPollRoute";
 import getPollRoute from "./routes/poll/getPollRoute";
 import updatePollRoute from "./routes/poll/updatePollRoute";
+import createMeetingRoute from "./routes/team/createMeetingRoute";
 import createTeamRoute from "./routes/team/createTeamRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
+import deleteMeetingRoute from "./routes/team/deleteMeetingRoute";
+import editMeetingRoute from "./routes/team/editMeetingRoute";
 import getAppointmentRoute from "./routes/team/getAppointmentRoute";
+import getMeetingRoute from "./routes/team/getMeetingRoute";
 import getTeamRoute from "./routes/team/getTeamRoute";
 import getUserTeamsRoute from "./routes/team/getUserTeamsRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 import updateAppointmentRoute from "./routes/team/updateAppointmentRoute";
-import updateAvailableTimeRoute from "./routes/team/updateAvailableTimeRoute";
 import updateCancellationRoute from "./routes/team/updateCancellationRoute";
 import updateCoadminRoute from "./routes/team/updateCoadminRoute";
-import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
-import userRoute from "./routes/user/userRegistrationRoute";
 import updatePermissionRoute from "./routes/team/updatePermissionRoute";
 import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
+import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
+import userRoute from "./routes/user/userRegistrationRoute";
 
 dotenv.config();
 
 const app = express();
 const PORT = 5001;
+const io = new Server(5002, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
 // Middleware
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST", "PATCH"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // If cookies or credentials are involved
   })
@@ -44,17 +57,30 @@ app.use("/api/teams/create", createTeamRoute);
 app.use("/api/teams", updateAppointmentRoute);
 app.use("/api/teams", updateTeamMembersRoute);
 app.use("/api/teams", updateCancellationRoute);
-app.use("/api/teams", updateAvailableTimeRoute);
+app.use("/api/teams", getMeetingRoute);
+app.use("/api/teams", createMeetingRoute);
+app.use("/api/teams", editMeetingRoute);
+app.use("/api/teams", deleteMeetingRoute);
 app.use("/api/teams", updateCoadminRoute);
 app.use("/api/teams", updatePermissionRoute);
 app.use("/api/teams", updateTeamDescriptionRoute);
-app.use("/api/teams/", getTeamRoute);
+app.use("/api/teams", getTeamRoute);
 app.use("/api/appointment/get-appointment", getAppointmentRoute);
 app.use("/api/appointment/delete-appointment", deleteAppointmentRoute);
 app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
 app.use("/api/polls/create", createPollRoute);
 app.use("/api/polls", updatePollRoute);
 app.use("/api/polls", getPollRoute);
+app.use("/api/document/", getMeetingMinuteRoute);
+
+async function findOrCreateMeetingMinute(id: any) {
+  if (id === null) return;
+
+  const meetingMinute = await MeetingMinute.findById(id);
+  if (meetingMinute) return meetingMinute;
+  return await MeetingMinute.create({ _id: id, data: "" });
+}
+
 // MongoDB connection
 mongoose
   .connect(process.env.MONGODB_URI!, {
@@ -68,6 +94,29 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+startScheduler();
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+io.on("connection", (socket) => {
+  console.log("Socket Connected");
+  socket.on("get-document", async (meeting) => {
+    const meetingMinute = await findOrCreateMeetingMinute(meeting);
+    if (meetingMinute === undefined) {
+      console.log("meeting minute is undefined");
+      return;
+    }
+    socket.join(meeting);
+    socket.emit("load-document", meetingMinute.data);
+
+    socket.on("send-changes", (delta) => {
+      socket.broadcast.to(meeting).emit("receive-changes", delta);
+    });
+
+    socket.on("save-document", async (data) => {
+      await MeetingMinute.findByIdAndUpdate(meeting, { data });
+    });
+  });
 });

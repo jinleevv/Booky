@@ -97,7 +97,9 @@ export default function DashBoardTeams() {
                 <CardHeader className="pt-4">
                   <CardTitle className="flex justify-between">
                     <div className="flex my-auto gap-1">
-                      <Label className="text-lg font-bold">{team.name}</Label>
+                      <Label className="text-lg font-bold">
+                        {team.teamName}
+                      </Label>
                       <div className="my-auto">
                         <Button
                           variant="ghost"

@@ -23,10 +23,10 @@ export const getAppointmentHandler: RequestHandler = async (
       return;
     }
 
-    // Find the appointment with the matching token.
-    const appointment = team.appointments.find(
-      (item) => item.token === appointmentToken
-    );
+    // // Find the appointment with the matching token.
+    // const appointment = team.appointments.find(
+    //   (item) => item.token === appointmentToken
+    // );
 
     // TODO: only check if expire date has not been passed.
     const isWithin7Days = (tokenExpireDate: Date) => {
@@ -37,12 +37,12 @@ export const getAppointmentHandler: RequestHandler = async (
       return tokenExpireDate >= today && tokenExpireDate <= sevenDaysFromNow;
     };
 
-    if (!isWithin7Days(appointment!.tokenExpiry)) {
-      res.status(400).json({ message: "Expired Appointment" });
-      return;
-    }
+    // if (!isWithin7Days(appointment!.tokenExpiry)) {
+    //   res.status(400).json({ message: "Expired Appointment" });
+    //   return;
+    // }
 
-    res.status(200).json(appointment);
+    // res.status(200).json(appointment);
   } catch (error) {
     console.error("Error querying teams:", error);
     res.status(500).json({ message: "Server error" });

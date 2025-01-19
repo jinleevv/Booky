@@ -27,20 +27,20 @@ export const cancelOfficeHourHandler: RequestHandler = async (
     }
 
     // Check if the cancelledMeeting already exists.
-    if (
-      team.cancelledMeetings.includes({
-        day: cancelledDate,
-        meeting: { start: start, end: end },
-      })
-    ) {
-      res.status(400).json({ message: "Date already cancelled" });
-      return;
-    }
+    // if (
+    //   team.cancelledMeetings.includes({
+    //     day: cancelledDate,
+    //     meeting: { start: start, end: end },
+    //   })
+    // ) {
+    //   res.status(400).json({ message: "Date already cancelled" });
+    //   return;
+    // }
 
-    team.cancelledMeetings = [
-      ...team.cancelledMeetings,
-      { day: cancelledDate, meeting: { start: start, end: end } },
-    ];
+    // team.cancelledMeetings = [
+    //   ...team.cancelledMeetings,
+    //   { day: cancelledDate, meeting: { start: start, end: end } },
+    // ];
     await team.save();
 
     // Send a cancellation notification email to all members of the team.
@@ -65,10 +65,10 @@ export const cancelOfficeHourHandler: RequestHandler = async (
       }
     });
 
-    res.status(200).json({
-      message: "Office hour cancelled successfully",
-      cancelledDays: team.cancelledMeetings,
-    });
+    // res.status(200).json({
+    //   message: "Office hour cancelled successfully",
+    //   cancelledDays: team.cancelledMeetings,
+    // });
   } catch (error) {
     console.error("Error cancelling office hour:", error);
     res.status(500).json({ message: "Server error" });
