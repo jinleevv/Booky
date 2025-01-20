@@ -47,7 +47,7 @@ export default function DashBoard() {
         const date = today.getDate().toString().padStart(2, "0");
         const year = today.getFullYear();
         const hour = today.getHours();
-        const todayConverted = month + "-" + date + "-" + year;
+        const todayConverted = year + "-" + month + "-" + date;
 
         const upcoming = [];
         const past = [];
@@ -59,14 +59,13 @@ export default function DashBoard() {
           team.meetingTeam.forEach((meetingTeam) => {
             const meetingTeamName = meetingTeam.meetingName;
             meetingTeam.meeting.forEach((meeting) => {
-              const meetingDateConverted = convertDateFormat(meeting.date);
-              if (meetingDateConverted >= todayConverted) {
+              if (meeting.date >= todayConverted) {
                 upcoming.push({
                   teamName: teamName,
                   teamAdmin: teamAdmin,
                   teamId: teamId,
                   meetingTeamName: meetingTeamName,
-                  date: meetingDateConverted,
+                  date: meeting.date,
                   time: meeting.time,
                   attendees: meeting.attendees,
                 });
@@ -76,7 +75,7 @@ export default function DashBoard() {
                   teamAdmin: teamAdmin,
                   teamId: teamId,
                   meetingTeamName: meetingTeamName,
-                  date: meetingDateConverted,
+                  date: meeting.date,
                   time: meeting.time,
                   attendees: meeting.attendees,
                 });
@@ -94,12 +93,12 @@ export default function DashBoard() {
         // Only show meetings within dateRange
         const upcomingDateLimit = new Date(today);
         upcomingDateLimit.setDate(today.getDate() + dateRange);
-        const formattedUpcomingDateLimit = convertDateFormat(upcomingDateLimit.toISOString().split("T")[0]);
+        const formattedUpcomingDateLimit = upcomingDateLimit.toISOString().split("T")[0];
         const filteredUpcoming = upcoming.filter((meeting) => meeting.date <= formattedUpcomingDateLimit);
 
         const pastDateLimit = new Date(today);
         pastDateLimit.setDate(today.getDate() - dateRange);
-        const formattedPastDateLimit = convertDateFormat(pastDateLimit.toISOString().split("T")[0]);
+        const formattedPastDateLimit = pastDateLimit.toISOString().split("T")[0];
         const filteredPast = past.filter((meeting) => meeting.date >= formattedPastDateLimit);
 
         setUpcomingMeetings(filteredUpcoming);
@@ -112,11 +111,6 @@ export default function DashBoard() {
 
     fetchOfficeHours();
   }, [userEmail, dateRange]);
-
-  // Convert YYYY-MM-DD -> MM-DD-YYYY
-  function convertDateFormat(dateStr: string): string {
-    return dateStr.split("-").reverse().slice(0, 2).reverse().join("-") + "-" + dateStr.split("-")[0];
-  }
 
   // useEffect(() => {
   //   const fetchOfficeHours = async () => {
@@ -535,9 +529,24 @@ export default function DashBoard() {
     }
   };
 
-  async function handleDateRangeSelection(range: number) {
-
+  function getOrdinalSuffix(day: number): string {
+    if (day > 3 && day < 21) return "th"; // Special case for 11th-19th
+    switch (day % 10) {
+      case 1: return "st";
+      case 2: return "nd";
+      case 3: return "rd";
+      default: return "th";
+    }
   }
+  
+  function formatDateWithOrdinal(dateStr: string): string {
+    const date = new Date(dateStr); // Convert YYYY-MM-DD to Date object
+    const dayNumber = date.getDate();
+    const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date);
+  
+    return `${monthName} ${dayNumber}${getOrdinalSuffix(dayNumber)}, ${date.getFullYear()}`;
+  }
+  
 
   return (
     <section className="h-screen w-screen bg-white">
@@ -619,7 +628,7 @@ export default function DashBoard() {
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
                                 <Label className="font-bold">
-                                  {meeting.date}, {meeting.teamName}: {meeting.meetingTeamName}
+                                  {`${formatDateWithOrdinal(meeting.date)} \u00A0\u00A0\u00A0 ${meeting.teamName}: ${meeting.meetingTeamName}`}
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}
@@ -633,19 +642,19 @@ export default function DashBoard() {
                                     (attendee, subIndex) => (
                                       <div className="flex w-full justify-between text-sm">
                                         <div>
-                                          <Label className="text-black font-bold">
-                                            Time:{" "}
-                                          </Label>
-                                          <Label className="text-gray-600">
-                                            {attendee.time}
-                                          </Label>
-                                        </div>
-                                        <div>
                                           <Label className="font-bold text-black">
                                             Email:{" "}
                                           </Label>{" "}
                                           <Label className="text-gray-600">
                                             {attendee.participantEmail}
+                                          </Label>
+                                        </div>
+                                        <div>
+                                          <Label className="text-black font-bold">
+                                            Time:{" "}
+                                          </Label>
+                                          <Label className="text-gray-600">
+                                            {attendee.time}
                                           </Label>
                                         </div>
                                       </div>
