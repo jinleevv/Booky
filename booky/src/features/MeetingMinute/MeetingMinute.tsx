@@ -3,7 +3,10 @@ import "quill/dist/quill.snow.css";
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
+import { Document, Packer, Paragraph } from "docx";
+import { saveAs } from "file-saver";
 import "./MeetingMinute.css";
+import { Button } from "@/components/ui/button";
 
 const SAVE_INTERVAL_MS = 2000;
 
@@ -20,7 +23,7 @@ const TOOLBAR_OPTIONS = [
 ];
 
 export default function MeetingMinute() {
-  const { meetingId } = useParams();
+  const { date, time, meetingId } = useParams();
   const [socket, setSocket] = useState<any>(null);
   const [quill, setQuill] = useState<any>(null);
   useEffect(() => {
@@ -92,5 +95,32 @@ export default function MeetingMinute() {
     setQuill(q);
   }, []);
 
-  return <div className="meetingMinuteContainer mt-4" ref={wrapperRef}></div>;
+  async function handleExport() {
+    if (!quill) return;
+
+    const doc = new Document({
+      sections: [
+        {
+          children: [
+            new Paragraph({
+              text: quill.getText(),
+            }),
+          ],
+        },
+      ],
+    });
+
+    const buffer = await Packer.toBlob(doc);
+
+    saveAs(buffer, `Meeting_Minutes_${date}_${time}.docx`);
+  }
+
+  return (
+    <>
+      <div className="flex w-full h-full justify-end">
+        <Button onClick={handleExport}>Export</Button>
+      </div>
+      <div className="meetingMinuteContainer mt-4" ref={wrapperRef}></div>
+    </>
+  );
 }
