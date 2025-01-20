@@ -30,7 +30,7 @@ const formSchema = z.object({
 });
 
 interface ScheduleFormProps {
-  selectedMeeting: any;
+  selectedMeetingTeam: any;
   selectedDate: string | null;
   selectedTime: string | null;
   teamId: string;
@@ -39,7 +39,7 @@ interface ScheduleFormProps {
 }
 
 export default function ScheduleForm({
-  selectedMeeting,
+  selectedMeetingTeam,
   selectedDate: selectedDay,
   selectedTime,
   teamId,
@@ -84,7 +84,7 @@ export default function ScheduleForm({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            meetingTeamId: selectedMeeting._id,
+            meetingTeamId: selectedMeetingTeam._id,
             day: selectedDay,
             time: selectedTime,
             attend: newAttend,
