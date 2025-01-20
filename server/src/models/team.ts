@@ -35,7 +35,7 @@ export interface IMeetingTeam {
   cancelledMeetings: ICancelledMeetings[];
 }
 
-interface IMeeting {
+export interface IMeeting {
   _id: string;
   date: string;
   time: ITimeRange;
@@ -44,7 +44,7 @@ interface IMeeting {
 
 // An office hour schedule is defined by these attributes.
 // There is one for each day of the week (7 total).
-interface ISchedule {
+export interface ISchedule {
   day: string;
   enabled: boolean;
   times: ITimeRange[];

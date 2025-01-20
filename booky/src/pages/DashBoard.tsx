@@ -603,6 +603,10 @@ export default function DashBoard() {
                     <DropdownMenuItem onClick={() => setDateRange(7)}>
                       <span>7 Days</span>
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setDateRange(31)}>
+                      <span>31 Days</span>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
