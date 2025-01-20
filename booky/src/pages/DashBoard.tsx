@@ -52,15 +52,17 @@ export default function DashBoard() {
 
         const upcoming = [];
         const past = [];
-
+        
         teams.forEach((team) => {
           team.meetingTeam.forEach((meetingTeam) => {
-            meetingTeam.meeting.forEach((meeting) => {
+            meetingTeam.meeting.forEach((meeting) => {console.log(meeting.date);
               if (meeting.date >= todayConverted) {
                 upcoming.push({
                   teamId: team._id,
                   teamName: team.teamName,
+                  meetingTeamId: meetingTeam._id,
                   meetingTeamName: meetingTeam.meetingName,
+                  meetingId: meeting._id,
                   meetingHostEmail: meetingTeam.hostEmail,
                   date: meeting.date,
                   time: meeting.time,
@@ -71,6 +73,7 @@ export default function DashBoard() {
                   teamId: team._id,
                   teamName: team.teamName,
                   meetingTeamName: meetingTeam.meetingName,
+                  meetingId: meeting._id,
                   meetingHostEmail: meetingTeam.hostEmail,
                   date: meeting.date,
                   time: meeting.time,
@@ -488,14 +491,16 @@ export default function DashBoard() {
     return timeInMinutes >= startInMinutes && timeInMinutes <= endInMinutes;
   }
 
-  const handleCancel = async (
+  async function handleCancel(
+    teamId: string, 
+    meetingTeamId: string, 
+    meetingId: string, 
     cancelledDate: string,
-    teamId: string,
     start: string,
-    end: string
-  ) => {
+    end: string,
+  ) {
     try {
-      const response = await fetch(`${server}/api/teams/${teamId}/cancel`, {
+      const response = await fetch(`${server}/api/teams/cancel/${teamId}/${meetingTeamId}/${meetingId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -507,22 +512,16 @@ export default function DashBoard() {
         }),
       });
 
-      if (!response.ok) throw toast("Failed to cancel office hour");
+      if (!response.ok) {
+        toast("Failed to cancel the meeting");
+        return;
+      }
 
-      toast(`Successfully cancelled office hour for ${cancelledDate}`);
-
-      // Remove cancelled office hour from state
-      const filteredUpcoming = upcomingMeetings.filter((item) => {
-        const isCancelled =
-          item.date === cancelledDate &&
-          item.start === start &&
-          item.end === end;
-
-        return !isCancelled; // Keep items that are not cancelled
-      });
-      setUpcomingMeetings(filteredUpcoming);
+      setCancelledMeetings((prev) => [...prev, meetingId]);
+      toast(`Successfully cancelled the meeting`);
     } catch (error) {
-      toast("Failed to cancel office hour.");
+      console.error("Error cancelling meeting:", error);
+      toast("Failed to cancel the meeting.");
     }
   };
 
@@ -537,11 +536,14 @@ export default function DashBoard() {
   }
   
   function formatDateWithOrdinal(dateStr: string): string {
+    console.log(dateStr)
+    const parsedDate = dateStr.split("-");
     const date = new Date(dateStr); // Convert YYYY-MM-DD to Date object
-    const dayNumber = date.getDate();
+    // console.log(date);
+    const dayNumber = parsedDate[2];
     const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date);
   
-    return `${monthName} ${dayNumber}${getOrdinalSuffix(dayNumber)}, ${date.getFullYear()}`;
+    return `${monthName} ${dayNumber}${getOrdinalSuffix(parseInt(dayNumber, 10))}, ${date.getFullYear()}`;
   }
   
 
@@ -664,14 +666,17 @@ export default function DashBoard() {
                                   <Button
                                     variant="outline"
                                     className="ml-4"
-                                    onClick={() => {
+                                    onClick={() => 
                                       handleCancel(
-                                        meeting.date,
                                         meeting.teamId,
-                                        meeting.start,
-                                        meeting.end
-                                      );
-                                    }}
+                                        meeting.meetingTeamId,
+                                        meeting.meetingId,
+                                        meeting.date,
+                                        meeting.time.start,
+                                        meeting.time.end
+                                      )
+                                    }
+                                    disabled={cancelledMeetings.some((cancelled) => cancelled === meeting.meetingId)}
                                   >
                                     Cancel the Meeting
                                   </Button>
