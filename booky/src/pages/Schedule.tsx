@@ -104,7 +104,7 @@ export default function Schedule() {
         setAdminName(data.adminName);
         setAdminEmail(data.adminEmail);
         setAvailableTime(data.availableTime);
-        setDuration(parseInt(data.durations[0], 10));
+        //setDuration(parseInt(data.durations[0], 10));
         setExistingAppointments(data.appointments);
         setTeamMembers(data.members);
         setCancelledDays(data.cancelledMeetings);

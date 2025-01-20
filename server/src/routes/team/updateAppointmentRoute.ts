@@ -10,9 +10,9 @@ function isTimeInRange(time: string, startTime: string, endTime: string) {
     const [time, modifier] = timeString.split(" ");
     let [hours, minutes] = time.split(":").map(Number);
 
-    if (modifier === "PM" && hours !== 12) {
+    if ((modifier === "PM" || modifier === "p.m.") && hours !== 12) {
       hours += 12;
-    } else if (modifier === "AM" && hours === 12) {
+    } else if ((modifier === "AM" || modifier === "p.m.") && hours === 12) {
       hours = 0;
     }
 
@@ -36,7 +36,6 @@ export const updateAppointmentsHandler: RequestHandler = async (
 ): Promise<void> => {
   const { teamId } = req.params;
   const { meetingTeamId, day, time, attend } = req.body;
-
   try {
     if (!meetingTeamId || !attend || !day || !time) {
       res.status(400).json({ message: "Invalid or missing appointments data" });
@@ -49,19 +48,28 @@ export const updateAppointmentsHandler: RequestHandler = async (
       return;
     }
 
-    const findMeetingTeam: any = team.meetingTeam.find(
+    const findMeetingTeam = team.meetingTeam.find(
       (meeting) => meeting._id.toString() === meetingTeamId
     );
 
-    const updateMeeting = findMeetingTeam.meeting.map((m: any) => {
+    if (!findMeetingTeam) {
+      res.status(404).json({ message: "Meeting team not found" });
+      return;
+    }
+
+    let appointmentUpdated = false;
+
+    findMeetingTeam.meeting.forEach((m: any) => {
       if (m.date === day && isTimeInRange(time, m.time.start, m.time.end)) {
-        if (m.attendees) {
-          m.attendees.push(attend);
-        } else {
-          m.attendees = [attend];
-        }
+        m.attendees.push(attend);
+        appointmentUpdated = true;
       }
     });
+
+    if (!appointmentUpdated) {
+      res.status(400).json({ message: "No matching appointment found or attendee already added" });
+      return;
+    }
 
     await team.save();
 
@@ -76,7 +84,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
 
     const mailOptions = {
       from: `Booky <${process.env.EMAIL}>`,
-      to: attend.email,
+      to: attend.participantEmail,
       subject: "Booky Confirmation",
       text: `Booky Confirmation Email\n\n Cancel Link: http://10.140.17.108:3000/${team._id}/${attend.token} \n\n Have a great day :) \n Booky`,
     };

@@ -74,7 +74,8 @@ export default function ScheduleForm({
       token: generateRandomToken(),
       tokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     };
-
+    console.log(values.name);
+    console.log(values.email);
     try {
       const response = await fetch(
         `${server}/api/teams/${teamId}/appointments`,

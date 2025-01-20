@@ -94,7 +94,7 @@ export default function CreateTeamForm() {
       duration: "",
       recurringMeetingSchedule: days.map((day) => ({
         day,
-        enabled: day !== "Sunday" && day !== "Saturday",
+        enabled: false,
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
       })),
       coadmins: [],
@@ -114,8 +114,6 @@ export default function CreateTeamForm() {
       meetingLink: "",
     },
   });
-
-  const meetingTypeSelection = form.watch("meetingType");
 
   const { server, loggedInUser, userEmail, userName } = useHook();
   const [currentTab, setCurrentTab] = useState<string>("recurring");
