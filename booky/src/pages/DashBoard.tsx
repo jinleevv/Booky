@@ -26,6 +26,7 @@ export default function DashBoard() {
   const [upcomingMeetings, setUpcomingMeetings] = useState<any[]>([]);
   const [pastMeetings, setPastMeetings] = useState<any[]>([]);
   const [showUpcoming, setShowUpcoming] = useState(true); // Toggle between views
+  const [cancelledMeetings, setCancelledMeetings] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<number>(7);
 
   useEffect(() => {
@@ -53,34 +54,30 @@ export default function DashBoard() {
         const past = [];
 
         teams.forEach((team) => {
-          const teamName = team.teamName;
-          const teamId = team._id;
-          const teamAdmin = team.adminEmail;
           team.meetingTeam.forEach((meetingTeam) => {
-            const meetingTeamName = meetingTeam.meetingName;
             meetingTeam.meeting.forEach((meeting) => {
               if (meeting.date >= todayConverted) {
                 upcoming.push({
-                  teamName: teamName,
-                  teamAdmin: teamAdmin,
-                  teamId: teamId,
-                  meetingTeamName: meetingTeamName,
+                  teamId: team._id,
+                  teamName: team.teamName,
+                  meetingTeamName: meetingTeam.meetingName,
+                  meetingHostEmail: meetingTeam.hostEmail,
                   date: meeting.date,
                   time: meeting.time,
                   attendees: meeting.attendees,
                 });
               } else {
                 past.push({
-                  teamName: teamName,
-                  teamAdmin: teamAdmin,
-                  teamId: teamId,
-                  meetingTeamName: meetingTeamName,
+                  teamId: team._id,
+                  teamName: team.teamName,
+                  meetingTeamName: meetingTeam.meetingName,
+                  meetingHostEmail: meetingTeam.hostEmail,
                   date: meeting.date,
                   time: meeting.time,
                   attendees: meeting.attendees,
                 });
               }
-            })  
+            })
           });
         });
 
@@ -596,16 +593,12 @@ export default function DashBoard() {
                       <span>1 Day</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setDateRange(3)}>
-                      <span>3 Days</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setDateRange(7)}>
-                      <span>7 Days</span>
+                      <span>1 Week</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setDateRange(31)}>
-                      <span>31 Days</span>
+                      <span>1 Month</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -666,7 +659,7 @@ export default function DashBoard() {
                                   )}
                                 </div>
                               </div>
-                              {meeting.admin === userEmail ? (
+                              {meeting.meetingHostEmail === userEmail ? (
                                 <div className="flex w-full justify-end mt-5">
                                   <Button
                                     variant="outline"

@@ -74,8 +74,7 @@ interface IAttendee {
 // An office hour time slot can be uniquely identified within a team by the day and meeting.
 // Necessary for modifying availability in the calendar.
 interface ICancelledMeetings {
-  day: string;
-  time: ITimeRange;
+  _id: string,
 }
 
 const TimeRangeSchema: Schema = new Schema<ITimeRange>({
@@ -90,8 +89,7 @@ const ScheduleSchema: Schema = new Schema<ISchedule>({
 });
 
 const CancelledMeetingsSchema: Schema = new Schema<ICancelledMeetings>({
-  day: { type: String, required: true },
-  time: { type: String, required: true },
+  _id: { type: String, required: true },
 });
 
 // Storing the name is optional.
