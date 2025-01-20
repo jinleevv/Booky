@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 const router = express.Router();
 
-export const createMeetingHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const createMeetingTeamHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { teamId } = req.params;
   const {
     hostEmail,
@@ -30,7 +30,7 @@ export const createMeetingHandler: RequestHandler = async (req: Request, res: Re
       !currentTab ||
       !teamId
     ) {
-      res.status(400).json({ message: "Invalid or missing meeting data" });
+      res.status(400).json({ message: "Invalid or missing meetingTeam data" });
       return;
     }
 
@@ -97,13 +97,13 @@ export const createMeetingHandler: RequestHandler = async (req: Request, res: Re
     team.meetingTeam.push(newMeeting);
     await team.save();
     
-    res.status(200).json({ message: "Meeting created successfully" });
+    res.status(200).json({ message: "meetingTeam created successfully" });
   } catch (error) {
-    console.error("Error creating meeting", error);
+    console.error("Error creating meetingTeam", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-router.post("/:teamId/meetings", createMeetingHandler);
+router.post("/:teamId/meetingTeam", createMeetingTeamHandler);
 
 export default router;

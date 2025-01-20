@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 const router = express.Router();
 
 export const editMeetingHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-    const { teamId, meetingId } = req.params;
+    const { teamId, meetingTeamId } = req.params;
     const {
         meetingName,
         meetingDescription,
@@ -20,7 +20,7 @@ export const editMeetingHandler: RequestHandler = async (req: Request, res: Resp
     try {
         if(
             !teamId ||
-            !meetingId ||
+            !meetingTeamId ||
             !meetingName ||
             !recurringMeetingSchedule ||
             !oneTimeMeetingSchedule ||
@@ -68,7 +68,7 @@ export const editMeetingHandler: RequestHandler = async (req: Request, res: Resp
         const team = await Team.findOneAndUpdate(
             { 
                 _id: teamId, 
-                "meetingTeam._id": new mongoose.Types.ObjectId(meetingId)
+                "meetingTeam._id": new mongoose.Types.ObjectId(meetingTeamId)
             },
             {
                 $set: updateFields,
@@ -89,6 +89,6 @@ export const editMeetingHandler: RequestHandler = async (req: Request, res: Resp
     }
 }
 
-router.patch("/:teamId/meetings/:meetingId", editMeetingHandler);
+router.patch("/:teamId/meetingTeams/:meetingTeamId", editMeetingHandler);
 
 export default router;
