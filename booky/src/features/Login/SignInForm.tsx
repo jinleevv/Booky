@@ -42,7 +42,6 @@ export default function SignInForm() {
         values.email,
         values.password
       );
-
       toast("Sign-In Successful");
       setLoggedInUser(true);
       setUserName(response.user.displayName);
