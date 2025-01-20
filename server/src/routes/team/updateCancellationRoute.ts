@@ -54,31 +54,30 @@ export const cancelOfficeHourHandler: RequestHandler = async (
     // ];
 
     // Send a cancellation notification email to all members of the team.
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
-      },
-    });
-
-    const mailOptions = {
-      from: `Booky <${process.env.EMAIL}>`,
-      to: [...team.members, team.adminEmail].join(","),
-      subject: "Booky Cancel Announcement",
-      text: `Booky Cancel Announcement \n\n Cancelled Date: ${cancelledDate} \n Start Time: ${start} \n End Time: ${end} \n\n We are sorry for the inconvenience,\n Booky`,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Email sending failed:", error);
-      }
-    });
-
-    // res.status(200).json({
-    //   message: "Office hour cancelled successfully",
-    //   cancelledDays: team.cancelledMeetings,
+    // const transporter = nodemailer.createTransport({
+    //   service: "Gmail",
+    //   auth: {
+    //     user: process.env.EMAIL,
+    //     pass: process.env.PASSWORD,
+    //   },
     // });
+
+    // const mailOptions = {
+    //   from: `Booky <${process.env.EMAIL}>`,
+    //   to: [...team.members, team.adminEmail].join(","),
+    //   subject: "Booky Cancel Announcement",
+    //   text: `Booky Cancel Announcement \n\n Cancelled Date: ${cancelledDate} \n Start Time: ${start} \n End Time: ${end} \n\n We are sorry for the inconvenience,\n Booky`,
+    // };
+
+    // transporter.sendMail(mailOptions, (error, info) => {
+    //   if (error) {
+    //     console.error("Email sending failed:", error);
+    //   }
+    // });
+
+    res.status(200).json({
+      message: "Office hour cancelled successfully",
+    });
   } catch (error) {
     console.error("Error cancelling the meeting:", error);
     res.status(500).json({ message: "Server error" });

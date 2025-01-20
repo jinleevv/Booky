@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
+import { Ban, BanIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
@@ -52,10 +53,12 @@ export default function DashBoard() {
 
         const upcoming = [];
         const past = [];
-        
+        const cancelled = [];
+
         teams.forEach((team) => {
           team.meetingTeam.forEach((meetingTeam) => {
-            meetingTeam.meeting.forEach((meeting) => {console.log(meeting.date);
+            cancelled.push(...meetingTeam.cancelledMeetings.map(meeting => meeting._id));
+            meetingTeam.meeting.forEach((meeting) => {
               if (meeting.date >= todayConverted) {
                 upcoming.push({
                   teamId: team._id,
@@ -88,8 +91,6 @@ export default function DashBoard() {
         upcoming.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         past.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-        // TODO: Filter cancelled meetings
-
         // Only show meetings within dateRange
         const upcomingDateLimit = new Date(today);
         upcomingDateLimit.setDate(today.getDate() + dateRange);
@@ -103,6 +104,7 @@ export default function DashBoard() {
 
         setUpcomingMeetings(filteredUpcoming);
         setPastMeetings(filteredPast);
+        setCancelledMeetings(cancelled);
       } catch (error) {
         toast("Unable to fetch the meeting information");
         console.log(error);
@@ -111,362 +113,6 @@ export default function DashBoard() {
 
     fetchOfficeHours();
   }, [userEmail, dateRange]);
-
-  // useEffect(() => {
-  //   const fetchOfficeHours = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         `${server}/api/teams/by-user?userEmail=${userEmail}`
-  //       );
-
-  //       if (!response.ok) {
-  //         toast("Unable to fetch user information");
-  //         return;
-  //       }
-
-  //       const teams = await response.json();
-
-  //       const today = new Date();
-  //       const month = today.getMonth() + 1;
-  //       const date = today.getDate();
-  //       const year = today.getFullYear();
-  //       const hour = today.getHours();
-  //       const todayConverted = month + "-" + date + "-" + year;
-
-  //       const upcoming = [];
-  //       const past = [];
-  //       const processedMeetings = new Set();
-
-  //       teams.forEach((team) => {
-  //         const teamName = team.name;
-  //         const teamId = team._id;
-  //         const teamAdmin = team.adminEmail;
-  //         const teamAvailableTime = team.availableTime;
-  //         team.appointments.forEach((appointment) => {
-  //           const daysOfWeek = [
-  //             "Sunday",
-  //             "Monday",
-  //             "Tuesday",
-  //             "Wednesday",
-  //             "Thursday",
-  //             "Friday",
-  //             "Saturday",
-  //           ];
-
-  //           const todayDate = new Date(todayConverted);
-  //           const appointmentDate = new Date(appointment.day);
-  //           const appointmentDay =
-  //             daysOfWeek[new Date(appointment.day).getDay()];
-  //           const dateDifference = Math.abs(
-  //             todayDate.getDate() - appointmentDate.getDate()
-  //           );
-
-  //           Object.keys(teamAvailableTime).forEach((meetingHost) => {
-  //             if (processedMeetings.has(appointment.token)) {
-  //               return;
-  //             }
-
-  //             const appointmentAvailbleSlot = teamAvailableTime[
-  //               meetingHost
-  //             ].find((item) => item.day === appointmentDay);
-
-  //             if (todayDate < appointmentDate) {
-  //               if (dateDifference <= 7) {
-  //                 let validStartTime;
-  //                 let validEndTime;
-
-  //                 appointmentAvailbleSlot.times.forEach((item) => {
-  //                   const startTime = item.start;
-  //                   const endTime = item.end;
-  //                   const checkRange = isTimeWithinRange(
-  //                     appointment.time,
-  //                     startTime,
-  //                     endTime
-  //                   );
-  //                   if (checkRange) {
-  //                     validStartTime = startTime;
-  //                     validEndTime = endTime;
-  //                     return;
-  //                   }
-  //                 });
-
-  //                 const checkDateEntry = upcoming.find(
-  //                   (item) =>
-  //                     item.date === appointment.day &&
-  //                     item.start === validStartTime &&
-  //                     item.end === validEndTime
-  //                 );
-
-  //                 if (!checkDateEntry) {
-  //                   upcoming.push({
-  //                     teamId: teamId,
-  //                     admin: teamAdmin,
-  //                     date: appointment.day,
-  //                     day: appointmentDay,
-  //                     start: validStartTime,
-  //                     end: validEndTime,
-  //                     team: teamName,
-  //                     appointments: [],
-  //                   });
-  //                 }
-
-  //                 const existingDateEntry = upcoming.find(
-  //                   (item) =>
-  //                     item.date === appointment.day &&
-  //                     item.start === validStartTime &&
-  //                     item.end === validEndTime
-  //                 );
-
-  //                 existingDateEntry.appointments.push({
-  //                   time: appointment.time,
-  //                   email: appointment.email,
-  //                 });
-
-  //                 processedMeetings.add(appointment.token);
-  //               }
-  //             } else if (todayDate > appointmentDate) {
-  //               if (dateDifference <= 7) {
-  //                 let validStartTime;
-  //                 let validEndTime;
-
-  //                 appointmentAvailbleSlot.times.forEach((item) => {
-  //                   const startTime = item.start;
-  //                   const endTime = item.end;
-  //                   const checkRange = isTimeWithinRange(
-  //                     appointment.time,
-  //                     startTime,
-  //                     endTime
-  //                   );
-  //                   if (checkRange) {
-  //                     validStartTime = startTime;
-  //                     validEndTime = endTime;
-  //                     return;
-  //                   }
-  //                 });
-
-  //                 const checkDateEntry = past.find(
-  //                   (item) =>
-  //                     item.date === appointment.day &&
-  //                     item.start === validStartTime &&
-  //                     item.end === validEndTime
-  //                 );
-
-  //                 if (!checkDateEntry) {
-  //                   past.push({
-  //                     teamId: teamId,
-  //                     admin: teamAdmin,
-  //                     date: appointment.day,
-  //                     day: appointmentDay,
-  //                     start: validStartTime,
-  //                     end: validEndTime,
-  //                     team: teamName,
-  //                     appointments: [],
-  //                   });
-  //                 }
-
-  //                 const existingDateEntry = past.find(
-  //                   (item) =>
-  //                     item.date === appointment.day &&
-  //                     item.start === validStartTime &&
-  //                     item.end === validEndTime
-  //                 );
-
-  //                 existingDateEntry.appointments.push({
-  //                   time: appointment.time,
-  //                   email: appointment.email,
-  //                 });
-
-  //                 processedMeetings.add(appointment.token);
-  //               }
-  //             } else {
-  //               const [_, hours, __, period] = appointment.time.match(
-  //                 /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
-  //               )!;
-  //               let convertHours = parseInt(hours);
-  //               if (
-  //                 (period === "PM" || period === "p.m.") &&
-  //                 convertHours !== 12
-  //               ) {
-  //                 convertHours += 12;
-  //               }
-  //               if (hour <= convertHours) {
-  //                 let validStartTime;
-  //                 let validEndTime;
-
-  //                 appointmentAvailbleSlot.times.forEach((item) => {
-  //                   const startTime = item.start;
-  //                   const endTime = item.end;
-  //                   const checkRange = isTimeWithinRange(
-  //                     appointment.time,
-  //                     startTime,
-  //                     endTime
-  //                   );
-  //                   if (checkRange) {
-  //                     validStartTime = startTime;
-  //                     validEndTime = endTime;
-  //                     return;
-  //                   }
-  //                 });
-
-  //                 const checkDateEntry = upcoming.find(
-  //                   (item) =>
-  //                     item.date === appointment.day &&
-  //                     item.start === validStartTime &&
-  //                     item.end === validEndTime
-  //                 );
-
-  //                 if (!checkDateEntry) {
-  //                   upcoming.push({
-  //                     teamId: teamId,
-  //                     admin: teamAdmin,
-  //                     date: appointment.day,
-  //                     day: appointmentDay,
-  //                     start: validStartTime,
-  //                     end: validEndTime,
-  //                     team: teamName,
-  //                     appointments: [],
-  //                   });
-  //                 }
-
-  //                 const existingDateEntry = upcoming.find(
-  //                   (item) =>
-  //                     item.date === appointment.day &&
-  //                     item.start === validStartTime &&
-  //                     item.end === validEndTime
-  //                 );
-
-  //                 existingDateEntry.appointments.push({
-  //                   time: appointment.time,
-  //                   email: appointment.email,
-  //                 });
-
-  //                 processedMeetings.add(appointment.token);
-  //               } else {
-  //                 let validStartTime;
-  //                 let validEndTime;
-
-  //                 appointmentAvailbleSlot.times.forEach((item) => {
-  //                   const startTime = item.start;
-  //                   const endTime = item.end;
-  //                   const checkRange = isTimeWithinRange(
-  //                     appointment.time,
-  //                     startTime,
-  //                     endTime
-  //                   );
-  //                   if (checkRange) {
-  //                     validStartTime = startTime;
-  //                     validEndTime = endTime;
-  //                     return;
-  //                   }
-  //                 });
-
-  //                 const checkDateEntry = past.find(
-  //                   (item) =>
-  //                     item.date === appointment.day &&
-  //                     item.start === validStartTime &&
-  //                     item.end === validEndTime
-  //                 );
-
-  //                 if (!checkDateEntry) {
-  //                   past.push({
-  //                     teamId: teamId,
-  //                     admin: teamAdmin,
-  //                     date: appointment.day,
-  //                     day: appointmentDay,
-  //                     start: validStartTime,
-  //                     end: validEndTime,
-  //                     team: teamName,
-  //                     appointments: [],
-  //                   });
-  //                 }
-
-  //                 const existingDateEntry = past.find(
-  //                   (item) =>
-  //                     item.date === appointment.day &&
-  //                     item.start === validStartTime &&
-  //                     item.end === validEndTime
-  //                 );
-
-  //                 existingDateEntry.appointments.push({
-  //                   time: appointment.time,
-  //                   email: appointment.email,
-  //                 });
-
-  //                 processedMeetings.add(appointment.token);
-  //               }
-  //             }
-  //           });
-  //         });
-  //       });
-
-  //       let filteredUpcoming = upcoming;
-  //       teams.forEach((team) => {
-  //         team.cancelledMeetings.forEach((cancelledMeeting) => {
-  //           filteredUpcoming = filteredUpcoming.filter((item) => {
-  //             const isCancelled =
-  //               item.date === cancelledMeeting.day &&
-  //               item.start === cancelledMeeting.meeting.start &&
-  //               item.end === cancelledMeeting.meeting.end;
-
-  //             return !isCancelled;
-  //           });
-  //         });
-  //       });
-
-  //       const timeToMinutes = (time: string): number => {
-  //         const [_, hours, minutes, period] = time.match(
-  //           /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
-  //         )!;
-  //         let militaryHours = parseInt(hours);
-  //         if ((period === "PM" || period === "p.m.") && militaryHours !== 12)
-  //           militaryHours += 12;
-  //         if ((period === "AM" || period === "a.m.") && militaryHours === 12)
-  //           militaryHours = 0;
-  //         return militaryHours * 60 + parseInt(minutes);
-  //       };
-
-  //       filteredUpcoming.sort((a, b) => {
-  //         // Compare by date first
-  //         const dateA = new Date(a.date);
-  //         const dateB = new Date(b.date);
-
-  //         if (dateA.getTime() !== dateB.getTime()) {
-  //           return dateA.getTime() - dateB.getTime(); // Sort by date
-  //         }
-
-  //         // If dates are equal, compare by start time
-  //         const startMinutesA = timeToMinutes(a.start);
-  //         const startMinutesB = timeToMinutes(b.start);
-
-  //         return startMinutesA - startMinutesB; // Sort by start time
-  //       });
-
-  //       past.sort((a, b) => {
-  //         // Compare by date first
-  //         const dateA = new Date(a.date);
-  //         const dateB = new Date(b.date);
-
-  //         if (dateA.getTime() !== dateB.getTime()) {
-  //           return dateA.getTime() - dateB.getTime(); // Sort by date
-  //         }
-
-  //         // If dates are equal, compare by start time
-  //         const startMinutesA = timeToMinutes(a.start);
-  //         const startMinutesB = timeToMinutes(b.start);
-
-  //         return startMinutesA - startMinutesB; // Sort by start time
-  //       });
-
-  //       setUpcomingOfficeHours(filteredUpcoming);
-  //       setPastOfficeHours(past);
-  //     } catch (error) {
-  //       toast("Unable to fetch the meeting information");
-  //       console.log(error);
-  //     }
-  //   };
-
-  //   fetchOfficeHours();
-  // }, [userEmail]);
 
   function isTimeWithinRange(
     time: string,
@@ -536,10 +182,8 @@ export default function DashBoard() {
   }
   
   function formatDateWithOrdinal(dateStr: string): string {
-    console.log(dateStr)
     const parsedDate = dateStr.split("-");
     const date = new Date(dateStr); // Convert YYYY-MM-DD to Date object
-    // console.log(date);
     const dayNumber = parsedDate[2];
     const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date);
   
@@ -626,7 +270,8 @@ export default function DashBoard() {
                           <AccordionItem key={index} value={`item-${index}`}>
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
-                                <Label className="font-bold">
+                                <Label className="flex gap-2 font-bold">
+                                  {cancelledMeetings.some((cancelled) => cancelled === meeting.meetingId) ? <BanIcon className="text-red-700" size={15}/> : <></>}
                                   {`${formatDateWithOrdinal(meeting.date)} \u00A0\u00A0\u00A0 ${meeting.teamName}: ${meeting.meetingTeamName}`}
                                 </Label>
                                 <Label className="mr-2">
