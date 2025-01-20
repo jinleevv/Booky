@@ -91,7 +91,9 @@ export default function MeetingDetails() {
                     variant="ghost"
                     className="w-10"
                     onClick={() =>
-                      navigate(`/dashboard/document/${meetingId}/`)
+                      navigate(
+                        `/dashboard/document/${meetingData.date}/${meetingData.time.start} - ${meetingData.time.end}/${meetingId}`
+                      )
                     }
                   >
                     Link
@@ -100,11 +102,39 @@ export default function MeetingDetails() {
                 <div>
                   <Label>Preview:</Label>
                   <ScrollArea className="w-full h-36 text-sm border rounded-lg p-3 mt-2">
-                    {meetingMinuteData
-                      ? meetingMinuteData.data
-                        ? meetingMinuteData.data.ops[0].insert
-                        : ""
-                      : ""}
+                    {meetingMinuteData && meetingMinuteData.data ? (
+                      meetingMinuteData.data.ops.map((op, index) => {
+                        if (typeof op.insert === "string") {
+                          return (
+                            <div
+                              key={index}
+                              style={{
+                                whiteSpace: "pre-wrap", // Respect whitespace and newlines
+                                wordWrap: "break-word", // Ensure long words wrap properly
+                              }}
+                            >
+                              {op.insert}
+                            </div>
+                          );
+                        } else if (op.insert.image) {
+                          return (
+                            <img
+                              key={index}
+                              src={op.insert.image}
+                              alt="Meeting Content"
+                              style={{
+                                maxWidth: "100%",
+                                height: "auto",
+                              }}
+                            />
+                          );
+                        } else {
+                          return null;
+                        }
+                      })
+                    ) : (
+                      <></>
+                    )}
                   </ScrollArea>
                 </div>
                 <div className="mt-6">

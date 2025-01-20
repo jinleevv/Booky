@@ -1,8 +1,10 @@
 import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
 import MeetingMinute from "@/features/MeetingMinute/MeetingMinute";
+import { useParams } from "react-router-dom";
 
 export default function MeetingMinutePage() {
+  const { date, time, meetingId } = useParams();
 
   return (
     <section className="h-screen w-screen bg-white">
@@ -15,7 +17,8 @@ export default function MeetingMinutePage() {
               <Label className="text-2xl font-bold text-black">
                 Meeting Minute
               </Label>{" "}
-              <Label className="text-xs text-gray-400">Insert Time </Label>
+              <Label className="text-xs text-gray-400">Date: {date}</Label>
+              <Label className="text-xs text-gray-400">Time: {time}</Label>
             </div>
           </div>
           <div>

@@ -105,6 +105,7 @@ export default function DashBoard() {
         setUpcomingMeetings(filteredUpcoming);
         setPastMeetings(filteredPast);
         setCancelledMeetings(cancelled);
+
       } catch (error) {
         toast("Unable to fetch the meeting information");
         console.log(error);
@@ -165,6 +166,7 @@ export default function DashBoard() {
 
       setCancelledMeetings((prev) => [...prev, meetingId]);
       toast(`Successfully cancelled the meeting`);
+
     } catch (error) {
       console.error("Error cancelling meeting:", error);
       toast("Failed to cancel the meeting.");

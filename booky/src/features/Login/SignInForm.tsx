@@ -12,7 +12,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { auth } from "../../../firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useHook } from "@/hooks";
@@ -31,12 +35,13 @@ export default function SignInForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      await setPersistence(auth, browserSessionPersistence);
+
       const response = await signInWithEmailAndPassword(
         auth,
         values.email,
         values.password
       );
-
       toast("Sign-In Successful");
       setLoggedInUser(true);
       setUserName(response.user.displayName);
@@ -44,6 +49,8 @@ export default function SignInForm() {
     } catch (error) {
       if (error.code === "auth/invalid-credential") {
         toast("Invalid email or password");
+      } else {
+        toast("Unable to sign in due to an error");
       }
     }
   }

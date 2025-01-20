@@ -3,7 +3,11 @@ import "quill/dist/quill.snow.css";
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
+import { Document, ImageRun, Packer, Paragraph } from "docx";
+import { saveAs } from "file-saver";
 import "./MeetingMinute.css";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const SAVE_INTERVAL_MS = 2000;
 
@@ -20,7 +24,7 @@ const TOOLBAR_OPTIONS = [
 ];
 
 export default function MeetingMinute() {
-  const { meetingId } = useParams();
+  const { date, time, meetingId } = useParams();
   const [socket, setSocket] = useState<any>(null);
   const [quill, setQuill] = useState<any>(null);
   useEffect(() => {
@@ -92,5 +96,76 @@ export default function MeetingMinute() {
     setQuill(q);
   }, []);
 
-  return <div className="meetingMinuteContainer mt-4" ref={wrapperRef}></div>;
+  async function handleExport() {
+    if (!quill) return;
+
+    try {
+      const delta = quill.getContents();
+      const children = [];
+
+      const editorElement = document.querySelector(".ql-editor");
+
+      for (const op of delta.ops) {
+        if (op.insert && typeof op.insert === "string") {
+          children.push(
+            new Paragraph({
+              text: op.insert.trim(),
+            })
+          );
+        } else if (op.insert && op.insert.image) {
+          const src = op.insert.image;
+
+          if (src.startsWith("data:image")) {
+            const base64Data = src.split(",")[1];
+            const buffer = Uint8Array.from(atob(base64Data), (c) =>
+              c.charCodeAt(0)
+            );
+
+            // Find the corresponding image in the editor DOM
+            const imageElement = editorElement?.querySelector<HTMLImageElement>(
+              `img[src="${src}"]`
+            );
+
+            // Get image dimensions
+            const width = imageElement?.naturalWidth || 300; // Default to 300px
+            const height = imageElement?.naturalHeight || 200; // Default to 200px
+
+            children.push(
+              new Paragraph({
+                children: [
+                  new ImageRun({
+                    data: buffer,
+                    transformation: { width, height },
+                    type: "png",
+                  }),
+                ],
+              })
+            );
+          }
+        }
+      }
+
+      const doc = new Document({
+        sections: [
+          {
+            children,
+          },
+        ],
+      });
+
+      const buffer = await Packer.toBlob(doc);
+      saveAs(buffer, `Meeting_Minutes_${date}_${time}.docx`);
+    } catch (error) {
+      toast("Failed to export document. Please try again.");
+    }
+  }
+
+  return (
+    <>
+      <div className="flex w-full h-full justify-end">
+        <Button onClick={handleExport}>Export</Button>
+      </div>
+      <div className="meetingMinuteContainer mt-4" ref={wrapperRef}></div>
+    </>
+  );
 }
