@@ -29,7 +29,6 @@ export default function DashBoardSchedule() {
   const [teamCoAdmin, setTeamCoAdmin] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
   const [meetingTeam, setMeetingTeam] = useState<any[]>([]);
-  const [duration, setDuration] = useState<number>(5);
   const [existingAppointments, setExistingAppointments] = useState<any[]>([]);
   const [cancelledDays, setCancelledDays] = useState<ICancelledDays[]>([]);
   const [selectedHost, setSelectedHost] = useState<string | null>(null);
@@ -110,7 +109,6 @@ export default function DashBoardSchedule() {
                     setTeamMembers={setTeamMembers}
                     meetingTeam={meetingTeam}
                     setMeetingTeam={setMeetingTeam}
-                    duration={duration}
                     existingAppointments={existingAppointments}
                     cancelledDays={cancelledDays}
                     selectedHost={selectedHost}
@@ -128,7 +126,6 @@ export default function DashBoardSchedule() {
                     setTeamMembers={setTeamMembers}
                     meetingTeam={meetingTeam}
                     setMeetingTeam={setMeetingTeam}
-                    duration={duration}
                     existingAppointments={existingAppointments}
                     cancelledDays={cancelledDays}
                     selectedHost={selectedHost}

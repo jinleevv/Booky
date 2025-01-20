@@ -47,7 +47,6 @@ interface IViewDetailsProps {
   setTeamMembers: React.Dispatch<React.SetStateAction<string[]>>;
   meetingTeam: any[];
   setMeetingTeam: React.Dispatch<React.SetStateAction<any>>;
-  duration: number;
   existingAppointments: any[];
   cancelledDays: ICancelledDays[];
   selectedHost: string | null;
@@ -64,7 +63,6 @@ export default function ViewDetails({
   setTeamMembers,
   meetingTeam,
   setMeetingTeam,
-  duration,
   selectedHost,
   setSelectedHost,
 }: IViewDetailsProps) {

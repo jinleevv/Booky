@@ -4,9 +4,18 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
+import { RiArrowDropDownLine } from "react-icons/ri";
+import { TbCalendar } from "react-icons/tb";
 import { useEffect, useState } from "react";
 import { useHook } from "@/hooks";
 import { toast } from "sonner";
@@ -14,9 +23,10 @@ import { toast } from "sonner";
 export default function DashBoard() {
   const { server, userEmail } = useHook();
 
-  const [upcomingOfficeHours, setUpcomingOfficeHours] = useState<any[]>([]);
-  const [pastOfficeHours, setPastOfficeHours] = useState<any[]>([]);
+  const [upcomingMeetings, setUpcomingMeetings] = useState<any[]>([]);
+  const [pastMeetings, setPastMeetings] = useState<any[]>([]);
   const [showUpcoming, setShowUpcoming] = useState(true); // Toggle between views
+  const [dateRange, setDateRange] = useState<number>(7);
 
   useEffect(() => {
     const fetchOfficeHours = async () => {
@@ -33,338 +43,67 @@ export default function DashBoard() {
         const teams = await response.json();
 
         const today = new Date();
-        const month = today.getMonth() + 1;
-        const date = today.getDate();
+        const month = (today.getMonth() + 1).toString().padStart(2, "0");
+        const date = today.getDate().toString().padStart(2, "0");
         const year = today.getFullYear();
         const hour = today.getHours();
         const todayConverted = month + "-" + date + "-" + year;
 
         const upcoming = [];
         const past = [];
-        const processedMeetings = new Set();
 
         teams.forEach((team) => {
-          const teamName = team.name;
+          const teamName = team.teamName;
           const teamId = team._id;
           const teamAdmin = team.adminEmail;
-          const teamAvailableTime = team.availableTime;
-          team.appointments.forEach((appointment) => {
-            const daysOfWeek = [
-              "Sunday",
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-            ];
-
-            const todayDate = new Date(todayConverted);
-            const appointmentDate = new Date(appointment.day);
-            const appointmentDay =
-              daysOfWeek[new Date(appointment.day).getDay()];
-            const dateDifference = Math.abs(
-              todayDate.getDate() - appointmentDate.getDate()
-            );
-
-            Object.keys(teamAvailableTime).forEach((meetingHost) => {
-              if (processedMeetings.has(appointment.token)) {
-                return;
-              }
-
-              const appointmentAvailbleSlot = teamAvailableTime[
-                meetingHost
-              ].find((item) => item.day === appointmentDay);
-
-              if (todayDate < appointmentDate) {
-                if (dateDifference <= 7) {
-                  let validStartTime;
-                  let validEndTime;
-
-                  appointmentAvailbleSlot.times.forEach((item) => {
-                    const startTime = item.start;
-                    const endTime = item.end;
-                    const checkRange = isTimeWithinRange(
-                      appointment.time,
-                      startTime,
-                      endTime
-                    );
-                    if (checkRange) {
-                      validStartTime = startTime;
-                      validEndTime = endTime;
-                      return;
-                    }
-                  });
-
-                  const checkDateEntry = upcoming.find(
-                    (item) =>
-                      item.date === appointment.day &&
-                      item.start === validStartTime &&
-                      item.end === validEndTime
-                  );
-
-                  if (!checkDateEntry) {
-                    upcoming.push({
-                      teamId: teamId,
-                      admin: teamAdmin,
-                      date: appointment.day,
-                      day: appointmentDay,
-                      start: validStartTime,
-                      end: validEndTime,
-                      team: teamName,
-                      appointments: [],
-                    });
-                  }
-
-                  const existingDateEntry = upcoming.find(
-                    (item) =>
-                      item.date === appointment.day &&
-                      item.start === validStartTime &&
-                      item.end === validEndTime
-                  );
-
-                  existingDateEntry.appointments.push({
-                    time: appointment.time,
-                    email: appointment.email,
-                  });
-
-                  processedMeetings.add(appointment.token);
-                }
-              } else if (todayDate > appointmentDate) {
-                if (dateDifference <= 7) {
-                  let validStartTime;
-                  let validEndTime;
-
-                  appointmentAvailbleSlot.times.forEach((item) => {
-                    const startTime = item.start;
-                    const endTime = item.end;
-                    const checkRange = isTimeWithinRange(
-                      appointment.time,
-                      startTime,
-                      endTime
-                    );
-                    if (checkRange) {
-                      validStartTime = startTime;
-                      validEndTime = endTime;
-                      return;
-                    }
-                  });
-
-                  const checkDateEntry = past.find(
-                    (item) =>
-                      item.date === appointment.day &&
-                      item.start === validStartTime &&
-                      item.end === validEndTime
-                  );
-
-                  if (!checkDateEntry) {
-                    past.push({
-                      teamId: teamId,
-                      admin: teamAdmin,
-                      date: appointment.day,
-                      day: appointmentDay,
-                      start: validStartTime,
-                      end: validEndTime,
-                      team: teamName,
-                      appointments: [],
-                    });
-                  }
-
-                  const existingDateEntry = past.find(
-                    (item) =>
-                      item.date === appointment.day &&
-                      item.start === validStartTime &&
-                      item.end === validEndTime
-                  );
-
-                  existingDateEntry.appointments.push({
-                    time: appointment.time,
-                    email: appointment.email,
-                  });
-
-                  processedMeetings.add(appointment.token);
-                }
+          team.meetingTeam.forEach((meetingTeam) => {
+            const meetingTeamName = meetingTeam.meetingName;
+            meetingTeam.meeting.forEach((meeting) => {
+              const meetingDateConverted = convertDateFormat(meeting.date);
+              if (meetingDateConverted >= todayConverted) {
+                upcoming.push({
+                  teamName: teamName,
+                  teamAdmin: teamAdmin,
+                  teamId: teamId,
+                  meetingTeamName: meetingTeamName,
+                  date: meetingDateConverted,
+                  time: meeting.time,
+                  attendees: meeting.attendees,
+                });
               } else {
-                const [_, hours, __, period] = appointment.time.match(
-                  /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
-                )!;
-                let convertHours = parseInt(hours);
-                if (
-                  (period === "PM" || period === "p.m.") &&
-                  convertHours !== 12
-                ) {
-                  convertHours += 12;
-                }
-                if (hour <= convertHours) {
-                  let validStartTime;
-                  let validEndTime;
-
-                  appointmentAvailbleSlot.times.forEach((item) => {
-                    const startTime = item.start;
-                    const endTime = item.end;
-                    const checkRange = isTimeWithinRange(
-                      appointment.time,
-                      startTime,
-                      endTime
-                    );
-                    if (checkRange) {
-                      validStartTime = startTime;
-                      validEndTime = endTime;
-                      return;
-                    }
-                  });
-
-                  const checkDateEntry = upcoming.find(
-                    (item) =>
-                      item.date === appointment.day &&
-                      item.start === validStartTime &&
-                      item.end === validEndTime
-                  );
-
-                  if (!checkDateEntry) {
-                    upcoming.push({
-                      teamId: teamId,
-                      admin: teamAdmin,
-                      date: appointment.day,
-                      day: appointmentDay,
-                      start: validStartTime,
-                      end: validEndTime,
-                      team: teamName,
-                      appointments: [],
-                    });
-                  }
-
-                  const existingDateEntry = upcoming.find(
-                    (item) =>
-                      item.date === appointment.day &&
-                      item.start === validStartTime &&
-                      item.end === validEndTime
-                  );
-
-                  existingDateEntry.appointments.push({
-                    time: appointment.time,
-                    email: appointment.email,
-                  });
-
-                  processedMeetings.add(appointment.token);
-                } else {
-                  let validStartTime;
-                  let validEndTime;
-
-                  appointmentAvailbleSlot.times.forEach((item) => {
-                    const startTime = item.start;
-                    const endTime = item.end;
-                    const checkRange = isTimeWithinRange(
-                      appointment.time,
-                      startTime,
-                      endTime
-                    );
-                    if (checkRange) {
-                      validStartTime = startTime;
-                      validEndTime = endTime;
-                      return;
-                    }
-                  });
-
-                  const checkDateEntry = past.find(
-                    (item) =>
-                      item.date === appointment.day &&
-                      item.start === validStartTime &&
-                      item.end === validEndTime
-                  );
-
-                  if (!checkDateEntry) {
-                    past.push({
-                      teamId: teamId,
-                      admin: teamAdmin,
-                      date: appointment.day,
-                      day: appointmentDay,
-                      start: validStartTime,
-                      end: validEndTime,
-                      team: teamName,
-                      appointments: [],
-                    });
-                  }
-
-                  const existingDateEntry = past.find(
-                    (item) =>
-                      item.date === appointment.day &&
-                      item.start === validStartTime &&
-                      item.end === validEndTime
-                  );
-
-                  existingDateEntry.appointments.push({
-                    time: appointment.time,
-                    email: appointment.email,
-                  });
-
-                  processedMeetings.add(appointment.token);
-                }
+                past.push({
+                  teamName: teamName,
+                  teamAdmin: teamAdmin,
+                  teamId: teamId,
+                  meetingTeamName: meetingTeamName,
+                  date: meetingDateConverted,
+                  time: meeting.time,
+                  attendees: meeting.attendees,
+                });
               }
-            });
+            })  
           });
         });
 
-        let filteredUpcoming = upcoming;
-        teams.forEach((team) => {
-          team.cancelledMeetings.forEach((cancelledMeeting) => {
-            filteredUpcoming = filteredUpcoming.filter((item) => {
-              const isCancelled =
-                item.date === cancelledMeeting.day &&
-                item.start === cancelledMeeting.meeting.start &&
-                item.end === cancelledMeeting.meeting.end;
+        // sort upcoming and past meetings by date
+        upcoming.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        past.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-              return !isCancelled;
-            });
-          });
-        });
+        // TODO: Filter cancelled meetings
 
-        const timeToMinutes = (time: string): number => {
-          const [_, hours, minutes, period] = time.match(
-            /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
-          )!;
-          let militaryHours = parseInt(hours);
-          if ((period === "PM" || period === "p.m.") && militaryHours !== 12)
-            militaryHours += 12;
-          if ((period === "AM" || period === "a.m.") && militaryHours === 12)
-            militaryHours = 0;
-          return militaryHours * 60 + parseInt(minutes);
-        };
+        // Only show meetings within dateRange
+        const upcomingDateLimit = new Date(today);
+        upcomingDateLimit.setDate(today.getDate() + dateRange);
+        const formattedUpcomingDateLimit = convertDateFormat(upcomingDateLimit.toISOString().split("T")[0]);
+        const filteredUpcoming = upcoming.filter((meeting) => meeting.date <= formattedUpcomingDateLimit);
 
-        filteredUpcoming.sort((a, b) => {
-          // Compare by date first
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
+        const pastDateLimit = new Date(today);
+        pastDateLimit.setDate(today.getDate() - dateRange);
+        const formattedPastDateLimit = convertDateFormat(pastDateLimit.toISOString().split("T")[0]);
+        const filteredPast = past.filter((meeting) => meeting.date >= formattedPastDateLimit);
 
-          if (dateA.getTime() !== dateB.getTime()) {
-            return dateA.getTime() - dateB.getTime(); // Sort by date
-          }
-
-          // If dates are equal, compare by start time
-          const startMinutesA = timeToMinutes(a.start);
-          const startMinutesB = timeToMinutes(b.start);
-
-          return startMinutesA - startMinutesB; // Sort by start time
-        });
-
-        past.sort((a, b) => {
-          // Compare by date first
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-
-          if (dateA.getTime() !== dateB.getTime()) {
-            return dateA.getTime() - dateB.getTime(); // Sort by date
-          }
-
-          // If dates are equal, compare by start time
-          const startMinutesA = timeToMinutes(a.start);
-          const startMinutesB = timeToMinutes(b.start);
-
-          return startMinutesA - startMinutesB; // Sort by start time
-        });
-
-        setUpcomingOfficeHours(filteredUpcoming);
-        setPastOfficeHours(past);
+        setUpcomingMeetings(filteredUpcoming);
+        setPastMeetings(filteredPast);
       } catch (error) {
         toast("Unable to fetch the meeting information");
         console.log(error);
@@ -372,7 +111,368 @@ export default function DashBoard() {
     };
 
     fetchOfficeHours();
-  }, [userEmail]);
+  }, [userEmail, dateRange]);
+
+  // Convert YYYY-MM-DD -> MM-DD-YYYY
+  function convertDateFormat(dateStr: string): string {
+    return dateStr.split("-").reverse().slice(0, 2).reverse().join("-") + "-" + dateStr.split("-")[0];
+  }
+
+  // useEffect(() => {
+  //   const fetchOfficeHours = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `${server}/api/teams/by-user?userEmail=${userEmail}`
+  //       );
+
+  //       if (!response.ok) {
+  //         toast("Unable to fetch user information");
+  //         return;
+  //       }
+
+  //       const teams = await response.json();
+
+  //       const today = new Date();
+  //       const month = today.getMonth() + 1;
+  //       const date = today.getDate();
+  //       const year = today.getFullYear();
+  //       const hour = today.getHours();
+  //       const todayConverted = month + "-" + date + "-" + year;
+
+  //       const upcoming = [];
+  //       const past = [];
+  //       const processedMeetings = new Set();
+
+  //       teams.forEach((team) => {
+  //         const teamName = team.name;
+  //         const teamId = team._id;
+  //         const teamAdmin = team.adminEmail;
+  //         const teamAvailableTime = team.availableTime;
+  //         team.appointments.forEach((appointment) => {
+  //           const daysOfWeek = [
+  //             "Sunday",
+  //             "Monday",
+  //             "Tuesday",
+  //             "Wednesday",
+  //             "Thursday",
+  //             "Friday",
+  //             "Saturday",
+  //           ];
+
+  //           const todayDate = new Date(todayConverted);
+  //           const appointmentDate = new Date(appointment.day);
+  //           const appointmentDay =
+  //             daysOfWeek[new Date(appointment.day).getDay()];
+  //           const dateDifference = Math.abs(
+  //             todayDate.getDate() - appointmentDate.getDate()
+  //           );
+
+  //           Object.keys(teamAvailableTime).forEach((meetingHost) => {
+  //             if (processedMeetings.has(appointment.token)) {
+  //               return;
+  //             }
+
+  //             const appointmentAvailbleSlot = teamAvailableTime[
+  //               meetingHost
+  //             ].find((item) => item.day === appointmentDay);
+
+  //             if (todayDate < appointmentDate) {
+  //               if (dateDifference <= 7) {
+  //                 let validStartTime;
+  //                 let validEndTime;
+
+  //                 appointmentAvailbleSlot.times.forEach((item) => {
+  //                   const startTime = item.start;
+  //                   const endTime = item.end;
+  //                   const checkRange = isTimeWithinRange(
+  //                     appointment.time,
+  //                     startTime,
+  //                     endTime
+  //                   );
+  //                   if (checkRange) {
+  //                     validStartTime = startTime;
+  //                     validEndTime = endTime;
+  //                     return;
+  //                   }
+  //                 });
+
+  //                 const checkDateEntry = upcoming.find(
+  //                   (item) =>
+  //                     item.date === appointment.day &&
+  //                     item.start === validStartTime &&
+  //                     item.end === validEndTime
+  //                 );
+
+  //                 if (!checkDateEntry) {
+  //                   upcoming.push({
+  //                     teamId: teamId,
+  //                     admin: teamAdmin,
+  //                     date: appointment.day,
+  //                     day: appointmentDay,
+  //                     start: validStartTime,
+  //                     end: validEndTime,
+  //                     team: teamName,
+  //                     appointments: [],
+  //                   });
+  //                 }
+
+  //                 const existingDateEntry = upcoming.find(
+  //                   (item) =>
+  //                     item.date === appointment.day &&
+  //                     item.start === validStartTime &&
+  //                     item.end === validEndTime
+  //                 );
+
+  //                 existingDateEntry.appointments.push({
+  //                   time: appointment.time,
+  //                   email: appointment.email,
+  //                 });
+
+  //                 processedMeetings.add(appointment.token);
+  //               }
+  //             } else if (todayDate > appointmentDate) {
+  //               if (dateDifference <= 7) {
+  //                 let validStartTime;
+  //                 let validEndTime;
+
+  //                 appointmentAvailbleSlot.times.forEach((item) => {
+  //                   const startTime = item.start;
+  //                   const endTime = item.end;
+  //                   const checkRange = isTimeWithinRange(
+  //                     appointment.time,
+  //                     startTime,
+  //                     endTime
+  //                   );
+  //                   if (checkRange) {
+  //                     validStartTime = startTime;
+  //                     validEndTime = endTime;
+  //                     return;
+  //                   }
+  //                 });
+
+  //                 const checkDateEntry = past.find(
+  //                   (item) =>
+  //                     item.date === appointment.day &&
+  //                     item.start === validStartTime &&
+  //                     item.end === validEndTime
+  //                 );
+
+  //                 if (!checkDateEntry) {
+  //                   past.push({
+  //                     teamId: teamId,
+  //                     admin: teamAdmin,
+  //                     date: appointment.day,
+  //                     day: appointmentDay,
+  //                     start: validStartTime,
+  //                     end: validEndTime,
+  //                     team: teamName,
+  //                     appointments: [],
+  //                   });
+  //                 }
+
+  //                 const existingDateEntry = past.find(
+  //                   (item) =>
+  //                     item.date === appointment.day &&
+  //                     item.start === validStartTime &&
+  //                     item.end === validEndTime
+  //                 );
+
+  //                 existingDateEntry.appointments.push({
+  //                   time: appointment.time,
+  //                   email: appointment.email,
+  //                 });
+
+  //                 processedMeetings.add(appointment.token);
+  //               }
+  //             } else {
+  //               const [_, hours, __, period] = appointment.time.match(
+  //                 /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
+  //               )!;
+  //               let convertHours = parseInt(hours);
+  //               if (
+  //                 (period === "PM" || period === "p.m.") &&
+  //                 convertHours !== 12
+  //               ) {
+  //                 convertHours += 12;
+  //               }
+  //               if (hour <= convertHours) {
+  //                 let validStartTime;
+  //                 let validEndTime;
+
+  //                 appointmentAvailbleSlot.times.forEach((item) => {
+  //                   const startTime = item.start;
+  //                   const endTime = item.end;
+  //                   const checkRange = isTimeWithinRange(
+  //                     appointment.time,
+  //                     startTime,
+  //                     endTime
+  //                   );
+  //                   if (checkRange) {
+  //                     validStartTime = startTime;
+  //                     validEndTime = endTime;
+  //                     return;
+  //                   }
+  //                 });
+
+  //                 const checkDateEntry = upcoming.find(
+  //                   (item) =>
+  //                     item.date === appointment.day &&
+  //                     item.start === validStartTime &&
+  //                     item.end === validEndTime
+  //                 );
+
+  //                 if (!checkDateEntry) {
+  //                   upcoming.push({
+  //                     teamId: teamId,
+  //                     admin: teamAdmin,
+  //                     date: appointment.day,
+  //                     day: appointmentDay,
+  //                     start: validStartTime,
+  //                     end: validEndTime,
+  //                     team: teamName,
+  //                     appointments: [],
+  //                   });
+  //                 }
+
+  //                 const existingDateEntry = upcoming.find(
+  //                   (item) =>
+  //                     item.date === appointment.day &&
+  //                     item.start === validStartTime &&
+  //                     item.end === validEndTime
+  //                 );
+
+  //                 existingDateEntry.appointments.push({
+  //                   time: appointment.time,
+  //                   email: appointment.email,
+  //                 });
+
+  //                 processedMeetings.add(appointment.token);
+  //               } else {
+  //                 let validStartTime;
+  //                 let validEndTime;
+
+  //                 appointmentAvailbleSlot.times.forEach((item) => {
+  //                   const startTime = item.start;
+  //                   const endTime = item.end;
+  //                   const checkRange = isTimeWithinRange(
+  //                     appointment.time,
+  //                     startTime,
+  //                     endTime
+  //                   );
+  //                   if (checkRange) {
+  //                     validStartTime = startTime;
+  //                     validEndTime = endTime;
+  //                     return;
+  //                   }
+  //                 });
+
+  //                 const checkDateEntry = past.find(
+  //                   (item) =>
+  //                     item.date === appointment.day &&
+  //                     item.start === validStartTime &&
+  //                     item.end === validEndTime
+  //                 );
+
+  //                 if (!checkDateEntry) {
+  //                   past.push({
+  //                     teamId: teamId,
+  //                     admin: teamAdmin,
+  //                     date: appointment.day,
+  //                     day: appointmentDay,
+  //                     start: validStartTime,
+  //                     end: validEndTime,
+  //                     team: teamName,
+  //                     appointments: [],
+  //                   });
+  //                 }
+
+  //                 const existingDateEntry = past.find(
+  //                   (item) =>
+  //                     item.date === appointment.day &&
+  //                     item.start === validStartTime &&
+  //                     item.end === validEndTime
+  //                 );
+
+  //                 existingDateEntry.appointments.push({
+  //                   time: appointment.time,
+  //                   email: appointment.email,
+  //                 });
+
+  //                 processedMeetings.add(appointment.token);
+  //               }
+  //             }
+  //           });
+  //         });
+  //       });
+
+  //       let filteredUpcoming = upcoming;
+  //       teams.forEach((team) => {
+  //         team.cancelledMeetings.forEach((cancelledMeeting) => {
+  //           filteredUpcoming = filteredUpcoming.filter((item) => {
+  //             const isCancelled =
+  //               item.date === cancelledMeeting.day &&
+  //               item.start === cancelledMeeting.meeting.start &&
+  //               item.end === cancelledMeeting.meeting.end;
+
+  //             return !isCancelled;
+  //           });
+  //         });
+  //       });
+
+  //       const timeToMinutes = (time: string): number => {
+  //         const [_, hours, minutes, period] = time.match(
+  //           /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
+  //         )!;
+  //         let militaryHours = parseInt(hours);
+  //         if ((period === "PM" || period === "p.m.") && militaryHours !== 12)
+  //           militaryHours += 12;
+  //         if ((period === "AM" || period === "a.m.") && militaryHours === 12)
+  //           militaryHours = 0;
+  //         return militaryHours * 60 + parseInt(minutes);
+  //       };
+
+  //       filteredUpcoming.sort((a, b) => {
+  //         // Compare by date first
+  //         const dateA = new Date(a.date);
+  //         const dateB = new Date(b.date);
+
+  //         if (dateA.getTime() !== dateB.getTime()) {
+  //           return dateA.getTime() - dateB.getTime(); // Sort by date
+  //         }
+
+  //         // If dates are equal, compare by start time
+  //         const startMinutesA = timeToMinutes(a.start);
+  //         const startMinutesB = timeToMinutes(b.start);
+
+  //         return startMinutesA - startMinutesB; // Sort by start time
+  //       });
+
+  //       past.sort((a, b) => {
+  //         // Compare by date first
+  //         const dateA = new Date(a.date);
+  //         const dateB = new Date(b.date);
+
+  //         if (dateA.getTime() !== dateB.getTime()) {
+  //           return dateA.getTime() - dateB.getTime(); // Sort by date
+  //         }
+
+  //         // If dates are equal, compare by start time
+  //         const startMinutesA = timeToMinutes(a.start);
+  //         const startMinutesB = timeToMinutes(b.start);
+
+  //         return startMinutesA - startMinutesB; // Sort by start time
+  //       });
+
+  //       setUpcomingOfficeHours(filteredUpcoming);
+  //       setPastOfficeHours(past);
+  //     } catch (error) {
+  //       toast("Unable to fetch the meeting information");
+  //       console.log(error);
+  //     }
+  //   };
+
+  //   fetchOfficeHours();
+  // }, [userEmail]);
 
   function isTimeWithinRange(
     time: string,
@@ -421,7 +521,7 @@ export default function DashBoard() {
       toast(`Successfully cancelled office hour for ${cancelledDate}`);
 
       // Remove cancelled office hour from state
-      const filteredUpcoming = upcomingOfficeHours.filter((item) => {
+      const filteredUpcoming = upcomingMeetings.filter((item) => {
         const isCancelled =
           item.date === cancelledDate &&
           item.start === start &&
@@ -429,11 +529,15 @@ export default function DashBoard() {
 
         return !isCancelled; // Keep items that are not cancelled
       });
-      setUpcomingOfficeHours(filteredUpcoming);
+      setUpcomingMeetings(filteredUpcoming);
     } catch (error) {
       toast("Failed to cancel office hour.");
     }
   };
+
+  async function handleDateRangeSelection(range: number) {
+
+  }
 
   return (
     <section className="h-screen w-screen bg-white">
@@ -466,6 +570,33 @@ export default function DashBoard() {
               >
                 Past
               </Button>
+              <div className="ml-auto">
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    asChild
+                    className="hover:bg-slate-100 p-1 rounded-lg"
+                  >
+                    <div className="flex gap-1">
+                      <TbCalendar size={15} />
+                      <Label className="font-bold m-auto">Date Range: {dateRange} days</Label>
+                      <RiArrowDropDownLine className="m-auto" />
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-32">
+                    <DropdownMenuItem onClick={() => setDateRange(1)}>
+                      <span>1 Day</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setDateRange(3)}>
+                      <span>3 Days</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setDateRange(7)}>
+                      <span>7 Days</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
             <div className="border border-dashed rounded-md p-4">
               <Accordion
@@ -475,7 +606,7 @@ export default function DashBoard() {
               >
                 {showUpcoming ? (
                   <>
-                    {upcomingOfficeHours.length === 0 ? (
+                    {upcomingMeetings.length === 0 ? (
                       <>
                         <div className="w-full text-center">
                           <Label>No Meetings</Label>
@@ -483,30 +614,30 @@ export default function DashBoard() {
                       </>
                     ) : (
                       <>
-                        {upcomingOfficeHours.map((meeting, index) => (
+                        {upcomingMeetings.map((meeting, index) => (
                           <AccordionItem key={index} value={`item-${index}`}>
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
                                 <Label className="font-bold">
-                                  {meeting.date}, {meeting.team}
+                                  {meeting.date}, {meeting.teamName}: {meeting.meetingTeamName}
                                 </Label>
                                 <Label className="mr-2">
-                                  {meeting.start} - {meeting.end}
+                                  {meeting.time.start} - {meeting.time.end}
                                 </Label>
                               </div>
                             </AccordionTrigger>
                             <AccordionContent>
                               <div className="flex w-full justify-between items-center mt-3">
                                 <div className="w-full space-y-2">
-                                  {meeting.appointments.map(
-                                    (appointment, subIndex) => (
+                                  {meeting.attendees.map(
+                                    (attendee, subIndex) => (
                                       <div className="flex w-full justify-between text-sm">
                                         <div>
                                           <Label className="text-black font-bold">
                                             Time:{" "}
                                           </Label>
                                           <Label className="text-gray-600">
-                                            {appointment.time}
+                                            {attendee.time}
                                           </Label>
                                         </div>
                                         <div>
@@ -514,7 +645,7 @@ export default function DashBoard() {
                                             Email:{" "}
                                           </Label>{" "}
                                           <Label className="text-gray-600">
-                                            {appointment.email}
+                                            {attendee.participantEmail}
                                           </Label>
                                         </div>
                                       </div>
@@ -550,7 +681,7 @@ export default function DashBoard() {
                   </>
                 ) : (
                   <>
-                    {pastOfficeHours.length === 0 ? (
+                    {pastMeetings.length === 0 ? (
                       <>
                         <div className="w-full text-center">
                           <Label>No Meetings</Label>
@@ -558,30 +689,30 @@ export default function DashBoard() {
                       </>
                     ) : (
                       <>
-                        {pastOfficeHours.map((meeting, index) => (
+                        {pastMeetings.map((meeting, index) => (
                           <AccordionItem key={index} value={`item-${index}`}>
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
                                 <Label className="font-bold">
-                                  {meeting.date}, {meeting.team}
+                                  {meeting.date}, {meeting.teamName}: {meeting.meetingTeamName}
                                 </Label>
                                 <Label className="mr-2">
-                                  {meeting.start} - {meeting.end}
+                                  {meeting.time.start} - {meeting.time.end}
                                 </Label>
                               </div>
                             </AccordionTrigger>
                             <AccordionContent>
                               <div className="flex w-full justify-between items-center mt-3">
                                 <div className="w-full space-y-2">
-                                  {meeting.appointments.map(
-                                    (appointment, subIndex) => (
+                                  {meeting.attendees.map(
+                                    (attendee, subIndex) => (
                                       <div className="flex w-full justify-between text-sm">
                                         <div>
                                           <Label className="text-black font-bold">
                                             Time:{" "}
                                           </Label>
                                           <Label className="text-gray-600">
-                                            {appointment.time}
+                                            {attendee.time}
                                           </Label>
                                         </div>
                                         <div>
@@ -589,7 +720,7 @@ export default function DashBoard() {
                                             Email:{" "}
                                           </Label>{" "}
                                           <Label className="text-gray-600">
-                                            {appointment.email}
+                                            {attendee.participantEmail}
                                           </Label>
                                         </div>
                                       </div>

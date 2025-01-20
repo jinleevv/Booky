@@ -53,7 +53,6 @@ interface IJoinAMeetingProps {
   setTeamMembers: React.Dispatch<React.SetStateAction<string[]>>;
   meetingTeam: any[];
   setMeetingTeam: React.Dispatch<React.SetStateAction<any>>;
-  duration: number;
   existingAppointments: any[];
   cancelledDays: ICancelledDays[];
   selectedHost: string | null;
@@ -70,7 +69,6 @@ export default function JoinAMeeting({
   setTeamMembers,
   meetingTeam,
   setMeetingTeam,
-  duration,
   selectedHost,
   setSelectedHost,
 }: IJoinAMeetingProps) {
@@ -82,6 +80,7 @@ export default function JoinAMeeting({
   const [userSelectedDate, setUserSelectedDate] = useState<string>(""); //Kind of redundent
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
 
+  const [duration, setDuration] = useState<string | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
   const [selectedMeetingTeam, setSelectedMeetingTeam] = useState<any>(null);
@@ -124,7 +123,7 @@ export default function JoinAMeeting({
         year + "-" + month + "-" + date,
         time.start,
         time.end,
-        duration
+        parseInt(duration, 10)
       );
 
       const existingDate = timeSlots.find(
@@ -354,6 +353,7 @@ export default function JoinAMeeting({
                           onClick={() => {
                             setSelectedHost(email);
                             setSelectedMeetingTeam(null);
+                            setDuration(null);
                           }}
                         >
                           <Label
@@ -442,7 +442,10 @@ export default function JoinAMeeting({
                           .map((meetingTeam) => (
                             <Card
                               className="w-full border rounded-3xl shadow-md cursor-pointer"
-                              onClick={() => setSelectedMeetingTeam(meetingTeam)}
+                              onClick={() => {
+                                setSelectedMeetingTeam(meetingTeam);
+                                setDuration(meetingTeam.duration);
+                              }}
                             >
                               <CardHeader className="pt-4">
                                 <CardTitle className="flex flex-wrap justify-between">
