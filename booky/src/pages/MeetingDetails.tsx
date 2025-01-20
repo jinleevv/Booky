@@ -91,7 +91,9 @@ export default function MeetingDetails() {
                     variant="ghost"
                     className="w-10"
                     onClick={() =>
-                      navigate(`/dashboard/document/${meetingId}/`)
+                      navigate(
+                        `/dashboard/document/${meetingData.date}/${meetingData.time.start} - ${meetingData.time.end}/${meetingId}`
+                      )
                     }
                   >
                     Link

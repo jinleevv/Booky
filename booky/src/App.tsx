@@ -117,7 +117,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/document/:meetingId/"
+          path="/dashboard/document/:date/:time/:meetingId"
           element={
             <ProtectedRoute>
               <MeetingMinutePage />
