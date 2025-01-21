@@ -89,7 +89,7 @@ export default function JoinAMeeting({
 
   useEffect(() => {
     setTimeSlots([]);
-    
+
     if (selectedHost && selectedMeetingTeam) {
       updateEnabledDaysAndDisabledDates(selectedHost);
     }
@@ -255,24 +255,24 @@ export default function JoinAMeeting({
 
   async function handleJoinTeam() {
     try {
-        const response = await fetch(`${server}/api/teams/${teamId}/members`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ members: userEmail }),
-        });
+      const response = await fetch(`${server}/api/teams/${teamId}/members`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ members: userEmail }),
+      });
 
-        if (response.ok) {
-            toast("Successfully joined the team!");
-            setTeamMembers([...teamMembers, userEmail]);
-        } else {
-            const errorData = await response.json();
-            toast(errorData.message || "Failed to join the team");
-        }
+      if (response.ok) {
+        toast("Successfully joined the team!");
+        setTeamMembers([...teamMembers, userEmail]);
+      } else {
+        const errorData = await response.json();
+        toast(errorData.message || "Failed to join the team");
+      }
     } catch (error) {
-        console.error("Error joining team:", error);
-        toast("An error occurred while trying to join the team.");
+      console.error("Error joining team:", error);
+      toast("An error occurred while trying to join the team.");
     }
   }
 
@@ -280,11 +280,11 @@ export default function JoinAMeeting({
     try {
       const response = await fetch(
         `${server}/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
-        { 
+        {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-          }
+          },
         }
       );
       if (!response.ok) {
@@ -292,7 +292,9 @@ export default function JoinAMeeting({
         return;
       }
 
-      setMeetingTeam((prevMeetings) => prevMeetings.filter(meeting => meeting._id !== meetingTeamId));
+      setMeetingTeam((prevMeetings) =>
+        prevMeetings.filter((meeting) => meeting._id !== meetingTeamId)
+      );
       toast("Team meeting deleted successfully!");
     } catch (error) {
       console.error("Error deleting team meeting:", error);
@@ -438,7 +440,10 @@ export default function JoinAMeeting({
                     <>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-3 w-full">
                         {meetingTeam
-                          .filter((meetingTeam) => meetingTeam.hostEmail === selectedHost)
+                          .filter(
+                            (meetingTeam) =>
+                              meetingTeam.hostEmail === selectedHost
+                          )
                           .map((meetingTeam) => (
                             <Card
                               className="w-full border rounded-3xl shadow-md cursor-pointer"
@@ -461,7 +466,9 @@ export default function JoinAMeeting({
                                           className="w-5 h-5"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(`/dashboard/${teamId}/edit-meetingTeam/${meetingTeam._id}`);
+                                            navigate(
+                                              `/dashboard/${teamId}/edit-meetingTeam/${meetingTeam._id}`
+                                            );
                                           }}
                                         >
                                           <TbEdit size={10} />
@@ -479,8 +486,8 @@ export default function JoinAMeeting({
                                         >
                                           <TbCalendarCancel size={10} />
                                         </Button>
-                                        <Dialog 
-                                          open={isDialogOpen} 
+                                        <Dialog
+                                          open={isDialogOpen}
                                           onOpenChange={setIsDialogOpen}
                                         >
                                           <DialogTrigger asChild>
@@ -495,18 +502,24 @@ export default function JoinAMeeting({
                                               <Trash size={10} />
                                             </Button>
                                           </DialogTrigger>
-                                          <DialogContent 
+                                          <DialogContent
                                             onClick={(e) => e.stopPropagation()}
                                           >
                                             <DialogHeader>
-                                              <DialogTitle>Delete Meeting</DialogTitle>
+                                              <DialogTitle>
+                                                Delete Meeting
+                                              </DialogTitle>
                                               <DialogDescription>
-                                                Are you sure you want to delete this meeting? This action cannot be undone.
+                                                Are you sure you want to delete
+                                                this meeting? This action cannot
+                                                be undone.
                                               </DialogDescription>
                                             </DialogHeader>
                                             <DialogFooter>
-                                              <Button variant="outline" onClick={(e) =>{
-                                                setIsDialogOpen(false)
+                                              <Button
+                                                variant="outline"
+                                                onClick={(e) => {
+                                                  setIsDialogOpen(false);
                                                 }}
                                               >
                                                 Cancel
@@ -514,7 +527,9 @@ export default function JoinAMeeting({
                                               <Button
                                                 variant="destructive"
                                                 onClick={(e) => {
-                                                  handleRemoveMeetingTeam(meetingTeam._id);
+                                                  handleRemoveMeetingTeam(
+                                                    meetingTeam._id
+                                                  );
                                                   setIsDialogOpen(false);
                                                 }}
                                               >
@@ -532,13 +547,13 @@ export default function JoinAMeeting({
                                     Meeting Type: {meetingTeam.schedule}
                                   </Label>
                                   <Label className="text-xs">
-                                    Description: {meetingTeam.meetingDescription}
+                                    Description:{" "}
+                                    {meetingTeam.meetingDescription}
                                   </Label>
                                 </CardDescription>
                               </CardHeader>
                             </Card>
-                          ))
-                        }
+                          ))}
                       </div>
                     </>
                   ) : (

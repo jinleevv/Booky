@@ -16,10 +16,7 @@ import { useEffect } from "react";
 import { useHook } from "@/hooks";
 
 const formSchema = z.object({
-  name: z
-    .string()
-    .regex(/^[a-zA-Z\s]+$/, "Name must contain only letters and spaces")
-    .optional(),
+  name: z.string(),
   email: z
     .string()
     .min(1, "Email is required")
@@ -74,8 +71,7 @@ export default function ScheduleForm({
       token: generateRandomToken(),
       tokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     };
-    console.log(values.name);
-    console.log(values.email);
+
     try {
       const response = await fetch(
         `${server}/api/teams/${teamId}/appointments`,

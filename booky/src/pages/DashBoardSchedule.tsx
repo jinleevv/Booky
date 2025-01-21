@@ -3,10 +3,9 @@ import DashboardNavBar from "@/features/DashboardNavBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import JoinAMeeting from "@/features/DashboardSchedule/JoinAMeeting";
 import { useParams } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useHook } from "@/hooks";
 import ViewDetails from "@/features/DashboardSchedule/ViewDetails/ViewDetails";
-import { useLocation } from "react-router-dom";
 
 interface ITimeRange {
   start: string;

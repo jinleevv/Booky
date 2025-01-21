@@ -202,12 +202,12 @@ export default function DashBoard() {
     }
   }
 
-  function numberToString(days: number) : string {
+  function numberToString(days: number): string {
     if (days == 1) {
       return "1 Day";
-    } else if(days == 7) {
+    } else if (days == 7) {
       return "1 Week";
-    } else if(days == 31) {
+    } else if (days == 31) {
       return "1 Month";
     }
   }
@@ -231,19 +231,20 @@ export default function DashBoard() {
         timeZone: "America/New_York",
         timeZoneName: "longOffset",
       });
-  
+
       const offsetString: string | undefined = estString.split(" ").pop();
-  
+
       if (!offsetString) {
         throw new Error("Failed to extract timezone offset");
       }
-  
-      const offsetMatch: RegExpMatchArray | null = offsetString.match(/[-+]\d+/);
-  
+
+      const offsetMatch: RegExpMatchArray | null =
+        offsetString.match(/[-+]\d+/);
+
       if (!offsetMatch) {
         throw new Error("Invalid offset format");
       }
-  
+
       const offsetHours: number = parseInt(offsetMatch[0]);
       return new Date(date.getTime() + offsetHours * 60 * 60 * 1000);
     } catch (error) {
@@ -292,7 +293,7 @@ export default function DashBoard() {
                   >
                     <div className="flex gap-1">
                       <TbCalendar size={15} />
-                      <Label className="font-bold m-auto">
+                      <Label className="m-auto">
                         Date Range: {numberToString(dateRange)}
                       </Label>
                       <RiArrowDropDownLine className="m-auto" />
@@ -324,8 +325,8 @@ export default function DashBoard() {
                   <>
                     {upcomingMeetings.length === 0 ? (
                       <>
-                        <div className="w-full text-center">
-                          <Label>No Meetings</Label>
+                        <div className="flex w-full h-14 justify-center items-center text-sm">
+                          <h1>No Meetings</h1>
                         </div>
                       </>
                     ) : (
@@ -334,7 +335,7 @@ export default function DashBoard() {
                           <AccordionItem key={index} value={`item-${index}`}>
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
-                                <Label className="flex gap-2 font-bold">
+                                <Label className="flex gap-2">
                                   {cancelledMeetings.some(
                                     (cancelled) =>
                                       cancelled === meeting.meetingId
