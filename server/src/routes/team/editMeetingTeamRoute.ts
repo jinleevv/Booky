@@ -153,7 +153,7 @@ export const editMeetingHandler: RequestHandler = async (
       });
     }
 
-    const todayString = today.toISOString().split(["T"][0]);
+    const todayString = today.toISOString().split("T")[0];
     const team = await Team.findOneAndUpdate(
       {
         _id: teamId,
