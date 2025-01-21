@@ -97,6 +97,7 @@ const PollSchema = new Schema<IPoll>(
   },
   {
     timestamps: true,
+    versionKey: false,
   }
 );
 

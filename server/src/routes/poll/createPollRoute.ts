@@ -1,5 +1,5 @@
 import express, { Request, RequestHandler, Response } from "express";
-import ShortUniqueId from "short-uuid";
+import { mongo } from "mongoose";
 import Poll from "../../models/poll";
 
 const router = express.Router();
@@ -20,10 +20,7 @@ export const createPollHandler: RequestHandler = async (
     }
 
     // Generate unique pollId
-    const _id = `poll-${pollName.replaceAll(
-      /\s/g,
-      "-"
-    )}-${ShortUniqueId().generate()}`;
+    const _id = new mongo.ObjectId();
 
     // Create new poll
     const newPoll = new Poll({
