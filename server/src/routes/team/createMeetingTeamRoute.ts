@@ -6,7 +6,38 @@ import ShortUniqueId from "short-uuid";
 
 const router = express.Router();
 
-export const createMeetingTeamHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+function convertToEST(date: Date): Date {
+  try {
+    const estString: string = date.toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      timeZoneName: "longOffset",
+    });
+
+    const offsetString: string | undefined = estString.split(" ").pop();
+
+    if (!offsetString) {
+      throw new Error("Failed to extract timezone offset");
+    }
+
+    const offsetMatch: RegExpMatchArray | null = offsetString.match(/[-+]\d+/);
+
+    if (!offsetMatch) {
+      throw new Error("Invalid offset format");
+    }
+
+    const offsetHours: number = parseInt(offsetMatch[0]);
+    return new Date(date.getTime() + offsetHours * 60 * 60 * 1000);
+  } catch (error) {
+    console.error("Error converting to EST:", error);
+    // Return original date if conversion fails
+    return date;
+  }
+}
+
+export const createMeetingTeamHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { teamId } = req.params;
   const {
     hostEmail,
@@ -47,7 +78,8 @@ export const createMeetingTeamHandler: RequestHandler = async (req: Request, res
 
     if (currentTab === "recurring") {
       const generatedMeetings: IMeeting[] = [];
-      const today = new Date();
+      const todayUTC = new Date();
+      const today = convertToEST(todayUTC);
 
       for (let i = 0; i < 14; i++) {
         const targetDate = new Date(today);
@@ -58,7 +90,8 @@ export const createMeetingTeamHandler: RequestHandler = async (req: Request, res
         });
 
         const daySchedule = recurringMeetingSchedule.find(
-          (schedule: ISchedule) => schedule.day === targetDay && schedule.enabled
+          (schedule: ISchedule) =>
+            schedule.day === targetDay && schedule.enabled
         );
 
         if (daySchedule) {
@@ -96,7 +129,7 @@ export const createMeetingTeamHandler: RequestHandler = async (req: Request, res
         type: meetingType,
         duration: meetingType === "oneOnOne" ? duration : null,
         zoomLink: meetingLink,
-        cancelledMeetings: []
+        cancelledMeetings: [],
       };
     } else {
       const oneTimeMeetingStartInfo = oneTimeMeetingSchedule.start.split("T"); // YYYY-MM-DD
@@ -118,15 +151,17 @@ export const createMeetingTeamHandler: RequestHandler = async (req: Request, res
 
         meetingName: meetingName,
         meetingDescription: meetingDescription,
-        meeting: [{
-          _id: meetingId,
-          date: date,
-          time: {
-            start: oneTimeMeetingStartInfo[1],
-            end: oneTimeMeetingEndInfo[1],
+        meeting: [
+          {
+            _id: meetingId,
+            date: date,
+            time: {
+              start: oneTimeMeetingStartInfo[1],
+              end: oneTimeMeetingEndInfo[1],
+            },
+            attendees: [],
           },
-          attendees: [],
-        }],
+        ],
         date: date,
         time: {
           start: oneTimeMeetingStartInfo[1],
@@ -142,7 +177,7 @@ export const createMeetingTeamHandler: RequestHandler = async (req: Request, res
 
     team.meetingTeam.push(newMeeting);
     await team.save();
-    
+
     res.status(200).json({ message: "meetingTeam created successfully" });
   } catch (error) {
     console.error("Error creating meetingTeam", error);
