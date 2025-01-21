@@ -419,7 +419,7 @@ export default function JoinAMeeting({
             </CardHeader>
             <CardContent className="flex w-full border-b-[1px] md:w-3/6 md:border-r-[1px] py-2 border-gray-200">
               {selectedMeetingTeam === null ? (
-                <div className="flex flex-col w-full mt-1.5 p-0 gap-2">
+                <div className="flex flex-col w-full mt-1.5 p-0 gap-2 overflow-y-auto">
                   <div className="flex w-full justify-between">
                     <Label className="text-lg font-bold">Meetings</Label>
                     <div>
