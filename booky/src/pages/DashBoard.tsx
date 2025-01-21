@@ -44,7 +44,7 @@ export default function DashBoard() {
 
         const teams = await response.json();
 
-        const today = new Date();
+        const today = convertToEST(new Date());
         const month = (today.getMonth() + 1).toString().padStart(2, "0");
         const date = today.getDate().toString().padStart(2, "0");
         const year = today.getFullYear();
@@ -202,6 +202,16 @@ export default function DashBoard() {
     }
   }
 
+  function numberToString(days: number) : string {
+    if (days == 1) {
+      return "1 Day";
+    } else if(days == 7) {
+      return "1 Week";
+    } else if(days == 31) {
+      return "1 Month";
+    }
+  }
+
   function formatDateWithOrdinal(dateStr: string): string {
     const parsedDate = dateStr.split("-");
     const date = new Date(dateStr); // Convert YYYY-MM-DD to Date object
@@ -215,12 +225,40 @@ export default function DashBoard() {
     )}, ${date.getFullYear()}`;
   }
 
+  function convertToEST(date: Date): Date {
+    try {
+      const estString: string = date.toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        timeZoneName: "longOffset",
+      });
+  
+      const offsetString: string | undefined = estString.split(" ").pop();
+  
+      if (!offsetString) {
+        throw new Error("Failed to extract timezone offset");
+      }
+  
+      const offsetMatch: RegExpMatchArray | null = offsetString.match(/[-+]\d+/);
+  
+      if (!offsetMatch) {
+        throw new Error("Invalid offset format");
+      }
+  
+      const offsetHours: number = parseInt(offsetMatch[0]);
+      return new Date(date.getTime() + offsetHours * 60 * 60 * 1000);
+    } catch (error) {
+      console.error("Error converting to EST:", error);
+      // Return original date if conversion fails
+      return date;
+    }
+  }
+
   return (
     <section className="h-screen w-screen bg-white">
       <div className="absolute w-3/6 h-2/6 bg-red-200 blur-[600px] top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4"></div>
-      <div className="flex">
+      <div className="flex h-screen">
         <DashboardNavBar />
-        <div className="w-full px-3 py-4 relative z-20 font-outfit">
+        <div className="w-full px-3 py-4 relative z-20 font-outfit overflow-y-auto">
           <Label className="text-2xl font-bold text-black">Meetings</Label>
           <div className="w-full h-5/6 mt-3 space-y-3">
             <div className="flex gap-1">
@@ -255,7 +293,7 @@ export default function DashBoard() {
                     <div className="flex gap-1">
                       <TbCalendar size={15} />
                       <Label className="font-bold m-auto">
-                        Date Range: {dateRange} days
+                        Date Range: {numberToString(dateRange)}
                       </Label>
                       <RiArrowDropDownLine className="m-auto" />
                     </div>
