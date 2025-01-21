@@ -96,7 +96,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-startScheduler();
+// startScheduler();
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
