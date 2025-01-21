@@ -59,7 +59,7 @@ const formatDateTime = (dateObject: any): string => {
 };
 
 function formatZonedDateTime(date, time) {
-  const [month, day, year] = date.split('-').map((value) => value.padStart(2, '0'));
+  const [year, month, day] = date.split('-').map((value) => value.padStart(2, '0'));
 
   const [hour, minute] = time.split(':').map((value) => value.padStart(2, '0'));
 
@@ -135,6 +135,7 @@ export default function EditMeetingTeamPage() {
         form.reset(formattedData);
       }
       else {
+        console.log(meetingData.date);
         const formattedData = {
           meetingName: meetingData.meetingName || "",
           meetingDescription: meetingData.meetingDescription || "",
