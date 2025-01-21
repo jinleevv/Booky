@@ -1,6 +1,8 @@
 import express, { Request, Response, RequestHandler } from "express";
-import Team, { IMeetingTeam } from "../../models/team";
+import MeetingMinute from "../../models/meetingMinute";
+import Team, { IMeetingTeam, IMeeting, ISchedule } from "../../models/team";
 import mongoose from "mongoose";
+import ShortUniqueId from "short-uuid";
 
 const router = express.Router();
 
@@ -31,6 +33,8 @@ export const editMeetingHandler: RequestHandler = async (req: Request, res: Resp
             return;
         }
 
+        const today = new Date().toISOString().split("T")[0];
+
         const updateFields: Record<string, any> = {
             "meetingTeam.$.meetingName": meetingName,
             "meetingTeam.$.meetingDescription": meetingDescription,
@@ -41,20 +45,59 @@ export const editMeetingHandler: RequestHandler = async (req: Request, res: Resp
 
         const unsetFields: Record<string, ""> = {};
 
+        let newMeetings: IMeeting[] = [];
+        const uid = ShortUniqueId();
+
         if (currentTab === "recurring") {
             updateFields["meetingTeam.$.schedule"] = "recurring";
             updateFields["meetingTeam.$.weekSchedule"] = recurringMeetingSchedule;
             unsetFields["meetingTeam.$.date"] = "";
             unsetFields["meetingTeam.$.time"] = "";
+
+            const todayDate = new Date();
+
+            for (let i = 0; i < 14; i++) {
+            const targetDate = new Date(todayDate);
+            targetDate.setDate(todayDate.getDate() + i);
+
+            const targetDay = targetDate.toLocaleString("en-US", {
+                weekday: "long",
+            });
+
+            const daySchedule = recurringMeetingSchedule.find(
+                (schedule: ISchedule) => schedule.day === targetDay && schedule.enabled
+            );
+
+            if (daySchedule) {
+                for (const timeRange of daySchedule.times) {
+                const meetingId = `meeting-${uid.generate()}`;
+
+                const meetingMinute = await MeetingMinute.create({
+                    _id: meetingId,
+                    data: {},
+                    createdAt: new Date(),
+                });
+
+                newMeetings.push({
+                    _id: meetingId,
+                    date: targetDate.toISOString().split("T")[0],
+                    time: timeRange,
+                    attendees: [],
+                });
+                }
+            }
+            }
         } else {
             const oneTimeMeetingStartInfo = oneTimeMeetingSchedule.start.split("T"); // YYYY-MM-DD
             const oneTimeMeetingEndInfo = oneTimeMeetingSchedule.end.split("T");
-            const date =
-                oneTimeMeetingStartInfo[0].split("-")[1] +
-                "-" +
-                oneTimeMeetingStartInfo[0].split("-")[2] +
-                "-" +
-                oneTimeMeetingStartInfo[0].split("-")[0];
+            const date = oneTimeMeetingStartInfo[0];
+            const meetingId = `meeting-${uid.generate()}`;
+
+            const meetingMinute = await MeetingMinute.create({
+            _id: meetingId,
+            data: {},
+            createdAt: new Date(),
+            });
 
             updateFields["meetingTeam.$.schedule"] = "one-time";
             updateFields["meetingTeam.$.date"] = date;
@@ -63,6 +106,16 @@ export const editMeetingHandler: RequestHandler = async (req: Request, res: Resp
                 end: oneTimeMeetingEndInfo[1],
             };
             unsetFields["meetingTeam.$.weekSchedule"] = "";
+
+            newMeetings.push({
+                _id: `meeting-${uid.generate()}`,
+                date: date,
+                time: {
+                    start: oneTimeMeetingStartInfo[1],
+                    end: oneTimeMeetingEndInfo[1],
+                },
+                attendees: [],
+            });
         }
 
         const team = await Team.findOneAndUpdate(
@@ -73,14 +126,20 @@ export const editMeetingHandler: RequestHandler = async (req: Request, res: Resp
             {
                 $set: updateFields,
                 $unset: unsetFields,
+                $pull: { "meetingTeam.$.meeting": { date: { $gt: today } } },
             },
-            { new: true, runValidators: true }
+            { new: true },
         );
 
         if (!team) {
             res.status(404).json({ message: "Team or Meeting not found" });
             return;
         }
+
+        await Team.findOneAndUpdate(
+            { _id: teamId, "meetingTeam._id": meetingTeamId },
+            { $push: { "meetingTeam.$.meeting": { $each: newMeetings } } },
+        );
 
         res.status(200).json({ message: "Meeting updated successfully" });
     } catch (error) {
