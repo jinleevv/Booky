@@ -1,6 +1,8 @@
 import express, { Request, Response, RequestHandler } from "express";
 import ShortUniqueId from "short-uuid";
-import Team from "../../models/team";
+import Team, { ISchedule, IMeetingTeam, IMeeting } from "../../models/team";
+import MeetingMinute from "../../models/meetingMinute";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -43,8 +45,45 @@ export const createTeamHandler: RequestHandler = async (
     }
 
     let meetingTeam = [];
+    const uid = ShortUniqueId();
 
     if (currentTab === "recurring") {
+
+      const generatedMeetings: IMeeting[] = [];
+      const today = new Date();
+
+      for (let i = 0; i < 14; i++) {
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + i);
+
+        const targetDay = targetDate.toLocaleString("en-US", {
+          weekday: "long",
+        });
+
+        const daySchedule = recurringMeeting.find(
+          (schedule: ISchedule) => schedule.day === targetDay && schedule.enabled
+        );
+
+        if (daySchedule) {
+          for (const timeRange of daySchedule.times) {
+            const meetingId = `meeting-${uid.generate()}`;
+
+            const meetingMinute = await MeetingMinute.create({
+              _id: meetingId,
+              data: {},
+              createdAt: new Date(),
+            });
+
+            generatedMeetings.push({
+              _id: meetingId,
+              date: targetDate.toISOString().split("T")[0],
+              time: timeRange,
+              attendees: [],
+            });
+          }
+        }
+      }
+
       meetingTeam = [
         {
           schedule: "recurring",
@@ -66,12 +105,15 @@ export const createTeamHandler: RequestHandler = async (
     } else {
       const oneTimeMeetingStartInfo = oneTimeMeeting.start.split("T"); // YYYY-MM-DD
       const oneTimeMeetingEndInfo = oneTimeMeeting.end.split("T");
-      const date =
-        oneTimeMeetingStartInfo[0].split("-")[1] +
-        "-" +
-        oneTimeMeetingStartInfo[0].split("-")[2] +
-        "-" +
-        oneTimeMeetingStartInfo[0].split("-")[0];
+      const date = oneTimeMeetingStartInfo[0]
+      const meetingId = `meeting-${uid.generate()}`;
+
+      const meetingMinute = await MeetingMinute.create({
+        _id: meetingId,
+        data: {},
+        createdAt: new Date(),
+      });
+
       meetingTeam = [
         {
           schedule: "one-time",
@@ -80,7 +122,15 @@ export const createTeamHandler: RequestHandler = async (
 
           meetingName: meetingName,
           meetingDescription: meetingDescription,
-          meeting: [],
+          meeting: [{
+            _id: meetingId,
+            date: date,
+            time: {
+              start: oneTimeMeetingStartInfo[1],
+              end: oneTimeMeetingEndInfo[1],
+            },
+            attendees: [],
+          }],
 
           date: date,
           time: {
