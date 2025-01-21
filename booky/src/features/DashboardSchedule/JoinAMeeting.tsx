@@ -76,33 +76,36 @@ export default function JoinAMeeting({
 
   const navigate = useNavigate();
 
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [userSelectedDate, setUserSelectedDate] = useState<string>(""); //Kind of redundent
+  const [selectedDate, setSelectedDate] = useState<Date>(null);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
 
-  const [duration, setDuration] = useState<string | null>(null);
+  const [duration, setDuration] = useState<string>("");
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
   const [selectedMeetingTeam, setSelectedMeetingTeam] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [enabledDays, setEnabledDays] = useState<Array<Date>>([]);
+  const [enabledDays, setEnabledDays] = useState<Array<string>>([]);
+
+  const [groupMeetingStatus, setGroupMeetingStatus] = useState<boolean>(false);
 
   useEffect(() => {
     setTimeSlots([]);
 
     if (selectedHost && selectedMeetingTeam) {
-      updateEnabledDaysAndDisabledDates(selectedHost);
+      updateEnabledDaysAndDisabledDates(selectedMeetingTeam);
     }
   }, [selectedHost, selectedMeetingTeam]);
 
   // Generate time slots when the selected date changes.
   useEffect(() => {
-    if (!selectedDate) return;
+    if (!selectedDate || !selectedMeetingTeam) return;
+    if (selectedMeetingTeam.type === "group") {
+      return;
+    }
     const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0"); // Add leading zero if needed
     const date = selectedDate.getDate().toString().padStart(2, "0"); // Add leading zero if needed
     const year = selectedDate.getFullYear();
 
-    setUserSelectedDate(`${year}-${month}-${date}`);
     const dayOfWeek = selectedDate.toLocaleDateString("en-US", {
       weekday: "long",
     });
@@ -110,6 +113,7 @@ export default function JoinAMeeting({
     const dayAvailability = selectedMeetingTeam.weekSchedule.find(
       (day) => day.day === dayOfWeek
     );
+
     if (!dayAvailability || !dayAvailability.enabled) {
       const updateTimeSlots = [{ day: `${year}-${month}-${date}`, slots: [] }];
       setTimeSlots([...timeSlots, ...updateTimeSlots]);
@@ -138,60 +142,18 @@ export default function JoinAMeeting({
         });
       }
     });
-
+    console.log(newTimeSlots);
     setTimeSlots(newTimeSlots);
   }, [selectedDate]);
 
-  function updateEnabledDaysAndDisabledDates(email: string) {
-    const dayMap = {
-      Sunday: 0,
-      Monday: 1,
-      Tuesday: 2,
-      Wednesday: 3,
-      Thursday: 4,
-      Friday: 5,
-      Saturday: 6,
-    };
-
-    const getDatesForDays = (enabledDays) => {
-      const today = new Date();
-      const availableDates = [];
-
-      for (let i = 0; i < 7; i++) {
-        const currentDate = new Date(today);
-        currentDate.setDate(today.getDate() + i); // Add `i` days to today's date
-        const currentDayName = Object.keys(dayMap).find(
-          (day) => dayMap[day] === currentDate.getDay()
-        );
-
-        if (enabledDays.includes(currentDayName)) {
-          availableDates.push(currentDate); // Add only enabled dates
-        }
-      }
-
-      return { availableDates };
-    };
-
-    // Recalculate enabledDays based on the admin's availability
-    const hostMeetingTeam = meetingTeam.filter(
-      (meeting) => meeting.hostName !== selectedHost
-    );
-
-    let enabled = [];
-
-    hostMeetingTeam.forEach((availableMeeting) => {
-      availableMeeting.weekSchedule.forEach((schedule) => {
-        if (schedule.enabled) {
-          enabled.push(schedule.day);
-        }
-      });
+  function updateEnabledDaysAndDisabledDates(selectedMeetingTeam) {
+    const meetingDates = [];
+    const meetings = selectedMeetingTeam.meeting;
+    meetings.forEach((meeting) => {
+      meetingDates.push(meeting.date);
     });
 
-    // Calculate available dates and all dates
-    const { availableDates } = getDatesForDays(enabled);
-
-    // Update the state
-    setEnabledDays(availableDates); // Update enabled days
+    setEnabledDays(meetingDates);
   }
 
   // Utility function to generate time slots
@@ -355,7 +317,6 @@ export default function JoinAMeeting({
                           onClick={() => {
                             setSelectedHost(email);
                             setSelectedMeetingTeam(null);
-                            setDuration(null);
                           }}
                         >
                           <Label
@@ -565,12 +526,14 @@ export default function JoinAMeeting({
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
-                  disabled={(date) =>
-                    !enabledDays.some(
-                      (enabledDate) =>
-                        enabledDate.toDateString() === date.toDateString()
-                    )
-                  }
+                  disabled={(date) => {
+                    const today = new Date(); 
+                    today.setHours(0, 0, 0, 0);
+                
+                    const dateISO = date.toISOString().split("T")[0];
+                
+                    return date < today || !enabledDays.some((enabledDate) => enabledDate === dateISO);
+                  }}
                   showOutsideDays={false}
                   className="flex-1 max-h-[461px] overflow-y-auto mt-3 p-0"
                   classNames={{
@@ -602,26 +565,44 @@ export default function JoinAMeeting({
             <div className="w-full md:w-2/6 h-full overflow-y-auto flex flex-col">
               <CardContent className="max-md:max-h-[27vh] h-1/2 w-full flex-1 py-2 border-b-[1px] border-gray-200 overflow-auto">
                 <div className="grid grid-cols-2 gap-2">
-                  {timeSlots.length > 0 ? (
-                    timeSlots
-                      .filter((timeSlot) => timeSlot.day === userSelectedDate) // Filter slots for the selected date
-                      .map((timeSlot) =>
-                        timeSlot.slots.map((time) => (
-                          <Button
-                            key={`${timeSlot.day}-${time}`} // Combine day and time for a unique key
-                            variant="outline"
-                            className={cn(
-                              "p-4 text-center rounded-lg",
-                              selectedTimeSlot === time
-                                ? "bg-black text-white"
-                                : "bg-white"
-                            )}
-                            onClick={() => setSelectedTimeSlot(time)} // Set the selected time slot
-                          >
-                            {time}
-                          </Button>
-                        ))
-                      )
+                  {selectedDate ? (
+                    selectedMeetingTeam.type == "group" ? (
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "p-4 text-center rounded-lg",
+                          groupMeetingStatus
+                            ? "bg-black text-white"
+                            : "bg-white"
+                        )}
+                        disabled={true}
+                      >
+                        Attend Group Meeting
+                      </Button>
+                    ) : (
+                      timeSlots.length > 0 ? (
+                        timeSlots
+                        .filter((timeSlot) => timeSlot.day === selectedDate.toISOString().split("T")[0]) // Filter slots for the selected date
+                        .map((timeSlot) =>
+                          timeSlot.slots.map((time) => (
+                            <Button
+                              key={`${timeSlot.day}-${time}`} // Combine day and time for a unique key
+                              variant="outline"
+                              className={cn(
+                                "p-4 text-center rounded-lg",
+                                selectedTimeSlot === time
+                                  ? "bg-black text-white"
+                                  : "bg-white"
+                              )}
+                              onClick={() => setSelectedTimeSlot(time)} // Set the selected time slot
+                            >
+                              {time}
+                            </Button>
+                          ))
+                        )
+                    ) : (<p className="col-span-2 text-center">No available slots</p>)
+                      
+                    )
                   ) : (
                     <p className="col-span-2 text-center">No available slots</p>
                   )}
@@ -629,7 +610,7 @@ export default function JoinAMeeting({
               </CardContent>
               <ScheduleForm
                 selectedMeetingTeam={selectedMeetingTeam}
-                selectedDate={userSelectedDate}
+                selectedDate={selectedDate ? selectedDate.toISOString().split("T")[0] : null}
                 selectedTime={selectedTimeSlot}
                 teamId={teamId!}
                 timeSlots={timeSlots}

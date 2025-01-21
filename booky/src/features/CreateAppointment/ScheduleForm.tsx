@@ -57,13 +57,26 @@ export default function ScheduleForm({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!selectedDay || !selectedTime) {
-      toast.error("Please select both date and time before submitting.");
-      return;
+    if (!selectedDay || !selectedTime ) {
+      if (selectedMeetingTeam.type !== "group") {
+        toast.error("Please select both date and time before submitting.");
+        return;
+      }
+    }
+
+    let newSelectedTime;
+
+    if (selectedMeetingTeam.type == "group") {
+      newSelectedTime = {
+        start: "10:00 AM",
+        end: "10:00 AM",
+      }
+    } else {
+      newSelectedTime = selectedTime;
     }
 
     const newAttend = {
-      time: selectedTime,
+      time: newSelectedTime,
 
       participantName: values.name,
       participantEmail: values.email,
@@ -83,7 +96,7 @@ export default function ScheduleForm({
           body: JSON.stringify({
             meetingTeamId: selectedMeetingTeam._id,
             day: selectedDay,
-            time: selectedTime,
+            time: newSelectedTime,
             attend: newAttend,
           }),
         }
