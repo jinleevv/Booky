@@ -1,7 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import AvailabilityCalendar from "@/features/CreatePoll/AvailabilityCalendar";
-import ParticipatePollForm from "@/features/CreatePoll/ParticipatePollForm";
+import UserAvailability from "@/features/CreatePoll/UserAvailability";
 import NavigationBar from "@/features/NavigationBar";
 import { days, parseStringTimeToInt } from "@/features/time";
 import { useHook } from "@/hooks";
@@ -21,7 +18,6 @@ export default function ParticipatePoll() {
 
   // Crucial states
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -34,8 +30,7 @@ export default function ParticipatePoll() {
     end: { date: string; day: number };
   }>({ start: { date: "", day: 0 }, end: { date: "", day: 0 } });
   const [participants, setParticipants] = useState<Participant[]>([]);
-
-  const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set<string>());
+  const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
 
   // Group availability state
   const [groupAvailability, setGroupAvailability] = useState<
@@ -71,13 +66,10 @@ export default function ParticipatePoll() {
         // Convert participants data to Map
         const availabilityMap = new Map<string, Set<string>>();
         for (const participant of participants) {
-          console.log("This is participant", participant.email);
           availabilityMap.set(participant.email, new Set(participant.schedule));
         }
 
         setGroupAvailability(availabilityMap);
-
-        console.log("This is map", groupAvailability);
       } catch (error) {
         setError(error instanceof Error ? error.message : "An error occurred");
         toast.error("Failed to load poll details");
@@ -90,32 +82,7 @@ export default function ParticipatePoll() {
     }
   }, [server, urlPath]);
 
-  async function updateAvailability(selectedSlots: Set<string>) {
-    try {
-      const response = await fetch(
-        `${server}/api/polls/${urlPath}/availability`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userEmail: userEmail,
-            selectedSlots: Array.from(selectedSlots),
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        toast.error("Failed to update availabilities");
-        return;
-      }
-    } catch (error) {
-      console.error("Error updating availability", error);
-    }
-  }
-
-  async function getAvailability() {
+  async function getAvailability(email: string) {
     try {
       const response = await fetch(`${server}/api/polls/${urlPath}`, {
         method: "GET",
@@ -137,6 +104,9 @@ export default function ParticipatePoll() {
       // Convert participants data to Map
       const availabilityMap = new Map();
       for (const participant of participants) {
+        if (participant.email === email) {
+          setSelectedCells(new Set(participant.schedule));
+        }
         availabilityMap.set(participant.email, new Set(participant.schedule));
       }
 
@@ -181,13 +151,7 @@ export default function ParticipatePoll() {
   function handleLogin(email: string) {
     setIsLoggedIn(true);
     setUserEmail(email);
-    getAvailability();
-  }
-
-  function handleTimeSlots(selectedTimeSlots: Set<string>) {
-    setSelectedTimeSlots(selectedTimeSlots);
-    updateAvailability(selectedTimeSlots);
-    getAvailability();
+    getAvailability(email);
   }
 
   return (
@@ -196,115 +160,26 @@ export default function ParticipatePoll() {
       <main className="container mx-auto py-8 px-12">
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 translate-x-1/2"></div>
         <h2 className="text-2xl font-bold">{pollName}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="flex flex-col gap-8">
           {/* Poll details */}
           <AnimatePresence>
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.7 }}
             >
-              <div className="w-full py-4 relative z-10">
-                {!isLoggedIn ? (
-                  <ParticipatePollForm onLogin={handleLogin} />
-                ) : (
-                  <Card className="h-full shadow-none">
-                    <CardContent className="p-6">
-                      <AvailabilityCalendar
-                        calendarType="user"
-                        timeSlots={timeSlots}
-                        userEmail={userEmail}
-                        selectedDays={selectedDays}
-                        groupAvailability={groupAvailability}
-                        handleTimeSlots={handleTimeSlots}
-                      />
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Time slots */}
-                <motion.div
-                  className="mt-8 bg-white w-4/5 px-8 py-6  space-y-2 rounded-2xl border"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.7 }}
-                >
-                  <div className="flex items-center justify-between mb-4 bg-white">
-                    <h3 className="font-semibold">Available Time</h3>
-                    <Button variant="outline" size="sm">
-                      Manually Create Meeting
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    {timeSlots.map((slot, index) => (
-                      <motion.div
-                        key={index}
-                        className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                      >
-                        <div className="flex items-center space-x-4">
-                          <span className="text-sm font-medium">
-                            {slot.availableRate}
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            {slot.date}
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            {slot.time}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {slot.participants}/{slot.maxParticipants}{" "}
-                            participants
-                          </span>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleTimeSlotSelect(`${slot.date}-${slot.time}`)
-                          }
-                          className={
-                            selectedTimeSlots.has(`${slot.date}-${slot.time}`)
-                              ? "bg-green-500 text-white hover:bg-green-600"
-                              : ""
-                          }
-                        >
-                          {selectedTimeSlots.has(`${slot.date}-${slot.time}`)
-                            ? "Selected"
-                            : "Select Time"}
-                        </Button>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              </div>
+              <UserAvailability
+                isLoggedIn={isLoggedIn}
+                handleLogin={handleLogin}
+                timeSlots={timeSlots}
+                userEmail={userEmail}
+                selectedDays={selectedDays}
+                groupAvailability={groupAvailability}
+                selectedCells={selectedCells}
+                setSelectedCells={setSelectedCells}
+              />
             </motion.div>
           </AnimatePresence>
-
-          <div className=" w-full py-4 relative z-10">
-            {/* Right Side Calendar */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7 }}
-            >
-              <Card className="h-full shadow-none">
-                <CardContent className="p-6">
-                  <AvailabilityCalendar
-                    calendarType="group"
-                    timeSlots={timeSlots}
-                    selectedDays={selectedDays}
-                    userEmail={userEmail}
-                    groupAvailability={groupAvailability}
-                    handleTimeSlots={handleTimeSlots}
-                  />
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
         </div>
       </main>
     </section>
