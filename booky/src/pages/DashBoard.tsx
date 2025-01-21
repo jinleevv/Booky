@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Ban, BanIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,9 @@ export default function DashBoard() {
 
         teams.forEach((team) => {
           team.meetingTeam.forEach((meetingTeam) => {
-            cancelled.push(...meetingTeam.cancelledMeetings.map(meeting => meeting._id));
+            cancelled.push(
+              ...meetingTeam.cancelledMeetings.map((meeting) => meeting._id)
+            );
             meetingTeam.meeting.forEach((meeting) => {
               if (meeting.date >= todayConverted) {
                 upcoming.push({
@@ -83,29 +85,40 @@ export default function DashBoard() {
                   attendees: meeting.attendees,
                 });
               }
-            })
+            });
           });
         });
 
         // sort upcoming and past meetings by date
-        upcoming.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        past.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        upcoming.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+        past.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
 
         // Only show meetings within dateRange
         const upcomingDateLimit = new Date(today);
         upcomingDateLimit.setDate(today.getDate() + dateRange);
-        const formattedUpcomingDateLimit = upcomingDateLimit.toISOString().split("T")[0];
-        const filteredUpcoming = upcoming.filter((meeting) => meeting.date <= formattedUpcomingDateLimit);
+        const formattedUpcomingDateLimit = upcomingDateLimit
+          .toISOString()
+          .split("T")[0];
+        const filteredUpcoming = upcoming.filter(
+          (meeting) => meeting.date <= formattedUpcomingDateLimit
+        );
 
         const pastDateLimit = new Date(today);
         pastDateLimit.setDate(today.getDate() - dateRange);
-        const formattedPastDateLimit = pastDateLimit.toISOString().split("T")[0];
-        const filteredPast = past.filter((meeting) => meeting.date >= formattedPastDateLimit);
+        const formattedPastDateLimit = pastDateLimit
+          .toISOString()
+          .split("T")[0];
+        const filteredPast = past.filter(
+          (meeting) => meeting.date >= formattedPastDateLimit
+        );
 
         setUpcomingMeetings(filteredUpcoming);
         setPastMeetings(filteredPast);
         setCancelledMeetings(cancelled);
-
       } catch (error) {
         toast("Unable to fetch the meeting information");
         console.log(error);
@@ -139,25 +152,28 @@ export default function DashBoard() {
   }
 
   async function handleCancel(
-    teamId: string, 
-    meetingTeamId: string, 
-    meetingId: string, 
+    teamId: string,
+    meetingTeamId: string,
+    meetingId: string,
     cancelledDate: string,
     start: string,
-    end: string,
+    end: string
   ) {
     try {
-      const response = await fetch(`${server}/api/teams/cancel/${teamId}/${meetingTeamId}/${meetingId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cancelledDate: cancelledDate,
-          start: start,
-          end: end,
-        }),
-      });
+      const response = await fetch(
+        `${server}/api/teams/cancel/${teamId}/${meetingTeamId}/${meetingId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cancelledDate: cancelledDate,
+            start: start,
+            end: end,
+          }),
+        }
+      );
 
       if (!response.ok) {
         toast("Failed to cancel the meeting");
@@ -166,32 +182,38 @@ export default function DashBoard() {
 
       setCancelledMeetings((prev) => [...prev, meetingId]);
       toast(`Successfully cancelled the meeting`);
-
     } catch (error) {
       console.error("Error cancelling meeting:", error);
       toast("Failed to cancel the meeting.");
     }
-  };
+  }
 
   function getOrdinalSuffix(day: number): string {
     if (day > 3 && day < 21) return "th"; // Special case for 11th-19th
     switch (day % 10) {
-      case 1: return "st";
-      case 2: return "nd";
-      case 3: return "rd";
-      default: return "th";
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
     }
   }
-  
+
   function formatDateWithOrdinal(dateStr: string): string {
     const parsedDate = dateStr.split("-");
     const date = new Date(dateStr); // Convert YYYY-MM-DD to Date object
     const dayNumber = parsedDate[2];
-    const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date);
-  
-    return `${monthName} ${dayNumber}${getOrdinalSuffix(parseInt(dayNumber, 10))}, ${date.getFullYear()}`;
+    const monthName = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+    }).format(date);
+
+    return `${monthName} ${dayNumber}${getOrdinalSuffix(
+      parseInt(dayNumber, 10)
+    )}, ${date.getFullYear()}`;
   }
-  
 
   return (
     <section className="h-screen w-screen bg-white">
@@ -232,7 +254,9 @@ export default function DashBoard() {
                   >
                     <div className="flex gap-1">
                       <TbCalendar size={15} />
-                      <Label className="font-bold m-auto">Date Range: {dateRange} days</Label>
+                      <Label className="font-bold m-auto">
+                        Date Range: {dateRange} days
+                      </Label>
                       <RiArrowDropDownLine className="m-auto" />
                     </div>
                   </DropdownMenuTrigger>
@@ -273,8 +297,22 @@ export default function DashBoard() {
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
                                 <Label className="flex gap-2 font-bold">
-                                  {cancelledMeetings.some((cancelled) => cancelled === meeting.meetingId) ? <BanIcon className="text-red-700" size={15}/> : <></>}
-                                  {`${formatDateWithOrdinal(meeting.date)} \u00A0\u00A0\u00A0 ${meeting.teamName}: ${meeting.meetingTeamName}`}
+                                  {cancelledMeetings.some(
+                                    (cancelled) =>
+                                      cancelled === meeting.meetingId
+                                  ) ? (
+                                    <BanIcon
+                                      className="text-red-700"
+                                      size={15}
+                                    />
+                                  ) : (
+                                    <></>
+                                  )}
+                                  {`${formatDateWithOrdinal(
+                                    meeting.date
+                                  )} \u00A0\u00A0\u00A0 ${meeting.teamName}: ${
+                                    meeting.meetingTeamName
+                                  }`}
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}
@@ -282,7 +320,7 @@ export default function DashBoard() {
                               </div>
                             </AccordionTrigger>
                             <AccordionContent>
-                              <div className="flex w-full justify-between items-center mt-3">
+                              <div className="flex w-full justify-between items-center mb-3">
                                 <div className="w-full space-y-2">
                                   {meeting.attendees.map(
                                     (attendee, subIndex) => (
@@ -309,11 +347,11 @@ export default function DashBoard() {
                                 </div>
                               </div>
                               {meeting.meetingHostEmail === userEmail ? (
-                                <div className="flex w-full justify-end mt-5">
+                                <div className="flex w-full justify-end mt-2">
                                   <Button
                                     variant="outline"
                                     className="ml-4"
-                                    onClick={() => 
+                                    onClick={() =>
                                       handleCancel(
                                         meeting.teamId,
                                         meeting.meetingTeamId,
@@ -323,7 +361,10 @@ export default function DashBoard() {
                                         meeting.time.end
                                       )
                                     }
-                                    disabled={cancelledMeetings.some((cancelled) => cancelled === meeting.meetingId)}
+                                    disabled={cancelledMeetings.some(
+                                      (cancelled) =>
+                                        cancelled === meeting.meetingId
+                                    )}
                                   >
                                     Cancel the Meeting
                                   </Button>
@@ -352,7 +393,8 @@ export default function DashBoard() {
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
                                 <Label className="font-bold">
-                                  {meeting.date}, {meeting.teamName}: {meeting.meetingTeamName}
+                                  {meeting.date}, {meeting.teamName}:{" "}
+                                  {meeting.meetingTeamName}
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}
