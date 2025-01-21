@@ -8,8 +8,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useHook } from "@/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 import { z } from "zod";
 
 type ParticipatePollFormProps = {
@@ -25,7 +28,12 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const ParticipatePollForm = ({ onLogin }: ParticipatePollFormProps) => {
+export default function ParticipatePollForm({
+  onLogin,
+}: ParticipatePollFormProps) {
+  const { server } = useHook();
+  const { id: urlPath } = useParams<string>();
+
   // Defining participant form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -35,10 +43,29 @@ const ParticipatePollForm = ({ onLogin }: ParticipatePollFormProps) => {
     },
   });
 
-  function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormValues) {
     onLogin(values.email);
-    console.log(values);
+
+    const response = await fetch(`${server}/api/polls/${urlPath}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userEmail: values.email,
+        selectedSlots: [],
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Failed to login user to the server", data);
+      return -1;
+    }
+
+    toast("Successfully checked into the poll");
   }
+
   return (
     <div className="w-4/5">
       <Form {...form}>
@@ -88,6 +115,4 @@ const ParticipatePollForm = ({ onLogin }: ParticipatePollFormProps) => {
       </Form>
     </div>
   );
-};
-
-export default ParticipatePollForm;
+}

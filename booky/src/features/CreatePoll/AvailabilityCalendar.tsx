@@ -1,9 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { formatTime } from "@/features/time";
+import { useHook } from "@/hooks";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 type AvailabilityCalendarProps = {
-  urlPath: string;
+  calendarType: "user" | "group";
   userEmail?: string;
   timeSlots: string[];
   selectedDays: string[];
@@ -11,37 +13,47 @@ type AvailabilityCalendarProps = {
   handleTimeSlots?: (selectedTimeSlots: Set<string>) => void;
 };
 
-const AvailabilityCalendar = ({
+export default function AvailabilityCalendar({
+  calendarType,
   timeSlots,
   selectedDays,
   userEmail,
-  groupAvailability = new Map(),
+  groupAvailability,
   handleTimeSlots,
-}: AvailabilityCalendarProps) => {
+}: AvailabilityCalendarProps) {
+  const { id: urlPath } = useParams<string>();
+  const { server } = useHook();
+
   const [selectedCells, setSelectedCells] = useState(new Set<string>());
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isSelecting, setIsSelecting] = useState(true);
-
   // fetching group availability
-  useEffect(() => {});
+  async function fetchGroupAvailability() {
+    const response = await fetch(`${server}/api/polls/${urlPath}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Failed to fetch group availability", data);
+      return;
+    }
+    console.log("groupAvailability iin calendar", data.participants);
+  }
 
-  // update backend when user's selection change
-  // useEffect(() => {
-  //   if (userEmail && handleTimeSlots) {
-  //     updateAvailability();
-  //   }
-  // }, [
-  //   handleTimeSlots,
-  //   server,
-  //   selectedTimeSlots,
-  //   selectedCells,
-  //   urlPath,
-  //   userEmail,
-  // ]);
+  useEffect(() => {
+    if (calendarType === "group") {
+      fetchGroupAvailability();
+    }
+  }, []);
 
-  const getCellId = (day: string, time: string) => `${day}-${time}`;
+  function getCellId(day: string, time: string) {
+    return `${day}-${time}`;
+  }
 
-  const handleMouseDown = (day: string, time: string) => {
+  function handleMouseDown(day: string, time: string) {
     setIsMouseDown(true);
     const cellId = getCellId(day, time);
     setIsSelecting(!selectedCells.has(cellId));
@@ -54,9 +66,9 @@ const AvailabilityCalendar = ({
     }
     setSelectedCells(newSelected);
     handleTimeSlots(newSelected);
-  };
+  }
 
-  const handleMouseEnter = (day: string, time: string) => {
+  function handleMouseEnter(day: string, time: string) {
     if (isMouseDown) {
       const cellId = getCellId(day, time);
       const newSelected = new Set(selectedCells);
@@ -69,30 +81,36 @@ const AvailabilityCalendar = ({
       setSelectedCells(newSelected);
       handleTimeSlots(newSelected);
     }
-  };
+  }
 
-  const handleMouseUp = () => {
+  function handleMouseUp() {
     setIsMouseDown(false);
-  };
+  }
 
   // Calculate total participants and available count for each cell
-  const getCellAvailability = (day: string, time: string) => {
+  function getCellAvailability(day: string, time: string) {
     const cellId = getCellId(day, time);
     let availableCount = 0;
-    const totalParticipants = groupAvailability.size;
+    const totalParticipants = groupAvailability.size + (userEmail ? 1 : 0); // Include current user
 
+    // Check group availability
     groupAvailability.forEach((availability) => {
       if (availability.has(cellId)) {
         availableCount++;
       }
     });
 
+    // Include current user's selection
+    if (selectedCells.has(cellId)) {
+      availableCount++;
+    }
+
     return { availableCount, totalParticipants };
-  };
+  }
 
   return (
     <>
-      {userEmail ? (
+      {calendarType == "user" ? (
         <Card
           className="border-none shadow-none"
           onMouseUp={handleMouseUp}
@@ -130,6 +148,12 @@ const AvailabilityCalendar = ({
           <div className="text-sm mb-4">
             Mouseover the Calendar to See Who Is Available
           </div>
+          <div className="flex items-center gap-2 mb-4">
+            <span>
+              {groupAvailability.size + (userEmail ? 1 : 0)} Participant
+              {groupAvailability.size + (userEmail ? 1 : 0) !== 1 && "s"}
+            </span>
+          </div>
           <CardContent className="p-4">
             <TimeGrid
               timeSlots={timeSlots}
@@ -140,16 +164,17 @@ const AvailabilityCalendar = ({
               groupAvailability={groupAvailability}
               getCellAvailability={getCellAvailability}
               isUserGrid={false}
+              userEmail={userEmail}
             />
           </CardContent>
         </Card>
       )}
     </>
   );
-};
+}
 
 // Separate component for the time grid
-const TimeGrid = ({
+function TimeGrid({
   timeSlots,
   selectedDays,
   selectedCells,
@@ -158,7 +183,31 @@ const TimeGrid = ({
   groupAvailability,
   getCellAvailability,
   isUserGrid,
-}) => {
+  userEmail,
+}: {
+  timeSlots: string[];
+  selectedDays: string[];
+  selectedCells: Set<string>;
+  handleMouseDown?: (day: string, time: string) => void;
+  handleMouseEnter?: (day: string, time: string) => void;
+  groupAvailability: Map<string, Set<string>>;
+  getCellAvailability: (
+    day: string,
+    time: string
+  ) => { availableCount: number; totalParticipants: number };
+  isUserGrid: boolean;
+  userEmail?: string;
+}) {
+  function getOpacityClass(availableCount: number, totalParticipants: number) {
+    if (totalParticipants === 0) return "opacity-0";
+    const percentage = (availableCount / totalParticipants) * 100;
+    if (percentage === 0) return "opacity-0";
+    if (percentage <= 25) return "opacity-25";
+    if (percentage <= 50) return "opacity-50";
+    if (percentage <= 75) return "opacity-75";
+    return "opacity-100";
+  }
+
   return (
     <div className="flex">
       {/* Time labels column */}
@@ -180,32 +229,43 @@ const TimeGrid = ({
 
       {/* Days columns */}
       <div className="flex flex-1">
-        {selectedDays.map((day) => (
+        {selectedDays.map((day, index) => (
           <div key={day} className="flex-1">
             <div className="text-center font-medium mb-2">{day}</div>
-            <div className="flex flex-col">
+            <div key={`${day}-${index}`} className="flex flex-col">
               {timeSlots.map((time, index) => {
                 const isHalfHour = time.endsWith("30");
                 const cellId = `${day}-${time}`;
                 const isSelected = selectedCells.has(cellId);
 
+                const { availableCount, totalParticipants } =
+                  getCellAvailability(day, time);
+
+                const opacityClass = isUserGrid
+                  ? selectedCells.has(cellId)
+                    ? "opacity-100"
+                    : "opacity-0"
+                  : getOpacityClass(availableCount, totalParticipants);
+
                 // Calculate cell color based on whether it's user or group grid
                 let cellColor = "bg-gray-100";
                 if (isUserGrid) {
                   cellColor = isSelected ? "bg-red-500" : "bg-gray-100";
-                } else if (groupAvailability) {
+                } else if (groupAvailability && userEmail) {
+                  cellColor = isSelected ? "bg-red-500" : "bg-gray-100";
                   const { availableCount, totalParticipants } =
                     getCellAvailability(day, time);
                   if (availableCount > 0) {
                     const opacity = (availableCount / totalParticipants) * 100;
-                    cellColor = `bg-red-500 opacity-${opacity}`;
+                    cellColor = `bg-red-500 ${opacityClass}`;
                   }
                 }
-
                 return (
-                  <div
-                    key={`${day}-${time}`}
-                    className={`
+                  <>
+                    {isUserGrid ? (
+                      <div
+                        key={`${day}-${time}`}
+                        className={`
                         h-8
                         border-l border-r
                         ${
@@ -216,9 +276,30 @@ const TimeGrid = ({
                         transition-colors
                         ${cellColor}
                       `}
-                    onMouseDown={() => handleMouseDown?.(day, time)}
-                    onMouseEnter={() => handleMouseEnter?.(day, time)}
-                  />
+                        onMouseDown={() =>
+                          isUserGrid && handleMouseDown?.(day, time)
+                        }
+                        onMouseEnter={() =>
+                          isUserGrid && handleMouseEnter?.(day, time)
+                        }
+                      />
+                    ) : (
+                      <div
+                        key={`${day}-${time}`}
+                        className={`
+                        h-8
+                        border-l border-r
+                        ${
+                          !isHalfHour ? "border-t" : "border-t border-t-dotted"
+                        } 
+                        ${index === timeSlots.length - 1 ? "border-b" : ""}
+                        cursor-pointer
+                        transition-colors
+                        ${cellColor}
+                      `}
+                      />
+                    )}
+                  </>
                 );
               })}
             </div>
@@ -227,6 +308,4 @@ const TimeGrid = ({
       </div>
     </div>
   );
-};
-
-export default AvailabilityCalendar;
+}
