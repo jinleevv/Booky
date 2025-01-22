@@ -25,6 +25,7 @@ export const getPollHandler: RequestHandler = async (
   }
 };
 
+router.get("/:urlPath/availability", getPollHandler);
 router.get("/:urlPath", getPollHandler);
 
 export default router;
