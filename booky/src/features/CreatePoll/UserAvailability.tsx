@@ -1,11 +1,23 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { useHook } from "@/hooks";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
+import { formatTime } from "../time";
 import ParticipatePollForm from "./ParticipatePollForm";
 import TimeGrid from "./TimeGrid";
-import { useParams } from "react-router-dom";
-import { useHook } from "@/hooks";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Label } from "@/components/ui/label";
+
+interface UserAvailabilityProps {
+  isLoggedIn: boolean;
+  handleLogin: () => void;
+  timeSlots: string[];
+  userEmail: string;
+  selectedDays: string[];
+  groupAvailability: Map<string, Set<string>>;
+  selectedCells: Set<string>;
+  setSelectedCells: (selectedCells: Set<string>) => void;
+}
 
 export default function UserAvailability({
   isLoggedIn,
@@ -16,12 +28,20 @@ export default function UserAvailability({
   groupAvailability,
   selectedCells,
   setSelectedCells,
-}) {
+}: UserAvailabilityProps) {
   const { id: urlPath } = useParams<string>();
   const { server } = useHook();
 
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isSelecting, setIsSelecting] = useState(true);
+
+  // Track hovered cells
+  const [hoveredCell, setHoveredCell] = useState<{
+    day: string;
+    time: string;
+  }>(null);
+  const [availableUsers, setAvailableUsers] = useState<string[]>([]);
+  const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
 
   async function updateAvailability(selectedSlots: Set<string>) {
     try {
@@ -91,7 +111,11 @@ export default function UserAvailability({
   function getCellAvailability(day: string, time: string) {
     const cellId = getCellId(day, time);
     let availableCount = 0;
-    const totalParticipants = groupAvailability.size + (userEmail ? 1 : 0); // Include current user
+
+    const userEmailInGroup =
+      userEmail && !groupAvailability.has(userEmail) ? 1 : 0;
+
+    const totalParticipants = groupAvailability.size + userEmailInGroup; // Include current user
 
     // Check group availability
     groupAvailability.forEach((availability) => {
@@ -100,26 +124,80 @@ export default function UserAvailability({
       }
     });
 
-    // Include current user's selection
-    if (selectedCells.has(cellId)) {
-      availableCount++;
-    }
-
     return { availableCount, totalParticipants };
   }
+
+  // Retrieve the list of available users for a cell
+  function getAvailableUsers(day: string, time: string): string[] {
+    const cellId = `${day}-${time}`;
+    const availableUsers: string[] = [];
+
+    // Check group availability
+    groupAvailability.forEach((availability, email) => {
+      if (availability.has(cellId)) {
+        availableUsers.push(email);
+      }
+    });
+
+    // Include current user's selection if not contained in availableUsers
+    if (selectedCells.has(cellId) && !availableUsers.includes(userEmail)) {
+      availableUsers.push(userEmail);
+    }
+    const allUsers = Array.from(groupAvailability.keys());
+    setNotAvailableUsers(
+      allUsers.filter((user) => !availableUsers.includes(user))
+    );
+    setAvailableUsers(availableUsers);
+    return availableUsers;
+  }
+
+  const userEmailInGroup =
+    userEmail && !groupAvailability.has(userEmail) ? 1 : 0;
 
   return (
     <div className="grid grid-cols-2 w-full py-2 relative z-10">
       {!isLoggedIn ? (
         <ParticipatePollForm onLogin={handleLogin} />
+      ) : hoveredCell ? (
+        <div>
+          <div className="text-center gap-4">
+            <h2 className="text-lg font-bold">
+              {`${availableUsers.length.toString()} /
+                ${(
+                  availableUsers.length + notAvailableUsers.length
+                ).toString()}`}
+            </h2>
+            <p className="text-md">
+              {hoveredCell.day} {formatTime(hoveredCell.time)}
+            </p>
+          </div>
+          <div className="mt-2 w-full p-4 border-l grid grid-cols-2">
+            <div className="text-center">
+              <h3 className="font-semibold">Available</h3>
+              <ul>
+                {availableUsers.map((user) => (
+                  <li key={user} className="text-sm">
+                    {user}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="text-center">
+              <h3 className="font-semibold">Not Available</h3>
+              <ul>
+                {notAvailableUsers.map((user) => (
+                  <li key={user} className="text-sm">
+                    {user}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       ) : (
         <Card className="h-full shadow-none">
           <CardContent className="p-6">
-            <Card
-              className="border-none shadow-none"
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-            >
+            <Card className="border-none shadow-none" onMouseUp={handleMouseUp}>
               <h2 className="text-md font-semibold mb-4">
                 {userEmail}'s Availability
               </h2>
@@ -138,10 +216,12 @@ export default function UserAvailability({
                   timeSlots={timeSlots}
                   selectedDays={selectedDays}
                   selectedCells={selectedCells}
+                  setHoveredCell={setHoveredCell}
                   handleMouseDown={handleMouseDown}
                   handleMouseEnter={handleMouseEnter}
                   groupAvailability={groupAvailability}
                   getCellAvailability={getCellAvailability}
+                  getAvailableUsers={getAvailableUsers}
                   isUserGrid={true}
                   userEmail={userEmail}
                 />
@@ -158,8 +238,8 @@ export default function UserAvailability({
                 Group's Availability
               </Label>
               <Label className="text-sm font-semibold mb-4">
-                {groupAvailability.size + (userEmail ? 1 : 0)} Participant
-                {groupAvailability.size + (userEmail ? 1 : 0) !== 1 && "s"}
+                {groupAvailability.size + userEmailInGroup} Participant
+                {groupAvailability.size + userEmailInGroup !== 1 && "s"}
               </Label>
             </div>
 
@@ -171,10 +251,12 @@ export default function UserAvailability({
                 timeSlots={timeSlots}
                 selectedDays={selectedDays}
                 selectedCells={selectedCells}
+                setHoveredCell={setHoveredCell}
                 handleMouseDown={handleMouseDown}
                 handleMouseEnter={handleMouseEnter}
                 groupAvailability={groupAvailability}
                 getCellAvailability={getCellAvailability}
+                getAvailableUsers={getAvailableUsers}
                 isUserGrid={false}
                 userEmail={userEmail}
               />

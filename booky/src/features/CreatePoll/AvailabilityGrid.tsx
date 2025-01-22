@@ -19,7 +19,6 @@ const AvailabilityGrid = ({
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isSelecting, setIsSelecting] = useState(true);
 
-  console.log(selectedCells);
   const getCellId = (day: string, time: string) => `${day}-${time}`;
 
   const handleMouseDown = (day: string, time: string) => {
