@@ -10,7 +10,7 @@ import TimeGrid from "./TimeGrid";
 
 interface UserAvailabilityProps {
   isLoggedIn: boolean;
-  handleLogin: () => void;
+  handleLogin: (email: string) => void;
   timeSlots: string[];
   userEmail: string;
   selectedDays: string[];
@@ -129,7 +129,7 @@ export default function UserAvailability({
 
   // Retrieve the list of available users for a cell
   function getAvailableUsers(day: string, time: string): string[] {
-    const cellId = `${day}-${time}`;
+    const cellId = getCellId(day, time);
     const availableUsers: string[] = [];
 
     // Check group availability
@@ -223,7 +223,6 @@ export default function UserAvailability({
                   getCellAvailability={getCellAvailability}
                   getAvailableUsers={getAvailableUsers}
                   isUserGrid={true}
-                  userEmail={userEmail}
                 />
               </CardContent>
             </Card>
@@ -258,7 +257,6 @@ export default function UserAvailability({
                 getCellAvailability={getCellAvailability}
                 getAvailableUsers={getAvailableUsers}
                 isUserGrid={false}
-                userEmail={userEmail}
               />
             </CardContent>
           </Card>

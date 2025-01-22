@@ -26,6 +26,7 @@ export default function TimeGrid({
   getAvailableUsers: (day: string, time: string) => string[];
   isUserGrid: boolean;
 }) {
+  
   function getColorIntensity(
     availableCount: number,
     totalParticipants: number
