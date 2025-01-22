@@ -101,7 +101,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/:teamId/:meetingTeamId/:meetingId"
+          path="/dashboard/:teamId/:meetingTeamId/:meetingTeamName/:meetingId"
           element={
             <ProtectedRoute>
               <MeetingDetails />

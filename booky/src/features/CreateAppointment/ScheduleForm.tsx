@@ -16,7 +16,7 @@ import { useEffect } from "react";
 import { useHook } from "@/hooks";
 
 const formSchema = z.object({
-  name: z.string(),
+  name: z.string().optional(),
   email: z
     .string()
     .min(1, "Email is required")
@@ -57,7 +57,7 @@ export default function ScheduleForm({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!selectedDay || !selectedTime ) {
+    if (!selectedDay || !selectedTime) {
       if (selectedMeetingTeam.type !== "group") {
         toast.error("Please select both date and time before submitting.");
         return;
@@ -70,7 +70,7 @@ export default function ScheduleForm({
       newSelectedTime = {
         start: "10:00 AM",
         end: "10:00 AM",
-      }
+      };
     } else {
       newSelectedTime = selectedTime;
     }

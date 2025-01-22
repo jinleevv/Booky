@@ -87,11 +87,11 @@ export default function ViewDetails({
     try {
       const response = await fetch(
         `${server}/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
-        { 
+        {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-          }
+          },
         }
       );
       if (!response.ok) {
@@ -99,7 +99,9 @@ export default function ViewDetails({
         return;
       }
 
-      setMeetingTeam((prevMeetings) => prevMeetings.filter(meeting => meeting._id !== meetingTeamId));
+      setMeetingTeam((prevMeetings) =>
+        prevMeetings.filter((meeting) => meeting._id !== meetingTeamId)
+      );
       toast("Team meeting deleted successfully!");
     } catch (error) {
       console.error("Error deleting team meeting:", error);
@@ -289,7 +291,9 @@ export default function ViewDetails({
                 </Button>
               </div>
 
-              <Label className="text-lg font-bold">Meeting Name</Label>
+              <Label className="text-lg font-bold">
+                {selectedMeeting.meetingName}
+              </Label>
               <Tabs defaultValue="details">
                 <TabsList>
                   <TabsTrigger value="details">Meeting Details</TabsTrigger>
@@ -302,6 +306,7 @@ export default function ViewDetails({
                       ...meeting,
                       teamId: teamId, // Dynamically add teamId
                       meetingTeamId: selectedMeeting._id,
+                      meetingTeamName: selectedMeeting.meetingName,
                     }))}
                   />
                 </TabsContent>

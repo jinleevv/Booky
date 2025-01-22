@@ -160,7 +160,7 @@ export default function UserAvailability({
     userEmail && !groupAvailability.has(userEmail) ? 1 : 0;
 
   return (
-    <div className="grid grid-cols-2 w-full py-2 relative z-10">
+    <div className="grid grid-cols-2 w-full gap-5 py-2 relative z-10">
       {!isLoggedIn ? (
         <ParticipatePollForm onLogin={handleLogin} />
       ) : hoveredCell ? (

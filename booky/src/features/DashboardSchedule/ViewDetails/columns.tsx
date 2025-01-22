@@ -7,6 +7,7 @@ export interface MeetingInformation {
   _id: string; // Unique meeting ID
   teamId: string;
   meetingTeamId: string;
+  meetingTeamName: string;
   date: string; // Meeting date in "YYYY-MM-DD" format
   time: {
     start: string; // Start time in "HH:MM AM/PM" format
@@ -41,12 +42,15 @@ export function MeetingColumns(): ColumnDef<MeetingInformation>[] {
         const meetingId = row.original._id;
         const teamId = row.original.teamId;
         const meetingTeamId = row.original.meetingTeamId;
+        const meetingTeamName = row.original.meetingTeamName;
         return (
           <div className="flex justify-end items-center">
             <Button
               onClick={(e) => {
                 e.preventDefault();
-                navigate(`/dashboard/${teamId}/${meetingTeamId}/${meetingId}`);
+                navigate(
+                  `/dashboard/${teamId}/${meetingTeamId}/${meetingTeamName}/${meetingId}`
+                );
               }}
             >
               Details

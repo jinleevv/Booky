@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DashboardNavBar from "@/features/DashboardNavBar";
 import { useHook } from "@/hooks";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { HiOutlineArrowNarrowLeft } from "react-icons/hi";
 import { useParams, useNavigate } from "react-router-dom";
@@ -10,7 +11,7 @@ import { toast } from "sonner";
 
 export default function MeetingDetails() {
   const navigate = useNavigate();
-  const { teamId, meetingTeamId, meetingId } = useParams();
+  const { teamId, meetingTeamId, meetingTeamName, meetingId } = useParams();
   const { server } = useHook();
 
   const [meetingData, setMeetingData] = useState<any>(null);
@@ -74,7 +75,7 @@ export default function MeetingDetails() {
                     Back
                   </Button>
                 </div>
-                <Label className="text-lg font-bold">Meeting Name</Label>
+                <Label className="text-lg font-bold">{meetingTeamName}</Label>
                 <Label className="text-sm font-light text-gray-600">
                   Date: {meetingData.date}
                 </Label>
@@ -83,64 +84,63 @@ export default function MeetingDetails() {
                 </Label>
               </div>
               <div className="p-4 w-full h-full border border-dashed rounded-lg">
-                <div className="w-full h-fit">
-                  <Label className="text-medium font-bold">
+                <div className="flex w-full h-6 my-auto">
+                  <Label className="text-medium font-bold my-auto">
                     Meeting Minute{" "}
                   </Label>{" "}
-                  <Button
-                    variant="ghost"
-                    className="w-10"
-                    onClick={() =>
-                      navigate(
-                        `/dashboard/document/${meetingData.date}/${meetingData.time.start} - ${meetingData.time.end}/${meetingId}`
-                      )
-                    }
-                  >
-                    Link
-                  </Button>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full h-full"
+                      onClick={() =>
+                        navigate(
+                          `/dashboard/document/${meetingData.date}/${meetingData.time.start} - ${meetingData.time.end}/${meetingId}`
+                        )
+                      }
+                    >
+                      <ArrowRight size={15} />
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <Label>Preview:</Label>
-                  <ScrollArea className="w-full h-36 text-sm border rounded-lg p-3 mt-2">
-                    {meetingMinuteData && meetingMinuteData.data ? (
-                      meetingMinuteData.data.ops.map((op, index) => {
-                        if (typeof op.insert === "string") {
-                          return (
-                            <div
-                              key={index}
-                              style={{
-                                whiteSpace: "pre-wrap", // Respect whitespace and newlines
-                                wordWrap: "break-word", // Ensure long words wrap properly
-                              }}
-                            >
-                              {op.insert}
-                            </div>
-                          );
-                        } else if (op.insert.image) {
-                          return (
-                            <img
-                              key={index}
-                              src={op.insert.image}
-                              alt="Meeting Content"
-                              style={{
-                                maxWidth: "100%",
-                                height: "auto",
-                              }}
-                            />
-                          );
-                        } else {
-                          return null;
-                        }
-                      })
-                    ) : (
-                      <></>
-                    )}
-                  </ScrollArea>
-                </div>
-                <div className="mt-6">
-                  <Label className="text-medium font-bold">Tasks</Label>
+                <div className="w-full h-[680px] p-4 mt-3 border rounded-lg text-sm">
+                  {meetingMinuteData && meetingMinuteData.data ? (
+                    meetingMinuteData.data.ops.map((op, index) => {
+                      if (typeof op.insert === "string") {
+                        return (
+                          <div
+                            key={index}
+                            style={{
+                              whiteSpace: "pre-wrap", // Respect whitespace and newlines
+                              wordWrap: "break-word", // Ensure long words wrap properly
+                            }}
+                          >
+                            {op.insert}
+                          </div>
+                        );
+                      } else if (op.insert.image) {
+                        return (
+                          <img
+                            key={index}
+                            src={op.insert.image}
+                            alt="Meeting Content"
+                            style={{
+                              maxWidth: "100%",
+                              height: "auto",
+                            }}
+                          />
+                        );
+                      } else {
+                        return null;
+                      }
+                    })
+                  ) : (
+                    <></>
+                  )}
                 </div>
               </div>
+              {/* <div className="mt-6">
+                  <Label className="text-medium font-bold">Tasks</Label>
+                </div> */}
             </>
           )}
         </div>

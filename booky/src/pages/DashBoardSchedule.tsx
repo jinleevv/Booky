@@ -95,7 +95,7 @@ export default function DashBoardSchedule() {
               >
                 <TabsList>
                   <TabsTrigger value="join">Join a Meeting</TabsTrigger>
-                  <TabsTrigger value="view">View</TabsTrigger>
+                  <TabsTrigger value="view">Meeting Minutes</TabsTrigger>
                 </TabsList>
                 <TabsContent value="join">
                   <JoinAMeeting
