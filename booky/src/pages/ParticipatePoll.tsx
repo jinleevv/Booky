@@ -84,12 +84,15 @@ export default function ParticipatePoll() {
 
   async function getAvailability(email: string) {
     try {
-      const response = await fetch(`${server}/api/polls/${urlPath}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${server}/api/polls/${urlPath}/availability`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         toast.error("Failed to fetch cell availability");

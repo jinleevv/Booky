@@ -11,6 +11,7 @@ export default function TimeGrid({
   getCellAvailability,
   getAvailableUsers,
   isUserGrid,
+  userEmail,
 }: {
   timeSlots: string[];
   selectedDays: string[];
@@ -25,25 +26,24 @@ export default function TimeGrid({
   ) => { availableCount: number; totalParticipants: number };
   getAvailableUsers: (day: string, time: string) => string[];
   isUserGrid: boolean;
+  userEmail?: string;
 }) {
-  
-  function getColorIntensity(
-    availableCount: number,
-    totalParticipants: number
-  ) {
-    if (totalParticipants === 0) return "bg-gray-100";
-    const percentage = availableCount / totalParticipants;
-    if (percentage > 0 && percentage <= 1 / 11) return "bg-red-50";
-    if (percentage > 1 / 11 && percentage <= 2 / 11) return "bg-red-100";
-    if (percentage > 2 / 11 && percentage <= 3 / 11) return "bg-red-200";
-    if (percentage > 3 / 11 && percentage <= 4 / 11) return "bg-red-300";
-    if (percentage > 4 / 11 && percentage <= 5 / 11) return "bg-red-400";
-    if (percentage > 5 / 11 && percentage <= 6 / 11) return "bg-red-500";
-    if (percentage > 6 / 11 && percentage <= 7 / 11) return "bg-red-600";
-    if (percentage > 7 / 11 && percentage <= 8 / 11) return "bg-red-700";
-    if (percentage > 8 / 11 && percentage <= 9 / 11) return "bg-red-800";
-    if (percentage > 9 / 11 && percentage <= 10 / 11) return "bg-red-900";
-    return "bg-red-950";
+  function opacityClass(availableCount: number, totalParticipants: number) {
+    if (totalParticipants === 0) return "opacity-0";
+    const percentage = (availableCount / totalParticipants) * 100;
+
+    if (percentage <= 10) return "opacity-10";
+    if (percentage <= 20) return "opacity-20";
+    if (percentage <= 25) return "opacity-25";
+    if (percentage <= 30) return "opacity-30";
+    if (percentage <= 40) return "opacity-40";
+    if (percentage <= 50) return "opacity-50";
+    if (percentage <= 55) return "opacity-55";
+    if (percentage <= 60) return "opacity-60";
+    if (percentage <= 70) return "opacity-70";
+    if (percentage <= 80) return "opacity-80";
+    if (percentage <= 90) return "opacity-90";
+    return "opacity-100";
   }
 
   return (
@@ -80,24 +80,23 @@ export default function TimeGrid({
                 const { availableCount, totalParticipants } =
                   getCellAvailability(day, time);
 
-                const colorIntensity = isUserGrid
+                const opacity = isUserGrid
                   ? selectedCells.has(cellId)
                     ? "opacity-100"
                     : "opacity-0"
-                  : getColorIntensity(availableCount, totalParticipants);
+                  : opacityClass(availableCount, totalParticipants);
 
                 // Calculate cell color based on whether it's user or group grid
                 let cellColor = "bg-gray-100";
                 if (isUserGrid) {
-                  cellColor = isSelected ? "bg-red-700" : "bg-gray-100";
-                } else if (groupAvailability.size > 0) {
+                  cellColor = isSelected ? "bg-red-600" : "bg-gray-100";
+                } else if (groupAvailability && userEmail) {
+                  cellColor = isSelected ? "bg-red-600" : "bg-gray-100";
+
                   const { availableCount } = getCellAvailability(day, time);
-                  cellColor =
-                    isSelected && availableCount > 0
-                      ? `${colorIntensity}`
-                      : "bg-gray-100";
+
                   if (availableCount > 0) {
-                    cellColor = `${colorIntensity}`;
+                    cellColor = `bg-red-600 ${opacity}`;
                   }
                 }
 

@@ -118,11 +118,16 @@ export default function UserAvailability({
     const totalParticipants = groupAvailability.size + userEmailInGroup; // Include current user
 
     // Check group availability
-    groupAvailability.forEach((availability) => {
-      if (availability.has(cellId)) {
+    groupAvailability.forEach((availability, email) => {
+      if (availability.has(cellId) && email !== userEmail) {
         availableCount++;
       }
     });
+
+    // Include current user's selection
+    if (selectedCells.has(cellId)) {
+      availableCount++;
+    }
 
     return { availableCount, totalParticipants };
   }
@@ -197,7 +202,11 @@ export default function UserAvailability({
       ) : (
         <Card className="h-full shadow-none">
           <CardContent className="p-6">
-            <Card className="border-none shadow-none" onMouseUp={handleMouseUp}>
+            <Card
+              className="border-none shadow-none"
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
               <h2 className="text-md font-semibold mb-4">
                 {userEmail}'s Availability
               </h2>
@@ -207,7 +216,7 @@ export default function UserAvailability({
                   <span>Unavailable</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-red-700"></div>
+                  <div className="w-4 h-4 bg-red-600"></div>
                   <span>Available</span>
                 </div>
               </div>
@@ -223,6 +232,7 @@ export default function UserAvailability({
                   getCellAvailability={getCellAvailability}
                   getAvailableUsers={getAvailableUsers}
                   isUserGrid={true}
+                  userEmail={userEmail}
                 />
               </CardContent>
             </Card>
@@ -257,6 +267,7 @@ export default function UserAvailability({
                 getCellAvailability={getCellAvailability}
                 getAvailableUsers={getAvailableUsers}
                 isUserGrid={false}
+                userEmail={userEmail}
               />
             </CardContent>
           </Card>
