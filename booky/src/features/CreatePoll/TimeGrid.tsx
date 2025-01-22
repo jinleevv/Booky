@@ -4,16 +4,18 @@ export default function TimeGrid({
   timeSlots,
   selectedDays,
   selectedCells,
+  setHoveredCell,
   handleMouseDown,
   handleMouseEnter,
   groupAvailability,
   getCellAvailability,
+  getAvailableUsers,
   isUserGrid,
-  userEmail,
 }: {
   timeSlots: string[];
   selectedDays: string[];
   selectedCells: Set<string>;
+  setHoveredCell: (cell: { day: string; time: string } | null) => void;
   handleMouseDown?: (day: string, time: string) => void;
   handleMouseEnter?: (day: string, time: string) => void;
   groupAvailability: Map<string, Set<string>>;
@@ -21,17 +23,27 @@ export default function TimeGrid({
     day: string,
     time: string
   ) => { availableCount: number; totalParticipants: number };
+  getAvailableUsers: (day: string, time: string) => string[];
   isUserGrid: boolean;
-  userEmail?: string;
 }) {
-  function getOpacityClass(availableCount: number, totalParticipants: number) {
-    if (totalParticipants === 0) return "opacity-0";
-    const percentage = (availableCount / totalParticipants) * 100;
-    if (percentage === 0) return "opacity-0";
-    if (percentage <= 25) return "opacity-25";
-    if (percentage <= 50) return "opacity-50";
-    if (percentage <= 75) return "opacity-75";
-    return "opacity-100";
+  
+  function getColorIntensity(
+    availableCount: number,
+    totalParticipants: number
+  ) {
+    if (totalParticipants === 0) return "bg-gray-100";
+    const percentage = availableCount / totalParticipants;
+    if (percentage > 0 && percentage <= 1 / 11) return "bg-red-50";
+    if (percentage > 1 / 11 && percentage <= 2 / 11) return "bg-red-100";
+    if (percentage > 2 / 11 && percentage <= 3 / 11) return "bg-red-200";
+    if (percentage > 3 / 11 && percentage <= 4 / 11) return "bg-red-300";
+    if (percentage > 4 / 11 && percentage <= 5 / 11) return "bg-red-400";
+    if (percentage > 5 / 11 && percentage <= 6 / 11) return "bg-red-500";
+    if (percentage > 6 / 11 && percentage <= 7 / 11) return "bg-red-600";
+    if (percentage > 7 / 11 && percentage <= 8 / 11) return "bg-red-700";
+    if (percentage > 8 / 11 && percentage <= 9 / 11) return "bg-red-800";
+    if (percentage > 9 / 11 && percentage <= 10 / 11) return "bg-red-900";
+    return "bg-red-950";
   }
 
   return (
@@ -64,30 +76,31 @@ export default function TimeGrid({
                 const cellId = `${day}-${time}`;
 
                 const isSelected = selectedCells.has(cellId);
-                console.log(selectedCells);
 
                 const { availableCount, totalParticipants } =
                   getCellAvailability(day, time);
 
-                const opacityClass = isUserGrid
+                const colorIntensity = isUserGrid
                   ? selectedCells.has(cellId)
                     ? "opacity-100"
                     : "opacity-0"
-                  : getOpacityClass(availableCount, totalParticipants);
+                  : getColorIntensity(availableCount, totalParticipants);
 
                 // Calculate cell color based on whether it's user or group grid
                 let cellColor = "bg-gray-100";
                 if (isUserGrid) {
-                  cellColor = isSelected ? "bg-red-500" : "bg-gray-100";
-                } else if (groupAvailability && userEmail) {
-                  cellColor = isSelected ? "bg-red-500" : "bg-gray-100";
-                  const { availableCount, totalParticipants } =
-                    getCellAvailability(day, time);
+                  cellColor = isSelected ? "bg-red-700" : "bg-gray-100";
+                } else if (groupAvailability.size > 0) {
+                  const { availableCount } = getCellAvailability(day, time);
+                  cellColor =
+                    isSelected && availableCount > 0
+                      ? `${colorIntensity}`
+                      : "bg-gray-100";
                   if (availableCount > 0) {
-                    const opacity = (availableCount / totalParticipants) * 100;
-                    cellColor = `bg-red-500 ${opacityClass}`;
+                    cellColor = `${colorIntensity}`;
                   }
                 }
+
                 return (
                   <>
                     {isUserGrid ? (
@@ -129,6 +142,12 @@ export default function TimeGrid({
                           transition-colors
                           ${cellColor}
                         `}
+                        onMouseEnter={() => {
+                          if (isUserGrid) return;
+                          setHoveredCell({ day, time });
+                          getAvailableUsers(day, time);
+                        }}
+                        onMouseLeave={() => setHoveredCell(null)}
                       />
                     )}
                   </>
