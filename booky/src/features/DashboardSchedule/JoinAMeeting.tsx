@@ -386,17 +386,19 @@ export default function JoinAMeeting({
                   <div className="flex w-full justify-between">
                     <Label className="text-lg font-bold">Meetings</Label>
                     <div>
-                      <Button
-                        onClick={() =>
-                          navigate(`/dashboard/${teamId}/create-meeting`)
-                        }
-                      >
-                        <IoIosAdd />
-                        New Meeting
-                      </Button>
+                      {(adminEmail === userEmail ||
+                        teamCoAdmin.includes(userEmail)) && (
+                          <Button
+                          onClick={() =>
+                            navigate(`/dashboard/${teamId}/create-meeting`)
+                          }
+                        >
+                          <IoIosAdd />
+                          New Meeting
+                        </Button>
+                      )}
                     </div>
                   </div>
-
                   {selectedHost ? (
                     <>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-3 w-full">
