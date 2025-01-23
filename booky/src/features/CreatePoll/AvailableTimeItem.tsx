@@ -21,21 +21,21 @@ function AvailableTimeItem({
     userEmailInGroup;
 
   return (
-    <div className="border px-6 py-3 rounded-lg">
-      <div className="px-4 flex justify-between items-center">
-        <p className="text-sm font-bold">
+    <div className="border py-3 rounded-lg">
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-bold w-1/4 text-center">
           {`${availableCount.toString()} /
                 ${poll.participants.length.toString()}`}
         </p>
 
-        <p className="text-sm">
+        <p className="text-sm w-1/4 text-center">
           {formatDate(poll.dateRange.start.date)}~
           {formatDate(poll.dateRange.end.date)}
         </p>
-        <p className="text-sm">
+        <p className="text-sm w-1/4 text-center">
           {formatTime(poll.time.start)}-{formatTime(poll.time.end)}
         </p>
-        <div>
+        <div className="w-1/4 text-center">
           <Button disabled={isLoggedIn} className="bg-gray-500" size="sm">
             Create Meeting
           </Button>

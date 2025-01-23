@@ -67,7 +67,7 @@ export default function AvailableTime({ userEmail }: { userEmail: string }) {
           }
 
           // 3. Sort by start time
-          const timeA = a.time.start; // Assuming time.start is in "HH:MM" format
+          const timeA = a.time.start;
           const timeB = b.time.start;
           return timeA.localeCompare(timeB);
         });
@@ -103,14 +103,14 @@ export default function AvailableTime({ userEmail }: { userEmail: string }) {
             Manually Create Meeting
           </Button>
         </div>
-        <div className="pl-6 pr-16 pt-6 flex justify-between text-center text-sm text-gray-500">
-          <span>Available Rate</span>
-          <span>Date</span>
-          <span>Time</span>
-          <span>Create</span>
+        <div className="pt-6 flex justify-between text-center text-sm text-gray-500">
+          <span className="w-1/4 text-center">Available Rate</span>
+          <span className="w-1/4 text-center">Date</span>
+          <span className="w-1/4 text-center">Time</span>
+          <span className="w-1/4 text-center">Create</span>
         </div>
-        <hr />
-        <div className="pt-2 space-y-3">
+        <hr className="my-4 border-gray-300" />
+        <div className="space-y-3">
           {polls!.map((poll) => (
             <AvailableTimeItem
               key={poll._id}
