@@ -1,6 +1,5 @@
 export const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-
 export const availableTime = [
   "12:00 AM",
   "12:30 AM",
@@ -54,7 +53,7 @@ export const availableTime = [
 ];
 
 // Time conversion helpers
-export const convertTo24Hour = (time12h) => {
+export function convertTo24Hour(time12h) {
   // Parse the time components
   const [time, period] = time12h.split(" ");
   let [hours, minutes] = time.split(":");
@@ -68,17 +67,26 @@ export const convertTo24Hour = (time12h) => {
   }
 
   return `${hours.toString().padStart(2, "0")}:${minutes}`;
-};
+}
 
-export const formatTime = (time) => {
+export function formatTime(time) {
   const [hour, minute] = time.split(":");
   const hourNum = parseInt(hour);
   const period = hourNum >= 12 ? "PM" : "AM";
   const displayHour = hourNum > 12 ? hourNum - 12 : hourNum;
   return `${displayHour}:${minute} ${period}`;
-};
+}
 
-export const parseStringTimeToInt = (time: string): number => {
+export function parseStringTimeToInt(time: string): number {
   const [hour] = time.split(":");
   return parseInt(hour);
-};
+}
+
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
