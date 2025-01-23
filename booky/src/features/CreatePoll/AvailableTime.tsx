@@ -52,8 +52,27 @@ export default function AvailableTime({ userEmail }: { userEmail: string }) {
         }
 
         const data = await response.json();
+        // Sort the polls by number of participants (descending) and start date (ascending)
+        const sortedPolls = data.sort((a: PollData, b: PollData) => {
+          // Sort by number of participants
+          if (b.participants.length !== a.participants.length) {
+            return b.participants.length - a.participants.length;
+          }
 
-        setPolls(data);
+          // 2. Sort by start date
+          const dateA = new Date(a.dateRange.start.date).getTime();
+          const dateB = new Date(b.dateRange.start.date).getTime();
+          if (dateA !== dateB) {
+            return dateA - dateB;
+          }
+
+          // 3. Sort by start time
+          const timeA = a.time.start; // Assuming time.start is in "HH:MM" format
+          const timeB = b.time.start;
+          return timeA.localeCompare(timeB);
+        });
+
+        setPolls(sortedPolls);
       } catch (error) {
         setError(error instanceof Error ? error.message : "An error occurred");
         toast.error("Failed to fetch poll data");
@@ -80,11 +99,7 @@ export default function AvailableTime({ userEmail }: { userEmail: string }) {
       <CardContent className="p-6">
         <div className="flex justify-between text-center px-4">
           <Label className="text-lg font-semibold">Available Times</Label>
-          <Button
-            disabled={!loggedInUser}
-            className="bg-gray-500"
-            size="sm"
-          >
+          <Button disabled={!loggedInUser} className="bg-gray-500" size="sm">
             Manually Create Meeting
           </Button>
         </div>
