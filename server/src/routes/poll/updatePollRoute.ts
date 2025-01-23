@@ -81,11 +81,6 @@ export const updatePollHandler: RequestHandler = async (
       poll.participants!.push({ email: userEmail, schedule: selectedSlots });
     }
 
-    console.log(poll);
-    for (const participant of poll.participants!) {
-      console.log(participant);
-    }
-
     // Remove __v field from poll object
     await poll.save();
 

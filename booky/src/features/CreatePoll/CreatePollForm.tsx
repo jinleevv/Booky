@@ -93,8 +93,6 @@ export default function CreatePollForm() {
     values.endTime = convertTo24Hour(values.endTime);
 
     const urlPath = uuid();
-    console.log(values);
-    console.log(urlPath);
 
     const response = await fetch(`${server}/api/polls/create`, {
       method: "POST",

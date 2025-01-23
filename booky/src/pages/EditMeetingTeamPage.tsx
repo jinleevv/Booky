@@ -135,7 +135,6 @@ export default function EditMeetingTeamPage() {
         form.reset(formattedData);
       }
       else {
-        console.log(meetingData.date);
         const formattedData = {
           meetingName: meetingData.meetingName || "",
           meetingDescription: meetingData.meetingDescription || "",

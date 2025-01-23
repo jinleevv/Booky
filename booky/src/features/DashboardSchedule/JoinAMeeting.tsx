@@ -142,7 +142,6 @@ export default function JoinAMeeting({
         });
       }
     });
-    console.log(newTimeSlots);
     setTimeSlots(newTimeSlots);
   }, [selectedDate]);
 

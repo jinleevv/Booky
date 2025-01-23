@@ -89,7 +89,6 @@ export const scheduleMeetings = async () => {
       // Save the team after all meetings are added
       await team.save();
     }
-
     console.log("Scheduled meetings updated successfully.");
   } catch (error) {
     console.error("Error scheduling meetings:", error);

@@ -121,7 +121,6 @@ export default function DashBoard() {
         setCancelledMeetings(cancelled);
       } catch (error) {
         toast("Unable to fetch the meeting information");
-        console.log(error);
       }
     };
 

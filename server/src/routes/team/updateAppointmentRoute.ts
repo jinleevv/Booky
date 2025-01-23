@@ -38,7 +38,6 @@ export const updateAppointmentsHandler: RequestHandler = async (
   const { meetingTeamId, day, time, attend } = req.body;
   try {
     if (!meetingTeamId || !attend || !day || !time) {
-      console.log("time", time)
       res.status(400).json({ message: "Invalid or missing appointments data" });
       return;
     }
@@ -66,7 +65,8 @@ export const updateAppointmentsHandler: RequestHandler = async (
           m.attendees.push(attend);
           appointmentUpdated = true;
         }
-    })} 
+      });
+    }
     // else {
     //   findMeetingTeam.meeting.forEach((m: any) => {
     //     if (m.date === day) {
@@ -76,7 +76,11 @@ export const updateAppointmentsHandler: RequestHandler = async (
     // })}
 
     if (!appointmentUpdated) {
-      res.status(400).json({ message: "No matching appointment found or attendee already added" });
+      res
+        .status(400)
+        .json({
+          message: "No matching appointment found or attendee already added",
+        });
       return;
     }
 

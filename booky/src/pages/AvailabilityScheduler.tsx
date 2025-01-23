@@ -147,7 +147,6 @@ export default function AvailabilityScheduler() {
 
     values.startTime = convertTo24Hour(values.startTime);
     values.endTime = convertTo24Hour(values.endTime);
-    console.log(values);
   }
 
   return (
