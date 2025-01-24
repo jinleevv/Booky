@@ -30,7 +30,6 @@ import {
 import { DateRangePicker } from "@nextui-org/date-picker";
 import { useNavigate } from "react-router-dom";
 
-import { ClipboardCopy } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
@@ -116,28 +115,9 @@ export default function CreatePollForm() {
       return -1;
     }
 
-    toast("Successfully Created Poll", {
-      icon: <ClipboardCopy />,
-      action: {
-        label: "Copy Poll Link",
-        onClick: () => copyToClipboard(`${urlPath}`),
-      },
-      duration: 5000,
-    });
+    toast("Successfully Created Poll");
     navigate(`/poll/${urlPath}`);
   }
-
-  // Function to copy text to clipboard
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        toast.success("Successfully copied to clipboard!");
-      })
-      .catch(() => {
-        toast.error("Failed to copy to clipboard.");
-      });
-  };
 
   return (
     <div className="w-full max-w-lg p-6">

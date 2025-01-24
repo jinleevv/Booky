@@ -1,4 +1,3 @@
-import AvailableTime from "@/features/CreatePoll/AvailableTime";
 import UserAvailability from "@/features/CreatePoll/UserAvailability";
 import NavigationBar from "@/features/NavigationBar";
 import { days, parseStringTimeToInt } from "@/features/time";
@@ -7,9 +6,38 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-interface Participant {
+export interface Participant {
   email: string;
   schedule: string[];
+}
+
+interface DateRange {
+  start: { date: string; day: number };
+  end: { date: string; day: number };
+}
+
+interface TimeRange {
+  start: string;
+  end: string;
+  q;
+}
+
+export interface PollData {
+  _id: string;
+  pollName: string;
+  pollDescription?: string;
+  urlPath: string;
+  dateRange: DateRange;
+  time: TimeRange;
+  participants: Participant[];
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+interface AvailableTime {
+  start: string;
+  end: string;
+  participants: string[];
 }
 
 export default function ParticipatePoll() {
@@ -29,6 +57,7 @@ export default function ParticipatePoll() {
     start: { date: string; day: number };
     end: { date: string; day: number };
   }>({ start: { date: "", day: 0 }, end: { date: "", day: 0 } });
+  const [poll, setPoll] = useState<PollData>();
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
 
@@ -62,6 +91,7 @@ export default function ParticipatePoll() {
         setDateRange(data.dateRange);
         // populate participants state
         setParticipants(data.participants as Participant[]);
+        setPoll(data as PollData);
 
         // Convert participants data to Map
         const availabilityMap = new Map<string, Set<string>>();
@@ -69,7 +99,6 @@ export default function ParticipatePoll() {
           availabilityMap.set(participant.email, new Set(participant.schedule));
         }
 
-        setGroupAvailability(availabilityMap);
       } catch (error) {
         setError(error instanceof Error ? error.message : "An error occurred");
         toast.error("Failed to load poll details");
@@ -77,7 +106,7 @@ export default function ParticipatePoll() {
         setIsLoading(false);
       }
     }
-    if (urlPath) {
+    if (urlPath && poll === undefined) {
       fetchPollDetails();
     }
   }, [server, urlPath]);
@@ -162,8 +191,13 @@ export default function ParticipatePoll() {
       <NavigationBar />
       <main className="container mx-auto py-8 px-12">
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 translate-x-1/2"></div>
-        <h2 className="text-2xl font-bold">{pollName}</h2>
-        <div className="flex flex-col gap-8">
+        <div className="flex gap-4 items-baseline">
+          <h2 className="text-2xl font-bold">{pollName}</h2>
+          <p className="">
+            <span>Share link:</span> {urlPath}
+          </p>
+        </div>
+        <div className="pt-2 flex flex-col gap-8">
           {/* Poll details */}
           <AnimatePresence>
             <motion.div
@@ -172,6 +206,7 @@ export default function ParticipatePoll() {
               transition={{ duration: 0.7 }}
             >
               <UserAvailability
+                poll={poll}
                 isLoggedIn={isLoggedIn}
                 handleLogin={handleLogin}
                 timeSlots={timeSlots}
@@ -181,7 +216,6 @@ export default function ParticipatePoll() {
                 selectedCells={selectedCells}
                 setSelectedCells={setSelectedCells}
               />
-              <AvailableTime userEmail={userEmail} />
             </motion.div>
           </AnimatePresence>
         </div>
