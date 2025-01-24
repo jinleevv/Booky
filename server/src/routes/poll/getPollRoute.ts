@@ -25,6 +25,25 @@ export const getPollHandler: RequestHandler = async (
   }
 };
 
+export const getPollsHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const polls = await Poll.find();
+    if (!polls) {
+      res.status(404).json({ message: "Polls not found" });
+      return;
+    }
+
+    res.status(200).json(polls);
+  } catch (error) {
+    console.error("Error fetching polls:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+router.get("/all", getPollsHandler);
 router.get("/:urlPath/availability", getPollHandler);
 router.get("/:urlPath", getPollHandler);
 

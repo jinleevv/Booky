@@ -1,3 +1,4 @@
+import AvailableTime from "@/features/CreatePoll/AvailableTime";
 import UserAvailability from "@/features/CreatePoll/UserAvailability";
 import NavigationBar from "@/features/NavigationBar";
 import { days, parseStringTimeToInt } from "@/features/time";
@@ -6,7 +7,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-
 interface Participant {
   email: string;
   schedule: string[];
@@ -181,6 +181,7 @@ export default function ParticipatePoll() {
                 selectedCells={selectedCells}
                 setSelectedCells={setSelectedCells}
               />
+              <AvailableTime userEmail={userEmail} />
             </motion.div>
           </AnimatePresence>
         </div>
