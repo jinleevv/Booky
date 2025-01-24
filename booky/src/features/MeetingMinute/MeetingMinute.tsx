@@ -8,8 +8,49 @@ import { saveAs } from "file-saver";
 import "./MeetingMinute.css";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import InlineBlot from "quill/blots/inline";
+import { useHook } from "@/hooks";
+import { Label } from "@/components/ui/label";
 
 const SAVE_INTERVAL_MS = 2000;
+
+// Extend the Inline class from Parchment
+class CommentBlot extends InlineBlot {
+  static blotName = "comment";
+  static tagName = "span";
+  static className = "comment";
+
+  static create(value: any) {
+    const node = super.create() as HTMLElement;
+    node.setAttribute("data-comment", value);
+    node.style.backgroundColor = "yellow"; // Add background highlight
+    node.style.cursor = "pointer"; // Optional: Change cursor to indicate it's a comment
+    return node;
+  }
+
+  static formats(domNode: HTMLElement) {
+    return domNode.getAttribute("data-comment");
+  }
+
+  format(name: string, value: any) {
+    if (name === "comment") {
+      if (value) {
+        // If the comment format is being applied, update the data-comment attribute and background color
+        this.domNode.setAttribute("data-comment", value);
+        this.domNode.style.backgroundColor = "yellow";
+      } else {
+        // If the comment format is being removed, clear the data-comment attribute and remove the background color
+        this.domNode.removeAttribute("data-comment");
+        this.domNode.style.backgroundColor = ""; // Reset to default
+      }
+    } else {
+      super.format(name, value);
+    }
+  }
+}
+
+// Register the custom CommentBlot with Quill
+Quill.register(CommentBlot, true);
 
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -21,12 +62,26 @@ const TOOLBAR_OPTIONS = [
   [{ align: [] }],
   ["image", "blockquote", "code-block"],
   ["clean"],
+  [{ comment: "Add Comment" }],
 ];
+
+// Add a custom icon for the "Add Comment" button
+const CustomIcons = Quill.import("ui/icons");
+CustomIcons["comment"] = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18px" height="18px">
+    <path fill="currentColor" d="M20 2H4a2 2 0 0 0-2 2v14l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM4 20h16l-4 4H4a2 2 0 0 1-2-2v-2l2 2z"/>
+  </svg>
+`;
 
 export default function MeetingMinute() {
   const { date, time, meetingId } = useParams();
+  const { userName, userEmail } = useHook();
   const [socket, setSocket] = useState<any>(null);
   const [quill, setQuill] = useState<any>(null);
+  const [comments, setComments] = useState<
+    { id: number; text: string; comment: string; range: any }[]
+  >([]);
+
   useEffect(() => {
     const s = io("http://localhost:5002");
     setSocket(s);
@@ -89,7 +144,14 @@ export default function MeetingMinute() {
     wrapper.append(editor);
     const q = new Quill(editor, {
       theme: "snow",
-      modules: { toolbar: TOOLBAR_OPTIONS },
+      modules: {
+        toolbar: {
+          container: TOOLBAR_OPTIONS,
+          handlers: {
+            comment: () => handleAddComment(q),
+          },
+        },
+      },
     });
     q.enable(false);
     q.setText("Loading");
@@ -160,12 +222,79 @@ export default function MeetingMinute() {
     }
   }
 
+  function handleAddComment(quillInstance: any) {
+    const range = quillInstance.getSelection();
+    if (!range || range.length === 0) {
+      toast("Please select text to add a comment.");
+      return;
+    }
+
+    const selectedText = quillInstance.getText(range.index, range.length);
+    const comment = prompt("Add your comment:");
+
+    if (comment) {
+      const commentId = Date.now(); // Generate a unique ID for each comment
+      setComments((prevComments) => [
+        ...prevComments,
+        { id: commentId, text: selectedText, comment, range },
+      ]);
+
+      // Format the selected text to indicate it has a comment
+      quillInstance.formatText(range.index, range.length, "comment", commentId);
+    }
+  }
+
+  function handleResolveComment(commentId: number) {
+    const commentToRemove = comments.find((c) => c.id === commentId);
+
+    if (commentToRemove) {
+      const { range } = commentToRemove;
+
+      // Clear the comment format (remove highlight)
+      quill?.formatText(range.index, range.length, "comment", false);
+
+      // Remove the comment from the state
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment.id !== commentId)
+      );
+    }
+  }
+
   return (
     <>
-      <div className="flex w-full h-full justify-end">
+      <div className="flex w-full h-12 justify-end">
         <Button onClick={handleExport}>Export</Button>
       </div>
-      <div className="meetingMinuteContainer mt-4" ref={wrapperRef}></div>
+      <div className="flex w-full h-full gap-2">
+        <div
+          className="meetingMinuteContainer mt-4 w-4/5 h-full"
+          ref={wrapperRef}
+        ></div>
+        <div className="p-4 mt-1 rounded-lg w-1/5 h-full overflow-y-auto">
+          <h3 className="font-bold mb-4">Comments</h3>
+          {comments.map((c, index) => (
+            <div key={c.id} className="mb-4 border-b pb-2">
+              <Label className="font-medium">Commenter:{userEmail}</Label>{" "}
+              <br />
+              <Label className="font-medium">
+                Selected Text: {c.text}
+              </Label>{" "}
+              <br />
+              <Label className="text-gray-600">Comment: {c.comment}</Label>
+              <div className="flex flex-col w-full h-full justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => handleResolveComment(c.id)}
+                >
+                  Resolve
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </>
   );
 }

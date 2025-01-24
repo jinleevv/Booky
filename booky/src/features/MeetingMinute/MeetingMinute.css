@@ -1,4 +1,4 @@
-.meetingMinuteContainer .ql-editor {
+/* .meetingMinuteContainer .ql-editor {
   width: 100%;
   min-height: 700px;
   margin: 0.5rem;
@@ -7,6 +7,32 @@
 .meetingMinuteContainer .ql-container {
   display: flex;
   border-radius: 0.5rem;
+}
+
+.meetingMinuteContainer .ql-toolbar {
+  display: flex;
+  border-radius: 0.5rem;
+} */
+
+.meetingMinuteContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Make it take up all the available height */
+}
+
+.meetingMinuteContainer .ql-editor {
+  width: 100%;
+  flex: 1; /* Make it flexible within its container */
+  height: 780px;
+  margin: 0.5rem;
+  background-color: white;
+  overflow-y: auto; /* Add scrolling if content exceeds height */
+}
+
+.meetingMinuteContainer .ql-container {
+  display: flex;
+  border-radius: 0.5rem;
+  height: 100%; /* Ensure the container spans the full height */
 }
 
 .meetingMinuteContainer .ql-toolbar {
