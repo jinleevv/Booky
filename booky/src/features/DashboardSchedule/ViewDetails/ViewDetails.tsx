@@ -26,6 +26,7 @@ import { DataTable } from "./data-table";
 import { MeetingColumns } from "./columns";
 import { HiOutlineArrowNarrowLeft } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 interface ITimeRange {
   start: string;
@@ -71,6 +72,8 @@ export default function ViewDetails({
   const [selectedMeeting, setSelectedMeeting] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [meetingData, setMeetingData] = useState<any>(null);
+  const [searchParams] = useSearchParams();
+  const meetingTeamId = searchParams.get("meetingTeamId");
 
   useEffect(() => {
     if (meetingTeam && meetingTeam.length > 0) {
@@ -78,6 +81,11 @@ export default function ViewDetails({
         (team) => team.hostEmail === selectedHost
       );
       setMeetingData(displayMeetingTeams);
+    }
+    
+    if (meetingTeam && meetingTeamId) {
+      const meetingTeamToShow = meetingTeam.find(m => m._id === meetingTeamId);
+      if (meetingTeamToShow) setSelectedMeeting(meetingTeamToShow);
     }
   }, [selectedHost, meetingTeam]);
 
