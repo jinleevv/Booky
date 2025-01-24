@@ -95,7 +95,7 @@ export default function AvailableTime({ userEmail }: { userEmail: string }) {
   }
 
   return (
-    <Card className="mt-6 shadow-none relative z-10">
+    <Card className="mt-6 shadow-none">
       <CardContent className="p-6">
         <div className="flex justify-between text-center px-4">
           <Label className="text-lg font-semibold">Available Times</Label>

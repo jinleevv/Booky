@@ -14,7 +14,12 @@ function AvailableTimeItem({
   userEmail,
 }: AvailableTimeItemProps) {
   const userEmailInGroup =
-    userEmail && !poll.participants.some((p) => p.email == userEmail) ? 1 : 0;
+    userEmail &&
+    poll.participants.some(
+      (p) => p.email == userEmail && p.schedule.length == 0
+    )
+      ? 1
+      : 0;
 
   const availableCount =
     poll.participants.filter((p) => p.schedule.length > 0).length +
@@ -25,7 +30,7 @@ function AvailableTimeItem({
       <div className="flex justify-between items-center">
         <p className="text-sm font-bold w-1/4 text-center">
           {`${availableCount.toString()} /
-                ${poll.participants.length.toString()}`}
+                ${(poll.participants.length + userEmailInGroup).toString()}`}
         </p>
 
         <p className="text-sm w-1/4 text-center">
@@ -41,14 +46,6 @@ function AvailableTimeItem({
           </Button>
         </div>
       </div>
-      {/* <div className="mt-2">
-        <a
-          href={`/poll/${poll.urlPath}`}
-          className="text-sm text-blue-500 hover:underline"
-        >
-          View Poll
-        </a>
-      </div> */}
     </div>
   );
 }

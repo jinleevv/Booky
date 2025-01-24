@@ -76,7 +76,7 @@ const DayScheduleSchema = new Schema<IDaySchedule>(
 // Schema for participant availability
 const ParticipantScheduleSchema = new Schema<IParticipantSchedule>(
   {
-    email: { type: String, unique: true, required: true },
+    email: { type: String, required: true },
     schedule: [{ type: String }],
   },
   { _id: false }
@@ -105,17 +105,6 @@ const PollSchema = new Schema<IPoll>(
 PollSchema.index({ urlPath: 1 }, { unique: true });
 PollSchema.index({ creatorEmail: 1 });
 PollSchema.index({ createdAt: -1 });
-
-PollSchema.methods.getGroupParticipants = function (): Map<
-  string,
-  IDaySchedule[]
-> {
-  return this.participants;
-};
-
-PollSchema.methods.removeParticipant = function (email: string) {
-  this.participants.delete(email);
-};
 
 PollSchema.methods.getOverlappingTimes = function (): IDaySchedule[] {
   // Implementation to find overlapping times among all participants
