@@ -27,6 +27,7 @@ import { MeetingColumns } from "./columns";
 import { HiOutlineArrowNarrowLeft } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
+import { Merge } from 'lucide-react';
 
 interface ITimeRange {
   start: string;
@@ -74,6 +75,8 @@ export default function ViewDetails({
   const [meetingData, setMeetingData] = useState<any>(null);
   const [searchParams] = useSearchParams();
   const meetingTeamId = searchParams.get("meetingTeamId");
+  const [selectedMeetings, setSelectedMeetings] = useState<string[]>([]);
+
 
   useEffect(() => {
     if (meetingTeam && meetingTeam.length > 0) {
@@ -82,14 +85,14 @@ export default function ViewDetails({
       );
       setMeetingData(displayMeetingTeams);
     }
-    
+
     if (meetingTeam && meetingTeamId) {
       const meetingTeamToShow = meetingTeam.find(m => m._id === meetingTeamId);
       if (meetingTeamToShow) setSelectedMeeting(meetingTeamToShow);
     }
   }, [selectedHost, meetingTeam]);
 
-  const columns = MeetingColumns();
+  const columns = MeetingColumns(selectedMeetings, setSelectedMeetings);
 
   async function handleRemoveMeetingTeam(meetingTeamId: string) {
     try {
@@ -115,6 +118,10 @@ export default function ViewDetails({
       console.error("Error deleting team meeting:", error);
       toast("An error occurred while deleting the team meeting.");
     }
+  }
+
+  async function handleMergeMeetings() {
+    console.log(selectedMeetings);
   }
 
   return (
@@ -308,6 +315,57 @@ export default function ViewDetails({
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
+                  <Dialog
+                    open={isDialogOpen}
+                    onOpenChange={setIsDialogOpen}
+                  >
+                    <DialogTrigger asChild>
+                    <div className="flex justify-end mb-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-xl"
+                        disabled={selectedMeetings.length < 2}
+                      >
+                        <Merge />
+                        Merge Selected
+                      </Button>
+                    </div>
+                    </DialogTrigger>
+                    <DialogContent
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <DialogHeader>
+                        <DialogTitle>
+                          Merge Meeting Minutes
+                        </DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to merge
+                          the selected meeting minutes? This action cannot
+                          be undone.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={(e) => {
+                            setIsDialogOpen(false);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          className="bg-red-50 text-red-500 hover:bg-red-100"
+                          onClick={(e) => {
+                            handleMergeMeetings();
+                            setIsDialogOpen(false);
+                          }}
+                        >
+                          Merge
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   <DataTable
                     columns={columns}
                     data={selectedMeeting.meeting?.map((meeting) => ({
