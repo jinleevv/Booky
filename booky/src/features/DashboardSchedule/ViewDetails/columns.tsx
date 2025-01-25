@@ -2,6 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export interface MeetingInformation {
   _id: string; // Unique meeting ID
@@ -23,9 +24,38 @@ export interface Attendee {
   tokenExpiry: Date; // Token expiration date
 }
 
-export function MeetingColumns(): ColumnDef<MeetingInformation>[] {
+export function MeetingColumns(
+  selectedMeetings: { meetingId: string; date: string }[],
+  setSelectedMeetings: React.Dispatch<
+    React.SetStateAction<{ meetingId: string; date: string }[]>
+  >
+): ColumnDef<MeetingInformation>[] {
   const navigate = useNavigate();
+
   return [
+    {
+      id: "select",
+      cell: ({ row }) => {
+        const meetingId = row.original._id;
+        const date = row.original.date;
+        const isChecked = selectedMeetings.some(
+          (m) => m.meetingId === meetingId
+        );
+
+        return (
+          <Checkbox
+            checked={isChecked}
+            onCheckedChange={(checked) => {
+              setSelectedMeetings((prev) =>
+                checked
+                  ? [...prev, { meetingId, date }]
+                  : prev.filter((m) => m.meetingId !== meetingId)
+              );
+            }}
+          />
+        );
+      },
+    },
     {
       accessorKey: "date",
       header: "Date",
