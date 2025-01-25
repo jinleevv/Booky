@@ -143,16 +143,19 @@ export default function DashBoardTeams() {
                       </div>
 
                       <div className="my-auto">
-                        <Button
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveTeam(team._id);
-                          }}
-                          className="text-red-700 w-5 h-5"
-                        >
-                          <Trash size={10} />
-                        </Button>
+                        {(team.adminEmail === userEmail ||
+                          team.coadmins.includes(userEmail)) && (
+                          <Button
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveTeam(team._id);
+                            }}
+                            className="text-red-700 w-5 h-5"
+                          >
+                            <Trash size={10} />
+                          </Button>
+                        )}
                       </div>
                     </CardTitle>
                     <CardDescription className="grid space-y-1">

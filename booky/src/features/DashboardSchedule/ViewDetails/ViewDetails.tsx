@@ -27,7 +27,7 @@ import { MeetingColumns } from "./columns";
 import { HiOutlineArrowNarrowLeft } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
-import { Merge } from 'lucide-react';
+import { Merge } from "lucide-react";
 
 interface ITimeRange {
   start: string;
@@ -75,7 +75,9 @@ export default function ViewDetails({
   const [meetingData, setMeetingData] = useState<any>(null);
   const [searchParams] = useSearchParams();
   const meetingTeamIdFromParam = searchParams.get("meetingTeamId");
-  const [checkedMeetings, setCheckedMeetings] = useState<{ meetingId: string; date: string }[]>([]);
+  const [checkedMeetings, setCheckedMeetings] = useState<
+    { meetingId: string; date: string }[]
+  >([]);
   const [meetingList, setMeetingList] = useState<any[]>([]);
 
   useEffect(() => {
@@ -87,7 +89,9 @@ export default function ViewDetails({
     }
 
     if (meetingTeam && meetingTeamIdFromParam) {
-      const meetingTeamToShow = meetingTeam.find(m => m._id === meetingTeamIdFromParam);
+      const meetingTeamToShow = meetingTeam.find(
+        (m) => m._id === meetingTeamIdFromParam
+      );
       if (meetingTeamToShow) setSelectedMeeting(meetingTeamToShow);
     }
   }, [selectedHost, meetingTeam]);
@@ -122,9 +126,11 @@ export default function ViewDetails({
 
   async function handleMergeMeetings() {
     // Remove merged meetings
-    const sortedMeetings = [...checkedMeetings].sort((a, b) => b.date.localeCompare(a.date));
+    const sortedMeetings = [...checkedMeetings].sort((a, b) =>
+      b.date.localeCompare(a.date)
+    );
     const meetingsToDelete = sortedMeetings.slice(1).map((m) => m.meetingId);
-    
+
     try {
       const response = await fetch(
         `${server}/api/teams/${teamId}/${selectedMeeting._id}/delete-meetings`,
@@ -149,16 +155,20 @@ export default function ViewDetails({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ meetingMinutesToMerge: sortedMeetings.map((m) => m.meetingId) }),
+          body: JSON.stringify({
+            meetingMinutesToMerge: sortedMeetings.map((m) => m.meetingId),
+          }),
         }
       );
-  
+
       if (!mergeMinutesResponse.ok) {
         toast("Failed to merge the meeting minutes");
         return;
       }
 
-      const updatedMeetings = meetingList.filter(meeting => !meetingsToDelete.includes(meeting._id));
+      const updatedMeetings = meetingList.filter(
+        (meeting) => !meetingsToDelete.includes(meeting._id)
+      );
       setMeetingList(updatedMeetings);
       setCheckedMeetings([]);
 
@@ -236,8 +246,7 @@ export default function ViewDetails({
                       onClick={() => {
                         setSelectedMeeting(meeting);
                         setMeetingList(meeting.meeting);
-                        }
-                      }
+                      }}
                     >
                       <CardHeader className="pt-4">
                         <CardTitle className="flex justify-between">
@@ -364,34 +373,26 @@ export default function ViewDetails({
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details">
-                  <Dialog
-                    open={isDialogOpen}
-                    onOpenChange={setIsDialogOpen}
-                  >
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                    <div className="flex justify-end mb-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="rounded-xl"
-                        disabled={checkedMeetings.length < 2}
-                      >
-                        <Merge />
-                        Merge Selected
-                      </Button>
-                    </div>
+                      <div className="flex justify-end mb-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl"
+                          disabled={checkedMeetings.length < 2}
+                        >
+                          <Merge />
+                          Merge Selected
+                        </Button>
+                      </div>
                     </DialogTrigger>
-                    <DialogContent
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <DialogContent onClick={(e) => e.stopPropagation()}>
                       <DialogHeader>
-                        <DialogTitle>
-                          Merge Meeting Minutes
-                        </DialogTitle>
+                        <DialogTitle>Merge Meeting Minutes</DialogTitle>
                         <DialogDescription>
-                          Are you sure you want to merge
-                          the selected meeting minutes? This action cannot
-                          be undone.
+                          Are you sure you want to merge the selected meeting
+                          minutes? This action cannot be undone.
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
@@ -404,7 +405,7 @@ export default function ViewDetails({
                           Cancel
                         </Button>
                         <Button
-                          className="bg-red-50 text-red-500 hover:bg-red-100"
+                          className="bg-black text-white hover:bg-gray-800"
                           onClick={(e) => {
                             handleMergeMeetings();
                             setIsDialogOpen(false);

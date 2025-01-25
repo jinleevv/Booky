@@ -69,7 +69,7 @@ export default function MeetingDetails() {
                   <Button
                     variant="ghost"
                     className="gap-1.5 w-20 rounded-xl"
-                    onClick={() => navigate(`/dashboard/${teamId}?meetingTeamId=${meetingTeamId}`)}
+                    onClick={() => navigate(`/dashboard/${teamId}`)}
                   >
                     <HiOutlineArrowNarrowLeft size={25} />
                     Back

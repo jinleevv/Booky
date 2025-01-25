@@ -387,7 +387,7 @@ export default function JoinAMeeting({
                     <div>
                       {(adminEmail === userEmail ||
                         teamCoAdmin.includes(userEmail)) && (
-                          <Button
+                        <Button
                           onClick={() =>
                             navigate(`/dashboard/${teamId}/create-meeting`)
                           }
@@ -528,12 +528,17 @@ export default function JoinAMeeting({
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   disabled={(date) => {
-                    const today = new Date(); 
+                    const today = new Date();
                     today.setHours(0, 0, 0, 0);
-                
+
                     const dateISO = date.toISOString().split("T")[0];
-                
-                    return date < today || !enabledDays.some((enabledDate) => enabledDate === dateISO);
+
+                    return (
+                      date < today ||
+                      !enabledDays.some(
+                        (enabledDate) => enabledDate === dateISO
+                      )
+                    );
                   }}
                   showOutsideDays={false}
                   className="flex-1 max-h-[461px] overflow-y-auto mt-3 p-0"
@@ -565,25 +570,25 @@ export default function JoinAMeeting({
             </CardContent>
             <div className="w-full md:w-2/6 h-full overflow-y-auto flex flex-col">
               <CardContent className="max-md:max-h-[27vh] h-1/2 w-full flex-1 py-2 border-b-[1px] border-gray-200 overflow-auto">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 w-full h-full items-center gap-2">
                   {selectedDate ? (
                     selectedMeetingTeam.type == "group" ? (
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "p-4 text-center rounded-lg",
-                          groupMeetingStatus
-                            ? "bg-black text-white"
-                            : "bg-white"
-                        )}
-                        disabled={true}
-                      >
-                        Attend Group Meeting
-                      </Button>
-                    ) : (
-                      timeSlots.length > 0 ? (
-                        timeSlots
-                        .filter((timeSlot) => timeSlot.day === selectedDate.toISOString().split("T")[0]) // Filter slots for the selected date
+                      <div className="col-span-2 flex justify-center items-center">
+                        <Button
+                          variant="outline"
+                          className="w-full items-center rounded-lg bg-black text-white max-w-md"
+                          disabled={true}
+                        >
+                          Attend Group Meeting
+                        </Button>
+                      </div>
+                    ) : timeSlots.length > 0 ? (
+                      timeSlots
+                        .filter(
+                          (timeSlot) =>
+                            timeSlot.day ===
+                            selectedDate.toISOString().split("T")[0]
+                        ) // Filter slots for the selected date
                         .map((timeSlot) =>
                           timeSlot.slots.map((time) => (
                             <Button
@@ -601,8 +606,10 @@ export default function JoinAMeeting({
                             </Button>
                           ))
                         )
-                    ) : (<p className="col-span-2 text-center">No available slots</p>)
-                      
+                    ) : (
+                      <p className="col-span-2 text-center">
+                        No available slots
+                      </p>
                     )
                   ) : (
                     <p className="col-span-2 text-center">No available slots</p>
@@ -611,7 +618,9 @@ export default function JoinAMeeting({
               </CardContent>
               <ScheduleForm
                 selectedMeetingTeam={selectedMeetingTeam}
-                selectedDate={selectedDate ? selectedDate.toISOString().split("T")[0] : null}
+                selectedDate={
+                  selectedDate ? selectedDate.toISOString().split("T")[0] : null
+                }
                 selectedTime={selectedTimeSlot}
                 teamId={teamId!}
                 timeSlots={timeSlots}
