@@ -25,8 +25,10 @@ export interface Attendee {
 }
 
 export function MeetingColumns(
-  selectedMeetings: string[],
-  setSelectedMeetings: React.Dispatch<React.SetStateAction<string[]>>
+  selectedMeetings: { meetingId: string; date: string }[],
+  setSelectedMeetings: React.Dispatch<
+    React.SetStateAction<{ meetingId: string; date: string }[]>
+  >
 ): ColumnDef<MeetingInformation>[] {
   const navigate = useNavigate();
 
@@ -35,14 +37,19 @@ export function MeetingColumns(
       id: "select",
       cell: ({ row }) => {
         const meetingId = row.original._id;
+        const date = row.original.date;
+        const isChecked = selectedMeetings.some(
+          (m) => m.meetingId === meetingId
+        );
+
         return (
           <Checkbox
-            checked={selectedMeetings.includes(meetingId)}
-            onCheckedChange={() => {
+            checked={isChecked}
+            onCheckedChange={(checked) => {
               setSelectedMeetings((prev) =>
-                prev.includes(meetingId)
-                  ? prev.filter((id) => id !== meetingId)
-                  : [...prev, meetingId]
+                checked
+                  ? [...prev, { meetingId, date }]
+                  : prev.filter((m) => m.meetingId !== meetingId)
               );
             }}
           />

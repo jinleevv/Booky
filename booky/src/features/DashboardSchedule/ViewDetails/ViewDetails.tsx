@@ -74,9 +74,9 @@ export default function ViewDetails({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [meetingData, setMeetingData] = useState<any>(null);
   const [searchParams] = useSearchParams();
-  const meetingTeamId = searchParams.get("meetingTeamId");
-  const [selectedMeetings, setSelectedMeetings] = useState<string[]>([]);
-
+  const meetingTeamIdFromParam = searchParams.get("meetingTeamId");
+  const [checkedMeetings, setCheckedMeetings] = useState<{ meetingId: string; date: string }[]>([]);
+  const [meetingList, setMeetingList] = useState<any[]>([]);
 
   useEffect(() => {
     if (meetingTeam && meetingTeam.length > 0) {
@@ -86,13 +86,13 @@ export default function ViewDetails({
       setMeetingData(displayMeetingTeams);
     }
 
-    if (meetingTeam && meetingTeamId) {
-      const meetingTeamToShow = meetingTeam.find(m => m._id === meetingTeamId);
+    if (meetingTeam && meetingTeamIdFromParam) {
+      const meetingTeamToShow = meetingTeam.find(m => m._id === meetingTeamIdFromParam);
       if (meetingTeamToShow) setSelectedMeeting(meetingTeamToShow);
     }
   }, [selectedHost, meetingTeam]);
 
-  const columns = MeetingColumns(selectedMeetings, setSelectedMeetings);
+  const columns = MeetingColumns(checkedMeetings, setCheckedMeetings);
 
   async function handleRemoveMeetingTeam(meetingTeamId: string) {
     try {
@@ -121,7 +121,52 @@ export default function ViewDetails({
   }
 
   async function handleMergeMeetings() {
-    console.log(selectedMeetings);
+    // Remove merged meetings
+    const sortedMeetings = [...checkedMeetings].sort((a, b) => b.date.localeCompare(a.date));
+    const meetingsToDelete = sortedMeetings.slice(1).map((m) => m.meetingId);
+    
+    try {
+      const response = await fetch(
+        `${server}/api/teams/${teamId}/${selectedMeeting._id}/delete-meetings`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ meetingsToDelete }),
+        }
+      );
+      if (!response.ok) {
+        toast("Failed to merge the meetings");
+        return;
+      }
+
+      // Merge meeting minutes
+      const mergeMinutesResponse = await fetch(
+        `${server}/api/document/${teamId}/${selectedMeeting._id}/merge-meeting-minutes`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ meetingMinutesToMerge: sortedMeetings.map((m) => m.meetingId) }),
+        }
+      );
+  
+      if (!mergeMinutesResponse.ok) {
+        toast("Failed to merge the meeting minutes");
+        return;
+      }
+
+      const updatedMeetings = meetingList.filter(meeting => !meetingsToDelete.includes(meeting._id));
+      setMeetingList(updatedMeetings);
+      setCheckedMeetings([]);
+
+      toast("Meetings merged successfully!");
+    } catch (error) {
+      console.error("Error merging meetings:", error);
+      toast("An error occurred while merging the meetings.");
+    }
   }
 
   return (
@@ -188,7 +233,11 @@ export default function ViewDetails({
                   {meetingData.map((meeting) => (
                     <Card
                       className="w-full border rounded-3xl shadow-md cursor-pointer"
-                      onClick={() => setSelectedMeeting(meeting)}
+                      onClick={() => {
+                        setSelectedMeeting(meeting);
+                        setMeetingList(meeting.meeting);
+                        }
+                      }
                     >
                       <CardHeader className="pt-4">
                         <CardTitle className="flex justify-between">
@@ -325,7 +374,7 @@ export default function ViewDetails({
                         variant="ghost"
                         size="sm"
                         className="rounded-xl"
-                        disabled={selectedMeetings.length < 2}
+                        disabled={checkedMeetings.length < 2}
                       >
                         <Merge />
                         Merge Selected
@@ -368,7 +417,7 @@ export default function ViewDetails({
                   </Dialog>
                   <DataTable
                     columns={columns}
-                    data={selectedMeeting.meeting?.map((meeting) => ({
+                    data={meetingList.map((meeting) => ({
                       ...meeting,
                       teamId: teamId, // Dynamically add teamId
                       meetingTeamId: selectedMeeting._id,
