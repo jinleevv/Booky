@@ -3,11 +3,11 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-export const deleteMeetingFromMeetingTeamHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const deleteMeetingTeamFromTeamHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { teamId, meetingTeamId } = req.params;
   try {
     if (!teamId || !meetingTeamId) {
-      res.status(400).json({ message: "Invalid or missing teamId or meetingId" });
+      res.status(400).json({ message: "Invalid or missing teamId or meetingTeamId" });
       return;
     }
 
@@ -29,6 +29,6 @@ export const deleteMeetingFromMeetingTeamHandler: RequestHandler = async (req: R
   }
 };
 
-router.patch("/:teamId/team-meetings/:meetingTeamId", deleteMeetingFromMeetingTeamHandler);
+router.patch("/:teamId/team-meetings/:meetingTeamId", deleteMeetingTeamFromTeamHandler);
 
 export default router;
