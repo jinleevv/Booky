@@ -26,6 +26,7 @@ interface AvailableTime {
   start: string;
   end: string;
   participants: string[];
+  day: string;
 }
 
 export default function UserAvailability({
@@ -103,8 +104,6 @@ export default function UserAvailability({
       });
     });
 
-    console.log("timeSlotsMap", timeSlotsMap);
-
     // Add the current user's selected slots
     selectedSlots.forEach((slot) => {
       if (!timeSlotsMap.has(slot)) {
@@ -113,12 +112,33 @@ export default function UserAvailability({
       timeSlotsMap.get(slot)?.add(userEmail);
     });
 
-    console.log("timeSlotsMap after", timeSlotsMap);
+    const dayOrder = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    // Convert time slots to an array and sort them
-    const sortedTimeSlots = Array.from(timeSlotsMap.entries()).sort((a, b) =>
-      a[0].localeCompare(b[0])
-    );
+    // Sort by day of the week and then by time
+    const sortedTimeSlots = Array.from(timeSlotsMap.entries()).sort((a, b) => {
+      const parseDayAndTime = (slot: string) => {
+        const [day, time] = slot.split("-");
+        const [hour, minute] = time.split(":").map(Number);
+        const dayIndex = dayOrder.indexOf(day);
+        return { dayIndex, hour, minute };
+      };
+
+      const aDayTime = parseDayAndTime(a[0]);
+      const bDayTime = parseDayAndTime(b[0]);
+
+      // Compare by dayIndex first
+      if (aDayTime.dayIndex !== bDayTime.dayIndex) {
+        return aDayTime.dayIndex - bDayTime.dayIndex;
+      }
+
+      // If days are the same, compare by hour
+      if (aDayTime.hour !== bDayTime.hour) {
+        return aDayTime.hour - bDayTime.hour;
+      }
+
+      // If hours are the same, compare by minute
+      return aDayTime.minute - bDayTime.minute;
+    });
 
     // Group overlapping time slots
     const groupedTimeSlots: AvailableTime[] = [];
@@ -126,32 +146,52 @@ export default function UserAvailability({
       start: string;
       end: string;
       participants: Set<string>;
+      day: string; // Add day property
     } | null = null;
 
+    console.log(sortedTimeSlots);
     sortedTimeSlots.forEach(([slot, participants]) => {
-      const [day, time] = slot.split("-");
-
+      const [day, currentTime] = slot.split("-"); // Extract day and time from the slot
+      console.log("currentTime: ", currentTime);
       if (!currentGroup) {
         // Start a new group
-        currentGroup = { start: time, end: time, participants };
+        currentGroup = {
+          start: currentTime,
+          end: currentTime,
+          participants: new Set(participants),
+          day,
+        };
       } else {
-        // Check if the current time slot is continuous with the previous one
+        // Check if the current slot is continuous with the previous one
         const prevEndTime = currentGroup.end;
-        const currentStartTime = time;
+        const currentStartTime = currentTime;
 
-        // Check if the current time slot is 30 minutes after the previous one
-        if (isContinuous(prevEndTime, currentStartTime)) {
+        if (
+          currentGroup.day === day &&
+          isContinuous(prevEndTime, currentStartTime) &&
+          areSetsEqual(currentGroup.participants, participants)
+        ) {
           // Extend the current group
           currentGroup.end = currentStartTime;
+
+          // Merge participants
           participants.forEach((p) => currentGroup!.participants.add(p));
         } else {
-          // Add the current group to the list and start a new group
+          // Push the current group and start a new one
           groupedTimeSlots.push({
             start: currentGroup.start,
             end: currentGroup.end,
             participants: Array.from(currentGroup.participants),
+            day: currentGroup.day,
           });
-          currentGroup = { start: time, end: time, participants };
+
+          // Start a new group
+          currentGroup = {
+            start: currentTime,
+            end: currentTime,
+            participants: new Set(participants),
+            day,
+          };
         }
       }
     });
@@ -162,19 +202,43 @@ export default function UserAvailability({
         start: currentGroup.start,
         end: currentGroup.end,
         participants: Array.from(currentGroup.participants),
+        day: currentGroup.day,
       });
     }
+
+    console.log(groupedTimeSlots);
 
     return groupedTimeSlots;
   }
 
+  function areSetsEqual(setA: Set<string>, setB: Set<string>): boolean {
+    if (setA.size !== setB.size) return false;
+
+    for (const item of setA) {
+      if (!setB.has(item)) return false;
+    }
+
+    return true;
+  }
+
+  // Helper to normalize time format (e.g., "9:00" -> "09:00")
+  function normalizeTimeFormat(time: string): string {
+    const [hour, minute] = time.split(":");
+    const normalizedHour = hour.padStart(2, "0"); // Add leading zero if necessary
+    return `${normalizedHour}:${minute}`;
+  }
   // Helper function to check if two time slots are continuous
   function isContinuous(
     prevEndTime: string,
     currentStartTime: string
   ): boolean {
-    const prevEnd = new Date(`1970-01-01T${prevEndTime}:00`);
-    const currentStart = new Date(`1970-01-01T${currentStartTime}:00`);
+    const normalizedPrevEndTime = normalizeTimeFormat(prevEndTime);
+    const normalizedCurrentStartTime = normalizeTimeFormat(currentStartTime);
+
+    const prevEnd = new Date(`1970-01-01T${normalizedPrevEndTime}:00`);
+    const currentStart = new Date(
+      `1970-01-01T${normalizedCurrentStartTime}:00`
+    );
 
     // Check if the current start time is 30 minutes after the previous end time
     return currentStart.getTime() - prevEnd.getTime() === 30 * 60 * 1000;
@@ -410,9 +474,7 @@ export default function UserAvailability({
                       groupAvailability.size + 1
                     }`}
                   </p>
-                  <p className="text-sm w-1/4 text-center">
-                    {selectedDays[0]}~{selectedDays[selectedDays.length - 1]}
-                  </p>
+                  <p className="text-sm w-1/4 text-center">{item.day}</p>
                   <p className="text-sm w-1/4 text-center">
                     {formatTime(item.start)}-{formatTime(item.end)}
                   </p>
