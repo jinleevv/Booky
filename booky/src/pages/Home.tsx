@@ -98,13 +98,13 @@ export default function Home() {
                     />
                     Sign Up with Microsoft
                   </Button>
-                  <Button
+                  {/* <Button
                     className="w-full h-12 text-lg flex items-center gap-3"
                     onClick={handleGithubLogin}
                   >
                     <IoLogoGithub size={24} />
                     Sign Up with Github
-                  </Button>
+                  </Button> */}
                 </div>
                 <div className="w-full border border-t-1 border-black rounded-full"></div>
                 <div className="w-full text-center">
