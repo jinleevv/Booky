@@ -7,31 +7,17 @@ import { useEffect, useState } from "react";
 import { useHook } from "@/hooks";
 import ViewDetails from "@/features/DashboardSchedule/ViewDetails/ViewDetails";
 
-interface ITimeRange {
-  start: string;
-  end: string;
-}
-
-interface ICancelledDays {
-  day: string;
-  meeting: ITimeRange;
-}
-
 export default function DashBoardSchedule() {
   const { team: teamId } = useParams();
   const { server } = useHook();
 
   const [teamName, setTeamName] = useState<string>("Loading...");
-  const [adminName, setAdminName] = useState<string>("Loading...");
   const [adminEmail, setAdminEmail] = useState<string>("");
   const [teamDescription, setTeamDescription] = useState<string>("");
   const [teamCoAdmin, setTeamCoAdmin] = useState<string[]>([]);
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
   const [meetingTeam, setMeetingTeam] = useState<any[]>([]);
-  const [existingAppointments, setExistingAppointments] = useState<any[]>([]);
-  const [cancelledDays, setCancelledDays] = useState<ICancelledDays[]>([]);
   const [selectedHost, setSelectedHost] = useState<string | null>(null);
-  const [createdAt, setCreatedAt] = useState<string | null>(null);
 
   const [displayTabs, setDisplayTabs] = useState<string>("join");
 
@@ -56,17 +42,14 @@ export default function DashBoardSchedule() {
 
       if (response.ok) {
         setTeamName(data.teamName);
-        setAdminName(data.adminName);
         setTeamDescription(data.teamDescription);
         setAdminEmail(data.adminEmail);
         setTeamCoAdmin(data.coadmins);
         setTeamMembers(data.members);
         setMeetingTeam(data.meetingTeam);
         setSelectedHost(data.adminEmail);
-        setCreatedAt(data.createdAt);
       } else {
         setTeamName("Not Found");
-        setAdminName("Not Found");
       }
     } catch (error) {
       console.error("Error fetching team details:", error);
@@ -108,8 +91,6 @@ export default function DashBoardSchedule() {
                     setTeamMembers={setTeamMembers}
                     meetingTeam={meetingTeam}
                     setMeetingTeam={setMeetingTeam}
-                    existingAppointments={existingAppointments}
-                    cancelledDays={cancelledDays}
                     selectedHost={selectedHost}
                     setSelectedHost={setSelectedHost}
                   />
@@ -125,8 +106,6 @@ export default function DashBoardSchedule() {
                     setTeamMembers={setTeamMembers}
                     meetingTeam={meetingTeam}
                     setMeetingTeam={setMeetingTeam}
-                    existingAppointments={existingAppointments}
-                    cancelledDays={cancelledDays}
                     selectedHost={selectedHost}
                     setSelectedHost={setSelectedHost}
                   />

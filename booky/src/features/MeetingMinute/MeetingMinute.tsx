@@ -75,7 +75,7 @@ CustomIcons["comment"] = `
 
 export default function MeetingMinute() {
   const { date, time, meetingId } = useParams();
-  const { userName, userEmail } = useHook();
+  const { userEmail } = useHook();
   const [socket, setSocket] = useState<any>(null);
   const [quill, setQuill] = useState<any>(null);
   const [comments, setComments] = useState<

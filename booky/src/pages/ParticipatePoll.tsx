@@ -34,19 +34,11 @@ export interface PollData {
   updatedAt?: Date;
 }
 
-interface AvailableTime {
-  start: string;
-  end: string;
-  participants: string[];
-}
-
 export default function ParticipatePoll() {
   const { id: urlPath } = useParams<{ id: string }>();
   const { server } = useHook();
 
   // Crucial states
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
 
@@ -69,8 +61,6 @@ export default function ParticipatePoll() {
   useEffect(() => {
     async function fetchPollDetails() {
       try {
-        setIsLoading(true);
-        setError(null);
         const response = await fetch(`${server}/api/polls/${urlPath}`, {
           method: "GET",
           headers: {
@@ -98,12 +88,8 @@ export default function ParticipatePoll() {
         for (const participant of participants) {
           availabilityMap.set(participant.email, new Set(participant.schedule));
         }
-
       } catch (error) {
-        setError(error instanceof Error ? error.message : "An error occurred");
         toast.error("Failed to load poll details");
-      } finally {
-        setIsLoading(false);
       }
     }
     if (urlPath && poll === undefined) {

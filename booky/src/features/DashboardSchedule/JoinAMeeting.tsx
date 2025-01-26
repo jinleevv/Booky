@@ -33,16 +33,6 @@ interface TimeSlot {
   slots: string[]; // You can replace `any` with a more specific type for slots if available
 }
 
-interface ITimeRange {
-  start: string;
-  end: string;
-}
-
-interface ICancelledDays {
-  day: string;
-  meeting: ITimeRange;
-}
-
 interface IJoinAMeetingProps {
   teamId: string;
   teamName: string;
@@ -53,8 +43,6 @@ interface IJoinAMeetingProps {
   setTeamMembers: React.Dispatch<React.SetStateAction<string[]>>;
   meetingTeam: any[];
   setMeetingTeam: React.Dispatch<React.SetStateAction<any>>;
-  existingAppointments: any[];
-  cancelledDays: ICancelledDays[];
   selectedHost: string | null;
   setSelectedHost: React.Dispatch<React.SetStateAction<string | null>>;
 }
@@ -85,8 +73,6 @@ export default function JoinAMeeting({
   const [selectedMeetingTeam, setSelectedMeetingTeam] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [enabledDays, setEnabledDays] = useState<Array<string>>([]);
-
-  const [groupMeetingStatus, setGroupMeetingStatus] = useState<boolean>(false);
 
   useEffect(() => {
     setTimeSlots([]);

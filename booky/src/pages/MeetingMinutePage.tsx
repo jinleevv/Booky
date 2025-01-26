@@ -4,7 +4,7 @@ import MeetingMinute from "@/features/MeetingMinute/MeetingMinute";
 import { useParams } from "react-router-dom";
 
 export default function MeetingMinutePage() {
-  const { date, time, meetingId } = useParams();
+  const { date, time } = useParams();
 
   return (
     <section className="h-screen w-screen bg-white">

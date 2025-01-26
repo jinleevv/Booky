@@ -29,8 +29,6 @@ import {
   ZonedDateTime,
 } from "@internationalized/date";
 import { DateRangePicker } from "@nextui-org/date-picker";
-import { useNavigate } from "react-router-dom";
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -90,8 +88,7 @@ export default function AvailabilityScheduler() {
     },
   });
 
-  const { server, loggedInUser, userEmail } = useHook();
-  const navigate = useNavigate();
+  const { loggedInUser } = useHook();
 
   // Calendar grid state
   const [selectedCells, setSelectedCells] = useState(new Set());

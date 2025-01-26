@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Ban, BanIcon } from "lucide-react";
+import { BanIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
@@ -48,7 +48,6 @@ export default function DashBoard() {
         const month = (today.getMonth() + 1).toString().padStart(2, "0");
         const date = today.getDate().toString().padStart(2, "0");
         const year = today.getFullYear();
-        const hour = today.getHours();
         const todayConverted = year + "-" + month + "-" + date;
 
         const upcoming = [];
@@ -126,29 +125,6 @@ export default function DashBoard() {
 
     fetchOfficeHours();
   }, [userEmail, dateRange]);
-
-  function isTimeWithinRange(
-    time: string,
-    start: string,
-    end: string
-  ): boolean {
-    const toMilitaryTime = (timeStr: string): number => {
-      const [_, hours, minutes, period] = timeStr.match(
-        /(\d{2}):(\d{2}) (AM|PM|a.m.|p.m.)/
-      )!;
-      let militaryHours = parseInt(hours);
-      if ((period === "PM" || period === "p.m.") && hours !== "12") {
-        militaryHours += 12;
-      }
-      return militaryHours * 60 + parseInt(minutes);
-    };
-
-    const timeInMinutes = toMilitaryTime(time);
-    const startInMinutes = toMilitaryTime(start);
-    const endInMinutes = toMilitaryTime(end);
-
-    return timeInMinutes >= startInMinutes && timeInMinutes <= endInMinutes;
-  }
 
   async function handleCancel(
     teamId: string,

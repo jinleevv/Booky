@@ -29,16 +29,6 @@ import { useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { Merge } from "lucide-react";
 
-interface ITimeRange {
-  start: string;
-  end: string;
-}
-
-interface ICancelledDays {
-  day: string;
-  meeting: ITimeRange;
-}
-
 interface IViewDetailsProps {
   teamId: string;
   teamName: string;
@@ -49,8 +39,6 @@ interface IViewDetailsProps {
   setTeamMembers: React.Dispatch<React.SetStateAction<string[]>>;
   meetingTeam: any[];
   setMeetingTeam: React.Dispatch<React.SetStateAction<any>>;
-  existingAppointments: any[];
-  cancelledDays: ICancelledDays[];
   selectedHost: string | null;
   setSelectedHost: React.Dispatch<React.SetStateAction<string | null>>;
 }

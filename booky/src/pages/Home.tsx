@@ -17,6 +17,7 @@ import { LayoutPanelLeft } from "lucide-react";
 export default function Home() {
   const navigate = useNavigate();
   const { loggedInUser, setLoggedInUser, setUserName } = useHook();
+
   async function handleGoogleLogin() {
     try {
       const provider = new GoogleAuthProvider();
@@ -88,7 +89,15 @@ export default function Home() {
                     <img src="/google_logo.png" className="w-5 h-5" />
                     Sign Up with Google
                   </Button>
-
+                  <Button className="w-full h-12 text-lg flex items-center gap-3">
+                    <img
+                      width="20"
+                      height="20"
+                      src="https://img.icons8.com/color/48/microsoft.png"
+                      alt="microsoft"
+                    />
+                    Sign Up with Microsoft
+                  </Button>
                   <Button
                     className="w-full h-12 text-lg flex items-center gap-3"
                     onClick={handleGithubLogin}

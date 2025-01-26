@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import DashboardNavBar from "@/features/DashboardNavBar";
 import { useHook } from "@/hooks";
 import { ArrowRight } from "lucide-react";
