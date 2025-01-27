@@ -1,14 +1,36 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
+export interface IComment {
+  id: number;
+  text: string; // The text that the comment is associated with
+  comment: string;
+  range: {
+    index: number;
+    length: number;
+  };
+}
+
 export interface IMeetingMinute extends Document {
   _id: string;
   data: Object;
+  comments: IComment[];
   createdAt: Date;
 }
+
+const CommentSchema: Schema = new Schema<IComment>({
+  id: { type: Number, required: true },
+  text: { type: String, required: true },
+  comment: { type: String, required: true },
+  range: {
+    index: { type: Number, required: true },
+    length: { type: Number, required: true },
+  },
+});
 
 const MeetingMinuteSchema: Schema = new Schema<IMeetingMinute>({
   _id: { type: String, required: true },
   data: { type: Object, required: true },
+  comments: { type: [CommentSchema], required: false },
   createdAt: { type: Date },
 });
 
