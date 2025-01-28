@@ -28,6 +28,8 @@ import updateCoadminRoute from "./routes/team/updateCoadminRoute";
 import updatePermissionRoute from "./routes/team/updatePermissionRoute";
 import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
 import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
+import updateCommentsRoute from "./routes/document/updateCommentsRoute";
+import removeCommentsRoute from "./routes/document/removeCommentsRoute";
 import userRoute from "./routes/user/userRegistrationRoute";
 
 dotenv.config();
@@ -78,6 +80,8 @@ app.use("/api/polls", updatePollRoute);
 app.use("/api/polls", getPollRoute);
 app.use("/api/document/", getMeetingMinuteRoute);
 app.use("/api/document/", mergeMeetingMinutes);
+app.use("/api/document/", updateCommentsRoute);
+app.use("/api/document/", removeCommentsRoute);
 
 async function findOrCreateMeetingMinute(id: any) {
   if (id === null) return;
