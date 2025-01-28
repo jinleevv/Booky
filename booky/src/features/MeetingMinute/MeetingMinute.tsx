@@ -75,6 +75,7 @@ CustomIcons["comment"] = `
 
 export default function MeetingMinute() {
   const { date, time, meetingId } = useParams();
+  const { server } = useHook();
   const { userEmail } = useHook();
   const [socket, setSocket] = useState<any>(null);
   const [quill, setQuill] = useState<any>(null);
@@ -98,6 +99,7 @@ export default function MeetingMinute() {
       quill.enable();
     });
     socket.emit("get-document", meetingId);
+    fetchComments();
   }, [socket, quill, meetingId]);
 
   useEffect(() => {
@@ -222,7 +224,26 @@ export default function MeetingMinute() {
     }
   }
 
-  function handleAddComment(quillInstance: any) {
+  async function fetchComments() {
+    if (!meetingId) return;
+    try {
+      const response = await fetch(`${server}/api/document/${meetingId}`);
+      const data = await response.json();
+      setComments(data.comments);
+      if (quill) {
+        quill.setContents(data.content);
+
+        // Remove highlights for deleted comments
+        if (data.comments) {
+          setComments(data.comments);
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to fetch meeting comments data:", error);
+    }
+  }
+
+  async function handleAddComment(quillInstance: any) {
     const range = quillInstance.getSelection();
     if (!range || range.length === 0) {
       toast("Please select text to add a comment.");
@@ -234,29 +255,74 @@ export default function MeetingMinute() {
 
     if (comment) {
       const commentId = Date.now(); // Generate a unique ID for each comment
+
+      const response = await fetch(
+        `${server}/api/document/updateComments/${meetingId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: commentId,
+            text: selectedText,
+            comment: comment,
+            range: range,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        toast("Failed to update the comment");
+        return;
+      }
       setComments((prevComments) => [
         ...prevComments,
         { id: commentId, text: selectedText, comment, range },
       ]);
-
       // Format the selected text to indicate it has a comment
       quillInstance.formatText(range.index, range.length, "comment", commentId);
+      toast("Successfully updated the comment");
     }
   }
 
-  function handleResolveComment(commentId: number) {
+  async function handleResolveComment(commentId: number) {
     const commentToRemove = comments.find((c) => c.id === commentId);
 
     if (commentToRemove) {
       const { range } = commentToRemove;
 
+      const response = await fetch(
+        `${server}/api/document/removeComments/${meetingId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: commentId,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        toast("Failed to remove the comment");
+        return;
+      }
+
       // Clear the comment format (remove highlight)
-      quill?.formatText(range.index, range.length, "comment", false);
+      // quill?.formatText(range.index, range.length, "comment", false);
+
+      // **Remove comment formatting properly**
+      if (quill) {
+        quill.removeFormat(range.index, range.length);
+      }
 
       // Remove the comment from the state
       setComments((prevComments) =>
         prevComments.filter((comment) => comment.id !== commentId)
       );
+      toast("Successfully removed the comment");
     }
   }
 

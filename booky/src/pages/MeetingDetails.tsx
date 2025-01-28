@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { HiOutlineArrowNarrowLeft } from "react-icons/hi";
 import { useParams, useNavigate } from "react-router-dom";
+import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import { toast } from "sonner";
 
 export default function MeetingDetails() {
@@ -48,6 +49,17 @@ export default function MeetingDetails() {
     };
     fetchMeetingMinuteData();
   }, [meetingData]);
+
+  // Convert Delta to HTML
+  function renderQuillContent(delta) {
+    if (!delta || !delta.ops) return "";
+
+    const converter = new QuillDeltaToHtmlConverter(delta.ops, {
+      inlineStyles: true, // Use inline styles for formatting
+    });
+
+    return converter.convert(); // Converts Delta to HTML
+  }
 
   return (
     <section className="h-screen w-screen bg-white font-outfit">
@@ -101,41 +113,24 @@ export default function MeetingDetails() {
                     </Button>
                   </div>
                 </div>
-                <div className="w-full h-[680px] p-4 mt-3 border rounded-lg text-sm">
-                  {meetingMinuteData && meetingMinuteData.data ? (
-                    meetingMinuteData.data.ops.map((op, index) => {
-                      if (typeof op.insert === "string") {
-                        return (
-                          <div
-                            key={index}
-                            style={{
-                              whiteSpace: "pre-wrap", // Respect whitespace and newlines
-                              wordWrap: "break-word", // Ensure long words wrap properly
-                            }}
-                          >
-                            {op.insert}
-                          </div>
-                        );
-                      } else if (op.insert.image) {
-                        return (
-                          <img
-                            key={index}
-                            src={op.insert.image}
-                            alt="Meeting Content"
-                            style={{
-                              maxWidth: "100%",
-                              height: "auto",
-                            }}
-                          />
-                        );
-                      } else {
-                        return null;
-                      }
-                    })
+                {meetingMinuteData ? (
+                  meetingMinuteData.data ? (
+                    <div
+                      className="w-full h-[650px] p-4 mt-3 border rounded-lg text-sm" // Optional: To mimic Quill editor styling
+                      dangerouslySetInnerHTML={{
+                        __html: renderQuillContent(meetingMinuteData.data),
+                      }}
+                    />
                   ) : (
-                    <></>
-                  )}
-                </div>
+                    <div className="flex w-full h-full items-center justify-center">
+                      <Label className="text-sm">No meeting data found.</Label>
+                    </div>
+                  )
+                ) : (
+                  <div className="flex w-full h-full items-center justify-center">
+                    <div className="w-6 h-6 border-4 border-blue-500 border-solid border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
               </div>
               {/* <div className="mt-6">
                   <Label className="text-medium font-bold">Tasks</Label>
