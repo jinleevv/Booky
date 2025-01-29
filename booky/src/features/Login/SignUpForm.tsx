@@ -17,6 +17,7 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useHook } from "@/hooks";
+import { Label } from "@/components/ui/label";
 
 interface PasswordRequirement {
   match: boolean;
@@ -126,8 +127,8 @@ export default function SignUpForm() {
     if (!response.ok) {
       console.error("Failed to save user to database: ", response);
       return -1;
-    } 
-    
+    }
+
     return 0;
   }
 
@@ -201,8 +202,21 @@ export default function SignUpForm() {
             </FormItem>
           )}
         />
+        <div className="w-3/4 text-right">
+          <Label className="text-xs text-gray-400">
+            Already have an account?
+          </Label>{" "}
+          <Label
+            className="text-xs text-gray-400 underline cursor-pointer"
+            onClick={() => navigate("/login")}
+          >
+            Sign in
+          </Label>
+        </div>
         <div className="flex justify-end w-3/4">
-          <Button type="submit">Register</Button>
+          <Button type="submit" className="-mt-3">
+            Register
+          </Button>
         </div>
       </form>
     </Form>

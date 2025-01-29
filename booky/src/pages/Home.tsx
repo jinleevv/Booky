@@ -74,7 +74,10 @@ export default function Home() {
             {loggedInUser ? (
               <>
                 <div className="flex w-full">
-                  <Button className="w-full h-12 text-lg flex items-center gap-3">
+                  <Button
+                    className="w-full h-12 text-lg flex items-center gap-3"
+                    onClick={() => navigate("/dashboard")}
+                  >
                     <LayoutPanelLeft /> Go to Dashboard
                   </Button>
                 </div>

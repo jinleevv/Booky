@@ -21,7 +21,7 @@ export default function SignIn() {
               onClick={() => navigate("/")}
             >
               <HiOutlineArrowNarrowLeft size={25} />
-              Back
+              Home
             </Button>
           </div>
           <div className="space-y-4">
