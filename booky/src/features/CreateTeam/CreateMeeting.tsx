@@ -22,11 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 
-export default function CreateMeeting({
-  form,
-  currentTab,
-  setCurrentTab,
-}) {
+export default function CreateMeeting({ form, currentTab, setCurrentTab }) {
   const formatDateTime = (dateObject: any): string => {
     const { year, month, day, hour, minute } = dateObject;
 
@@ -41,16 +37,16 @@ export default function CreateMeeting({
       control={form.control}
       name="recurringMeetingSchedule"
       render={() => (
-        <div className="border w-full h-[590px] rounded-lg p-4 overflow-auto">
+        <div className="border w-full h-[590px] rounded-2xl p-4 overflow-auto">
           <div className="border-b-1 mb-4">
             <div className="flex w-full space-x-6">
               <FormField
                 control={form.control}
                 name="meetingName"
                 render={({ field }) => (
-                  <FormItem className="flex w-1/3 mb-6">
-                    <div className="w-40 my-auto">
-                      <FormLabel>Meeting Name:</FormLabel>
+                  <FormItem className="w-1/3 mb-6">
+                    <div className="w-40 -mb-1">
+                      <FormLabel>Meeting Name*</FormLabel>
                     </div>
                     <Input placeholder="Name" {...field} />
                     <FormMessage />
@@ -61,9 +57,9 @@ export default function CreateMeeting({
                 control={form.control}
                 name="meetingDescription"
                 render={({ field }) => (
-                  <FormItem className="flex w-1/3 mb-6">
-                    <div className="w-32 my-auto">
-                      <FormLabel>Description:</FormLabel>
+                  <FormItem className="w-1/3 mb-6">
+                    <div className="w-32 -mb-1">
+                      <FormLabel>Description</FormLabel>
                     </div>
                     <Input placeholder="Description" {...field} />
                     <FormMessage />
@@ -74,9 +70,9 @@ export default function CreateMeeting({
                 control={form.control}
                 name="meetingLink"
                 render={({ field }) => (
-                  <FormItem className="flex w-1/3 mb-6">
-                    <div className="w-32 my-auto">
-                      <FormLabel>Meeting Link:</FormLabel>
+                  <FormItem className="w-1/3 mb-6">
+                    <div className="w-32 -mb-1">
+                      <FormLabel>Meeting Link</FormLabel>
                     </div>
                     <Input
                       placeholder="Zoom Link, Teams Link, etc"
@@ -106,140 +102,153 @@ export default function CreateMeeting({
               </TabsList>
               <TabsContent value="recurring">
                 <div className="space-y-4">
-                  {form.watch("recurringMeetingSchedule").map((day, dayIndex) => (
-                    <div key={day.day} className="flex items-center space-x-4">
-                      <FormField
-                        control={form.control}
-                        name={`recurringMeetingSchedule.${dayIndex}.enabled`}
-                        render={({ field }) => (
-                          <FormItem className="flex w-32 items-center space-x-2">
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="mt-2"
-                              />
-                            </FormControl>
-                            <FormLabel className="font-medium">
-                              {day.day}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
+                  {form
+                    .watch("recurringMeetingSchedule")
+                    .map((day, dayIndex) => (
+                      <div
+                        key={day.day}
+                        className="flex items-center space-x-4"
+                      >
+                        <FormField
+                          control={form.control}
+                          name={`recurringMeetingSchedule.${dayIndex}.enabled`}
+                          render={({ field }) => (
+                            <FormItem className="flex w-32 items-center space-x-2">
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  className="mt-2"
+                                />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                {day.day}
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
 
-                      {/* Time Selects */}
-                      {day.enabled && (
-                        <div className="flex flex-col space-y-2">
-                          {day.times.map((time, timeIndex) => (
-                            <div
-                              key={timeIndex}
-                              className="flex items-center space-x-2"
-                            >
-                              {/* Start Time */}
-                              <FormField
-                                control={form.control}
-                                name={`recurringMeetingSchedule.${dayIndex}.times.${timeIndex}.start`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Select
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                      >
-                                        <SelectTrigger className="w-28">
-                                          <SelectValue placeholder="Start Time" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {availableTime.map((timeOption) => (
-                                            <SelectItem
-                                              key={timeOption}
-                                              value={timeOption}
-                                            >
-                                              {timeOption}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </FormControl>
-                                    <FormMessage />{" "}
-                                    {/* Display any validation error */}
-                                  </FormItem>
-                                )}
-                              />
-
-                              <span className="text-gray-500">-</span>
-
-                              {/* End Time */}
-                              <FormField
-                                control={form.control}
-                                name={`recurringMeetingSchedule.${dayIndex}.times.${timeIndex}.end`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Select
-                                        value={field.value}
-                                        onValueChange={field.onChange}
-                                      >
-                                        <SelectTrigger className="w-28">
-                                          <SelectValue placeholder="End Time" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {availableTime.map((timeOption) => (
-                                            <SelectItem
-                                              key={timeOption}
-                                              value={timeOption}
-                                            >
-                                              {timeOption}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  const updatedSchedule =
-                                    form.getValues("recurringMeetingSchedule");
-                                  updatedSchedule[dayIndex].times.push({
-                                    start: "09:00 AM",
-                                    end: "05:00 PM",
-                                  });
-                                  form.setValue("recurringMeetingSchedule", updatedSchedule);
-                                }}
+                        {/* Time Selects */}
+                        {day.enabled && (
+                          <div className="flex flex-col space-y-2">
+                            {day.times.map((time, timeIndex) => (
+                              <div
+                                key={timeIndex}
+                                className="flex items-center space-x-2"
                               >
-                                <Plus className="w-4 h-4" />
-                              </Button>
-                              {day.times.length > 1 && (
+                                {/* Start Time */}
+                                <FormField
+                                  control={form.control}
+                                  name={`recurringMeetingSchedule.${dayIndex}.times.${timeIndex}.start`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Select
+                                          value={field.value}
+                                          onValueChange={field.onChange}
+                                        >
+                                          <SelectTrigger className="w-28">
+                                            <SelectValue placeholder="Start Time" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {availableTime.map((timeOption) => (
+                                              <SelectItem
+                                                key={timeOption}
+                                                value={timeOption}
+                                              >
+                                                {timeOption}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </FormControl>
+                                      <FormMessage />{" "}
+                                      {/* Display any validation error */}
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <span className="text-gray-500">-</span>
+
+                                {/* End Time */}
+                                <FormField
+                                  control={form.control}
+                                  name={`recurringMeetingSchedule.${dayIndex}.times.${timeIndex}.end`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Select
+                                          value={field.value}
+                                          onValueChange={field.onChange}
+                                        >
+                                          <SelectTrigger className="w-28">
+                                            <SelectValue placeholder="End Time" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {availableTime.map((timeOption) => (
+                                              <SelectItem
+                                                key={timeOption}
+                                                value={timeOption}
+                                              >
+                                                {timeOption}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => {
-                                    const updatedSchedule =
-                                      form.getValues("recurringMeetingSchedule");
-                                    updatedSchedule[dayIndex].times.splice(
-                                      timeIndex,
-                                      1
+                                    const updatedSchedule = form.getValues(
+                                      "recurringMeetingSchedule"
                                     );
-                                    form.setValue("recurringMeetingSchedule", updatedSchedule);
+                                    updatedSchedule[dayIndex].times.push({
+                                      start: "09:00 AM",
+                                      end: "05:00 PM",
+                                    });
+                                    form.setValue(
+                                      "recurringMeetingSchedule",
+                                      updatedSchedule
+                                    );
                                   }}
                                 >
-                                  <Trash className="w-4 h-4 text-red-500" />
+                                  <Plus className="w-4 h-4" />
                                 </Button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                                {day.times.length > 1 && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      const updatedSchedule = form.getValues(
+                                        "recurringMeetingSchedule"
+                                      );
+                                      updatedSchedule[dayIndex].times.splice(
+                                        timeIndex,
+                                        1
+                                      );
+                                      form.setValue(
+                                        "recurringMeetingSchedule",
+                                        updatedSchedule
+                                      );
+                                    }}
+                                  >
+                                    <Trash className="w-4 h-4 text-red-500" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </TabsContent>
               <TabsContent value="one-time">
@@ -253,15 +262,27 @@ export default function CreateMeeting({
                           hideTimeZone
                           defaultValue={{
                             start: parseZonedDateTime(
-                              `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
+                              `${
+                                new Date().toISOString().split("T")[0]
+                              }T09:00[America/Toronto]`
                             ),
                             end: parseZonedDateTime(
-                              `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
+                              `${
+                                new Date().toISOString().split("T")[0]
+                              }T17:00[America/Toronto]`
                             ),
                           }}
                           value={{
-                            start: field.value.start ? parseZonedDateTime(`${field.value.start}[America/Toronto]`) : undefined,
-                            end: field.value.end ? parseZonedDateTime(`${field.value.end}[America/Toronto]`) : undefined,
+                            start: field.value.start
+                              ? parseZonedDateTime(
+                                  `${field.value.start}[America/Toronto]`
+                                )
+                              : undefined,
+                            end: field.value.end
+                              ? parseZonedDateTime(
+                                  `${field.value.end}[America/Toronto]`
+                                )
+                              : undefined,
                           }}
                           label="Meeting / Event"
                           visibleMonths={2}
