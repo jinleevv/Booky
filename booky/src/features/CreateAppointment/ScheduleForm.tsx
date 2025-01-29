@@ -120,7 +120,7 @@ export default function ScheduleForm({
       }
     } catch (error) {
       console.error("Error submitting email:", error);
-      toast.error("Something went wrong!");
+      toast.error("You must complete the form!");
     }
   }
 

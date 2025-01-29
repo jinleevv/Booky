@@ -26,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useHook } from "@/hooks";
 import { IoIosAdd } from "react-icons/io";
+import { motion } from "framer-motion";
 import ScheduleForm from "../CreateAppointment/ScheduleForm";
 
 interface TimeSlot {
@@ -365,7 +366,11 @@ export default function JoinAMeeting({
                 )}
               </div>
             </CardHeader>
-            <CardContent className="flex w-full border-b-[1px] md:w-3/6 md:border-r-[1px] py-2 border-gray-200">
+            <CardContent
+              className={`flex w-full border-b-[1px] md:w-3/6 md:border-r-[1px] py-2 border-gray-200 ${
+                selectedMeetingTeam ? "md:w-3/6 md:border-r-[1px]" : "md:w-5/6"
+              }`}
+            >
               {selectedMeetingTeam === null ? (
                 <div className="flex flex-col w-full mt-1.5 p-0 gap-2 overflow-y-auto">
                   <div className="flex w-full justify-between">
@@ -509,110 +514,130 @@ export default function JoinAMeeting({
                   )}
                 </div>
               ) : (
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  disabled={(date) => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
+                <motion.div
+                  className="w-full h-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
 
-                    const dateISO = date.toISOString().split("T")[0];
+                      const dateISO = date.toISOString().split("T")[0];
 
-                    return (
-                      date < today ||
-                      !enabledDays.some(
-                        (enabledDate) => enabledDate === dateISO
-                      )
-                    );
-                  }}
-                  showOutsideDays={false}
-                  className="flex-1 max-h-[461px] overflow-y-auto mt-3 p-0"
-                  classNames={{
-                    months:
-                      "flex w-full flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 flex-1",
-                    month: "space-y-4 w-full",
-                    table: "w-full border-collapse space-y-1",
-                    head_row: "w-full flex justify-between",
-                    head_cell: "w-16 font-normal text-xs text-center",
-                    row: "w-full mt-2 flex justify-between",
-                    cell: "w-16 relative p-0 text-center focus-within:relative focus-within:z-20",
-                    day: "h-16 w-16 p-0 rounded-lg font-normal aria-selected:opacity-100 hover:bg-gray-100",
-                    day_selected:
-                      "bg-black text-white hover:bg-gray-800 focus:bg-black focus:text-white",
-                    day_today: "bg-accent text-accent-foreground",
-                    caption: "flex items-start justify-start pb-4 pl-2",
-                    caption_label: "w-64 text-xl font-semibold",
-                    nav: "space-x-1 flex w-full justify-end",
-                    nav_button: cn(
-                      buttonVariants({ variant: "outline" }),
-                      "h-7 w-10 p-0"
-                    ),
-                    nav_button_previous: "",
-                    nav_button_next: "",
-                  }}
-                />
+                      return (
+                        date < today ||
+                        !enabledDays.some(
+                          (enabledDate) => enabledDate === dateISO
+                        )
+                      );
+                    }}
+                    showOutsideDays={false}
+                    className="flex-1 max-h-[461px] overflow-y-auto mt-3 p-0"
+                    classNames={{
+                      months:
+                        "flex w-full flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 flex-1",
+                      month: "space-y-4 w-full",
+                      table: "w-full border-collapse space-y-1",
+                      head_row: "w-full flex justify-between",
+                      head_cell: "w-16 font-normal text-xs text-center",
+                      row: "w-full mt-2 flex justify-between",
+                      cell: "w-16 relative p-0 text-center focus-within:relative focus-within:z-20",
+                      day: "h-16 w-16 p-0 rounded-lg font-normal aria-selected:opacity-100 hover:bg-gray-100",
+                      day_selected:
+                        "bg-black text-white hover:bg-gray-800 focus:bg-black focus:text-white",
+                      day_today: "bg-accent text-accent-foreground",
+                      caption: "flex items-start justify-start pb-4 pl-2",
+                      caption_label: "w-64 text-xl font-semibold",
+                      nav: "space-x-1 flex w-full justify-end",
+                      nav_button: cn(
+                        buttonVariants({ variant: "outline" }),
+                        "h-7 w-10 p-0"
+                      ),
+                      nav_button_previous: "",
+                      nav_button_next: "",
+                    }}
+                  />
+                </motion.div>
               )}
             </CardContent>
-            <div className="w-full md:w-2/6 h-full overflow-y-auto flex flex-col">
-              <CardContent className="max-md:max-h-[27vh] h-1/2 w-full flex-1 py-2 border-b-[1px] border-gray-200 overflow-auto">
-                <div className="grid grid-cols-2 w-full h-full items-center gap-2">
-                  {selectedDate ? (
-                    selectedMeetingTeam.type == "group" ? (
-                      <div className="col-span-2 flex justify-center items-center">
-                        <Button
-                          variant="outline"
-                          className="w-full items-center rounded-lg bg-black text-white max-w-md"
-                          disabled={true}
-                        >
-                          Attend Group Meeting
-                        </Button>
-                      </div>
-                    ) : timeSlots.length > 0 ? (
-                      timeSlots
-                        .filter(
-                          (timeSlot) =>
-                            timeSlot.day ===
-                            selectedDate.toISOString().split("T")[0]
-                        ) // Filter slots for the selected date
-                        .map((timeSlot) =>
-                          timeSlot.slots.map((time) => (
-                            <Button
-                              key={`${timeSlot.day}-${time}`} // Combine day and time for a unique key
-                              variant="outline"
-                              className={cn(
-                                "p-4 text-center rounded-lg",
-                                selectedTimeSlot === time
-                                  ? "bg-black text-white"
-                                  : "bg-white"
-                              )}
-                              onClick={() => setSelectedTimeSlot(time)} // Set the selected time slot
-                            >
-                              {time}
-                            </Button>
-                          ))
-                        )
+            {selectedMeetingTeam ? (
+              <motion.div
+                className="w-full md:w-2/6 h-full overflow-y-auto flex flex-col"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6 }}
+              >
+                <CardContent className="max-md:max-h-[27vh] h-1/2 w-full flex-1 py-2 border-b-[1px] border-gray-200 overflow-auto">
+                  <div className="grid grid-cols-2 w-full h-full items-center gap-2">
+                    {selectedDate ? (
+                      selectedMeetingTeam.type == "group" ? (
+                        <div className="col-span-2 flex justify-center items-center">
+                          <Button
+                            variant="outline"
+                            className="w-full items-center rounded-lg bg-black text-white max-w-md"
+                            disabled={true}
+                          >
+                            Attend Group Meeting
+                          </Button>
+                        </div>
+                      ) : timeSlots.length > 0 ? (
+                        timeSlots
+                          .filter(
+                            (timeSlot) =>
+                              timeSlot.day ===
+                              selectedDate.toISOString().split("T")[0]
+                          ) // Filter slots for the selected date
+                          .map((timeSlot) =>
+                            timeSlot.slots.map((time) => (
+                              <Button
+                                key={`${timeSlot.day}-${time}`} // Combine day and time for a unique key
+                                variant="outline"
+                                className={cn(
+                                  "p-4 text-center rounded-lg",
+                                  selectedTimeSlot === time
+                                    ? "bg-black text-white"
+                                    : "bg-white"
+                                )}
+                                onClick={() => setSelectedTimeSlot(time)} // Set the selected time slot
+                              >
+                                {time}
+                              </Button>
+                            ))
+                          )
+                      ) : (
+                        <p className="col-span-2 text-center">
+                          No available slots
+                        </p>
+                      )
                     ) : (
                       <p className="col-span-2 text-center">
-                        No available slots
+                        Please select a date
                       </p>
-                    )
-                  ) : (
-                    <p className="col-span-2 text-center">No available slots</p>
-                  )}
-                </div>
-              </CardContent>
-              <ScheduleForm
-                selectedMeetingTeam={selectedMeetingTeam}
-                selectedDate={
-                  selectedDate ? selectedDate.toISOString().split("T")[0] : null
-                }
-                selectedTime={selectedTimeSlot}
-                teamId={teamId!}
-                timeSlots={timeSlots}
-                setTimeSlots={setTimeSlots}
-              />
-            </div>
+                    )}
+                  </div>
+                </CardContent>
+                <ScheduleForm
+                  selectedMeetingTeam={selectedMeetingTeam}
+                  selectedDate={
+                    selectedDate
+                      ? selectedDate.toISOString().split("T")[0]
+                      : null
+                  }
+                  selectedTime={selectedTimeSlot}
+                  teamId={teamId!}
+                  timeSlots={timeSlots}
+                  setTimeSlots={setTimeSlots}
+                />
+              </motion.div>
+            ) : (
+              <></>
+            )}
           </Card>
         </>
       )}
