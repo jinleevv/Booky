@@ -12,7 +12,7 @@ import {
 import { IoPersonCircle } from "react-icons/io5";
 import { Label } from "@/components/ui/label";
 import { RiArrowDropDownLine } from "react-icons/ri";
-import { LogOut } from "lucide-react";
+import { LogOut, UserPen, Vote } from "lucide-react";
 import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
 
@@ -69,9 +69,13 @@ export default function NavigationBar() {
           <DropdownMenuContent className="w-32">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {/* <DropdownMenuItem onClick={() => navigate("/")}>
+            <DropdownMenuItem onClick={() => navigate("/")}>
               <UserPen /> <span>Profile</span>
-            </DropdownMenuItem> */}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate("/poll")}>
+              <Vote /> <span>Poll</span>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {

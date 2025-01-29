@@ -322,11 +322,16 @@ export default function DashBoard() {
                                   ) : (
                                     <></>
                                   )}
-                                  {`${formatDateWithOrdinal(
+                                  <Label className="w-36 border-r-1 border-gray-500">{`${formatDateWithOrdinal(
+                                    meeting.date
+                                  )}`}</Label>
+                                  <Label>{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+
+                                  {/* {`${formatDateWithOrdinal(
                                     meeting.date
                                   )} \u00A0\u00A0\u00A0 ${meeting.teamName}: ${
                                     meeting.meetingTeamName
-                                  }`}
+                                  }`} */}
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}

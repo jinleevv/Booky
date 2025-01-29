@@ -47,11 +47,7 @@ export default function SignInForm() {
       setUserName(response.user.displayName);
       navigate("/");
     } catch (error) {
-      if (error.code === "auth/invalid-credential") {
-        toast("Invalid email or password");
-      } else {
-        toast("Unable to sign in due to an error");
-      }
+      toast("Email not found or password incorrect. Please try again.");
     }
   }
 

@@ -105,19 +105,19 @@ export default function NavigationBar() {
           </>
         ) : (
           <>
-            <Button
+            {/* <Button
               variant="ghost"
               className="bg-white hover:text-red-700 border-none"
               onClick={() => navigate("/poll")}
             >
               Poll
-            </Button>
+            </Button> */}
             <Button
-              variant="ghost"
-              className="bg-white hover:text-red-700 border-none"
-              onClick={() => navigate("/login")}
+              variant="outline"
+              className="bg-white hover:text-red-700 rounded-xl"
+              onClick={() => navigate("/poll")}
             >
-              Sign In
+              Availability Poll
             </Button>
             <Button
               onClick={() => navigate("/register")}
