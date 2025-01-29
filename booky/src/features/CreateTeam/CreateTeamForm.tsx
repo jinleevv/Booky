@@ -169,46 +169,18 @@ export default function CreateTeamForm() {
     <section className="grid mt-4 bg-white">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex w-full gap-2">
-            <div className="w-1/3 h-full border rounded-2xl p-3">
-              <FormField
-                control={form.control}
-                name="teamName"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <div className="flex w-full gap-2">
-                      <FormLabel className="w-24 mt-auto mb-auto">
-                        Team Name
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          className="w-full"
-                          placeholder="Team Name"
-                          {...field}
-                        />
-                      </FormControl>
+          <div className="flex w-full border rounded-2xl p-3 gap-3">
+            <div className="flex flex-col w-full h-full">
+              <div className="grid w-full h-full">
+                <Label className={`${pendingCoAdmin?.length ? "" : "mt-3"}`}>
+                  Co-Admin
+                </Label>
+                <div className="flex w-full overflow-auto gap-2 mt-2 rounded-lg">
+                  {pendingCoAdmin.map((email) => (
+                    <div className="h-full w-fit overflow-x-auto px-2 rounded-full bg-gray-700 text-white shrink-0">
+                      <Label>{email}</Label>
                     </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="w-1/3 border rounded-2xl p-3">
-              <div className="flex w-full h-full">
-                <Label className="my-auto">Admin: {userName}</Label>
-              </div>
-            </div>
-            <div className="w-1/3 border rounded-2xl p-3">
-              <div className="flex flex-col w-full h-full">
-                <div className="flex w-full h-full">
-                  <Label className="my-auto">Co-Admin</Label>
-                  <div className="flex w-full overflow-auto gap-2 mt-2">
-                    {pendingCoAdmin.map((email) => (
-                      <div className="h-full w-fit px-2 rounded-full bg-gray-700 text-white">
-                        <Label>{email}</Label>
-                      </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -240,28 +212,47 @@ export default function CreateTeamForm() {
               </Dialog>
             </div>
           </div>
-          <div className="w-full h-fit border rounded-2xl p-3">
-            <FormField
-              control={form.control}
-              name="teamDescription"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <div className="flex w-full gap-2">
-                    <FormLabel className="w-32 mt-auto mb-auto">
-                      Team Description
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="Team Description"
-                        {...field}
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <div className="flex w-full gap-2">
+            <div className="flex w-full h-full border rounded-2xl p-3 gap-3">
+              <FormField
+                control={form.control}
+                name="teamName"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <div className="w-full gap-2">
+                      <FormLabel className="w-24">Team Name*</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="w-full mt-1"
+                          placeholder="Team Name"
+                          {...field}
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="teamDescription"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <div className="w-full gap-2 mb-1">
+                      <FormLabel className="w-32">Team Description</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="w-full mt-1"
+                          placeholder="Team Description"
+                          {...field}
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
           <CreateMeeting
             form={form}
