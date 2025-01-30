@@ -55,7 +55,7 @@ export default function Attendance() {
             {attendanceCode.split("").map((char, index) => (
               <div
                 key={index}
-                className="w-12 h-12 flex items-center justify-center text-2xl font-bold border border-gray-400 rounded-lg shadow-md bg-gray-100"
+                className="mt-24 w-24 h-24 flex items-center justify-center text-2xl font-bold border border-gray-400 rounded-lg shadow-md bg-gray-100"
               >
                 {char}
               </div>

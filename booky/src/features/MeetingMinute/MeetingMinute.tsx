@@ -3,8 +3,8 @@ import "quill/dist/quill.snow.css";
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
-// import { Document, ImageRun, Packer, Paragraph } from "docx";
-// import { saveAs } from "file-saver";
+import { Document, ImageRun, Packer, Paragraph } from "docx";
+import { saveAs } from "file-saver";
 import "./MeetingMinute.css";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -12,6 +12,21 @@ import InlineBlot from "quill/blots/inline";
 import { useHook } from "@/hooks";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const SAVE_INTERVAL_MS = 2000;
 
@@ -179,69 +194,69 @@ export default function MeetingMinute() {
     setQuill(q);
   }, []);
 
-  // async function handleExport() {
-  //   if (!quill) return;
+  async function handleExport() {
+    if (!quill) return;
 
-  //   try {
-  //     const delta = quill.getContents();
-  //     const children = [];
+    try {
+      const delta = quill.getContents();
+      const children = [];
 
-  //     const editorElement = document.querySelector(".ql-editor");
+      const editorElement = document.querySelector(".ql-editor");
 
-  //     for (const op of delta.ops) {
-  //       if (op.insert && typeof op.insert === "string") {
-  //         children.push(
-  //           new Paragraph({
-  //             text: op.insert.trim(),
-  //           })
-  //         );
-  //       } else if (op.insert && op.insert.image) {
-  //         const src = op.insert.image;
+      for (const op of delta.ops) {
+        if (op.insert && typeof op.insert === "string") {
+          children.push(
+            new Paragraph({
+              text: op.insert.trim(),
+            })
+          );
+        } else if (op.insert && op.insert.image) {
+          const src = op.insert.image;
 
-  //         if (src.startsWith("data:image")) {
-  //           const base64Data = src.split(",")[1];
-  //           const buffer = Uint8Array.from(atob(base64Data), (c) =>
-  //             c.charCodeAt(0)
-  //           );
+          if (src.startsWith("data:image")) {
+            const base64Data = src.split(",")[1];
+            const buffer = Uint8Array.from(atob(base64Data), (c) =>
+              c.charCodeAt(0)
+            );
 
-  //           // Find the corresponding image in the editor DOM
-  //           const imageElement = editorElement?.querySelector<HTMLImageElement>(
-  //             `img[src="${src}"]`
-  //           );
+            // Find the corresponding image in the editor DOM
+            const imageElement = editorElement?.querySelector<HTMLImageElement>(
+              `img[src="${src}"]`
+            );
 
-  //           // Get image dimensions
-  //           const width = imageElement?.naturalWidth || 300; // Default to 300px
-  //           const height = imageElement?.naturalHeight || 200; // Default to 200px
+            // Get image dimensions
+            const width = imageElement?.naturalWidth || 300; // Default to 300px
+            const height = imageElement?.naturalHeight || 200; // Default to 200px
 
-  //           children.push(
-  //             new Paragraph({
-  //               children: [
-  //                 new ImageRun({
-  //                   data: buffer,
-  //                   transformation: { width, height },
-  //                   type: "png",
-  //                 }),
-  //               ],
-  //             })
-  //           );
-  //         }
-  //       }
-  //     }
+            children.push(
+              new Paragraph({
+                children: [
+                  new ImageRun({
+                    data: buffer,
+                    transformation: { width, height },
+                    type: "png",
+                  }),
+                ],
+              })
+            );
+          }
+        }
+      }
 
-  //     const doc = new Document({
-  //       sections: [
-  //         {
-  //           children,
-  //         },
-  //       ],
-  //     });
+      const doc = new Document({
+        sections: [
+          {
+            children,
+          },
+        ],
+      });
 
-  //     const buffer = await Packer.toBlob(doc);
-  //     saveAs(buffer, `Meeting_Minutes_${date}_${time}.docx`);
-  //   } catch (error) {
-  //     toast("Failed to export document. Please try again.");
-  //   }
-  // }
+      const buffer = await Packer.toBlob(doc);
+      saveAs(buffer, `Meeting_Minutes_${date}_${time}.docx`);
+    } catch (error) {
+      toast("Failed to export document. Please try again.");
+    }
+  }
 
   async function fetchComments() {
     if (!meetingId) return;
@@ -354,19 +369,46 @@ export default function MeetingMinute() {
 
   return (
     <>
-      {/* <div className="flex w-full h-12 justify-end">
-        <Button onClick={handleExport}>Export</Button>
-      </div> */}
-      <div className="flex w-3/4 h-full justify-center gap-2">
-        <img src="/booky_logo.png" alt="Booky Logo" className="w-26 h-14" />
-        <Input
-          className="w-1/2 h-14 border-none shadow-none focus-visible:border-gray-500"
-          style={{ fontSize: "17px" }}
-          type="text"
-          value={title}
-          onChange={handleTitleChange}
-          placeholder="Enter document title..."
-        />
+      {/*  */}
+      <div className="flex w-full h-full gap-2">
+        <div className="flex w-full h-full justify-center">
+          <img src="/booky_logo.png" alt="Booky Logo" className="w-26 h-14" />
+          <Input
+            className="w-1/2 h-14 border-none shadow-none focus-visible:border-gray-500"
+            style={{ fontSize: "17px" }}
+            type="text"
+            value={title}
+            onChange={handleTitleChange}
+            placeholder="Enter document title..."
+          />
+          <div className="flex w-2/12 h-full justify-end my-auto">
+            <Dialog>
+              <DialogTrigger>
+                <Button className="rounded-2xl">Export</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    Please select the documentation type
+                  </DialogTitle>
+                  <DialogDescription>
+                    Please select the documentation type to export
+                  </DialogDescription>
+                </DialogHeader>
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF Document (.pdf)</SelectItem>
+                    <SelectItem value="docx">Microsoft Word (.docx)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={handleExport}>Export</Button>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
       </div>
 
       {/* Editor & Comments Container */}
