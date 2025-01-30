@@ -326,12 +326,6 @@ export default function DashBoard() {
                                     meeting.date
                                   )}`}</Label>
                                   <Label>{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
-
-                                  {/* {`${formatDateWithOrdinal(
-                                    meeting.date
-                                  )} \u00A0\u00A0\u00A0 ${meeting.teamName}: ${
-                                    meeting.meetingTeamName
-                                  }`} */}
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}
@@ -411,9 +405,11 @@ export default function DashBoard() {
                           <AccordionItem key={index} value={`item-${index}`}>
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
-                                <Label className="font-bold">
-                                  {meeting.date}, {meeting.teamName}:{" "}
-                                  {meeting.meetingTeamName}
+                                <Label className="flex gap-2">
+                                  <Label className="w-36 border-r-1 border-gray-500">{`${formatDateWithOrdinal(
+                                    meeting.date
+                                  )}`}</Label>
+                                  <Label>{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}
