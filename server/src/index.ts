@@ -119,7 +119,11 @@ io.on("connection", (socket) => {
       return;
     }
     socket.join(meeting);
-    socket.emit("load-document", meetingMinute.data);
+    // socket.emit("load-document", meetingMinute.data);
+    socket.emit("load-document", {
+      data: meetingMinute.data,
+      title: meetingMinute.title, // Send title
+    });
 
     socket.on("send-changes", (delta) => {
       socket.broadcast.to(meeting).emit("receive-changes", delta);
@@ -127,6 +131,12 @@ io.on("connection", (socket) => {
 
     socket.on("save-document", async (data) => {
       await MeetingMinute.findByIdAndUpdate(meeting, { data });
+    });
+
+    // Handle title changes
+    socket.on("send-title-change", async (title) => {
+      await MeetingMinute.findByIdAndUpdate(meeting, { title });
+      socket.broadcast.to(meeting).emit("receive-title-change", title);
     });
   });
 });

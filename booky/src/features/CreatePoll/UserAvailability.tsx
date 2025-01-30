@@ -70,9 +70,6 @@ export default function UserAvailability({
         }
       );
 
-      const data = await response.json();
-      console.log(data);
-
       if (!response.ok) {
         toast.error("Failed to update availabilities");
         return;
@@ -149,10 +146,8 @@ export default function UserAvailability({
       day: string; // Add day property
     } | null = null;
 
-    console.log(sortedTimeSlots);
     sortedTimeSlots.forEach(([slot, participants]) => {
       const [day, currentTime] = slot.split("-"); // Extract day and time from the slot
-      console.log("currentTime: ", currentTime);
       if (!currentGroup) {
         // Start a new group
         currentGroup = {
@@ -205,9 +200,6 @@ export default function UserAvailability({
         day: currentGroup.day,
       });
     }
-
-    console.log(groupedTimeSlots);
-
     return groupedTimeSlots;
   }
 

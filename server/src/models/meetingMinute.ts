@@ -12,6 +12,7 @@ export interface IComment {
 
 export interface IMeetingMinute extends Document {
   _id: string;
+  title: string;
   data: Object;
   comments: IComment[];
   createdAt: Date;
@@ -29,6 +30,7 @@ const CommentSchema: Schema = new Schema<IComment>({
 
 const MeetingMinuteSchema: Schema = new Schema<IMeetingMinute>({
   _id: { type: String, required: true },
+  title: { type: String, required: false },
   data: { type: Object, required: true },
   comments: { type: [CommentSchema], required: false },
   createdAt: { type: Date },
