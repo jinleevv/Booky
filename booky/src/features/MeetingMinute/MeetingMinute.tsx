@@ -3,14 +3,15 @@ import "quill/dist/quill.snow.css";
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
-import { Document, ImageRun, Packer, Paragraph } from "docx";
-import { saveAs } from "file-saver";
+// import { Document, ImageRun, Packer, Paragraph } from "docx";
+// import { saveAs } from "file-saver";
 import "./MeetingMinute.css";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import InlineBlot from "quill/blots/inline";
 import { useHook } from "@/hooks";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const SAVE_INTERVAL_MS = 2000;
 
@@ -82,6 +83,16 @@ export default function MeetingMinute() {
   const [comments, setComments] = useState<
     { id: number; text: string; comment: string; range: any }[]
   >([]);
+  const [title, setTitle] = useState<string>("");
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for real-time title updates
+    socket.on("receive-title-change", (newTitle) => {
+      setTitle(newTitle);
+    });
+  }, [socket]);
 
   useEffect(() => {
     const s = io("http://localhost:5002");
@@ -95,9 +106,17 @@ export default function MeetingMinute() {
   useEffect(() => {
     if (socket === null || quill === null) return;
     socket.once("load-document", (document) => {
-      quill.setContents(document);
+      setTitle(document.title || `Meeting Minute, ${date}, ${time}`); // Set title
+
+      quill.setContents(document.data);
       quill.enable();
     });
+
+    // Listen for real-time title updates
+    socket.on("receive-title-change", (newTitle) => {
+      setTitle(newTitle);
+    });
+
     socket.emit("get-document", meetingId);
     fetchComments();
   }, [socket, quill, meetingId]);
@@ -160,69 +179,69 @@ export default function MeetingMinute() {
     setQuill(q);
   }, []);
 
-  async function handleExport() {
-    if (!quill) return;
+  // async function handleExport() {
+  //   if (!quill) return;
 
-    try {
-      const delta = quill.getContents();
-      const children = [];
+  //   try {
+  //     const delta = quill.getContents();
+  //     const children = [];
 
-      const editorElement = document.querySelector(".ql-editor");
+  //     const editorElement = document.querySelector(".ql-editor");
 
-      for (const op of delta.ops) {
-        if (op.insert && typeof op.insert === "string") {
-          children.push(
-            new Paragraph({
-              text: op.insert.trim(),
-            })
-          );
-        } else if (op.insert && op.insert.image) {
-          const src = op.insert.image;
+  //     for (const op of delta.ops) {
+  //       if (op.insert && typeof op.insert === "string") {
+  //         children.push(
+  //           new Paragraph({
+  //             text: op.insert.trim(),
+  //           })
+  //         );
+  //       } else if (op.insert && op.insert.image) {
+  //         const src = op.insert.image;
 
-          if (src.startsWith("data:image")) {
-            const base64Data = src.split(",")[1];
-            const buffer = Uint8Array.from(atob(base64Data), (c) =>
-              c.charCodeAt(0)
-            );
+  //         if (src.startsWith("data:image")) {
+  //           const base64Data = src.split(",")[1];
+  //           const buffer = Uint8Array.from(atob(base64Data), (c) =>
+  //             c.charCodeAt(0)
+  //           );
 
-            // Find the corresponding image in the editor DOM
-            const imageElement = editorElement?.querySelector<HTMLImageElement>(
-              `img[src="${src}"]`
-            );
+  //           // Find the corresponding image in the editor DOM
+  //           const imageElement = editorElement?.querySelector<HTMLImageElement>(
+  //             `img[src="${src}"]`
+  //           );
 
-            // Get image dimensions
-            const width = imageElement?.naturalWidth || 300; // Default to 300px
-            const height = imageElement?.naturalHeight || 200; // Default to 200px
+  //           // Get image dimensions
+  //           const width = imageElement?.naturalWidth || 300; // Default to 300px
+  //           const height = imageElement?.naturalHeight || 200; // Default to 200px
 
-            children.push(
-              new Paragraph({
-                children: [
-                  new ImageRun({
-                    data: buffer,
-                    transformation: { width, height },
-                    type: "png",
-                  }),
-                ],
-              })
-            );
-          }
-        }
-      }
+  //           children.push(
+  //             new Paragraph({
+  //               children: [
+  //                 new ImageRun({
+  //                   data: buffer,
+  //                   transformation: { width, height },
+  //                   type: "png",
+  //                 }),
+  //               ],
+  //             })
+  //           );
+  //         }
+  //       }
+  //     }
 
-      const doc = new Document({
-        sections: [
-          {
-            children,
-          },
-        ],
-      });
+  //     const doc = new Document({
+  //       sections: [
+  //         {
+  //           children,
+  //         },
+  //       ],
+  //     });
 
-      const buffer = await Packer.toBlob(doc);
-      saveAs(buffer, `Meeting_Minutes_${date}_${time}.docx`);
-    } catch (error) {
-      toast("Failed to export document. Please try again.");
-    }
-  }
+  //     const buffer = await Packer.toBlob(doc);
+  //     saveAs(buffer, `Meeting_Minutes_${date}_${time}.docx`);
+  //   } catch (error) {
+  //     toast("Failed to export document. Please try again.");
+  //   }
+  // }
 
   async function fetchComments() {
     if (!meetingId) return;
@@ -326,40 +345,64 @@ export default function MeetingMinute() {
     }
   }
 
+  // Send title updates in real-time
+  function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    socket.emit("send-title-change", newTitle); // Send to socket
+  }
+
   return (
     <>
-      <div className="flex w-full h-12 justify-end">
+      {/* <div className="flex w-full h-12 justify-end">
         <Button onClick={handleExport}>Export</Button>
+      </div> */}
+      <div className="flex w-3/4 h-full justify-center gap-2">
+        <img src="/booky_logo.png" alt="Booky Logo" className="w-26 h-14" />
+        <Input
+          className="w-1/2 h-14 border-none shadow-none focus-visible:border-gray-500"
+          style={{ fontSize: "17px" }}
+          type="text"
+          value={title}
+          onChange={handleTitleChange}
+          placeholder="Enter document title..."
+        />
       </div>
-      <div className="flex w-full h-full gap-2">
-        <div
-          className="meetingMinuteContainer mt-4 w-4/5 h-full"
-          ref={wrapperRef}
-        ></div>
-        <div className="p-4 mt-1 rounded-lg w-1/5 h-full overflow-y-auto">
-          <h3 className="font-bold mb-4">Comments</h3>
-          {comments.map((c, index) => (
-            <div key={c.id} className="mb-4 border-b pb-2">
-              <Label className="font-medium">Commenter:{userEmail}</Label>{" "}
-              <br />
-              <Label className="font-medium">
-                Selected Text: {c.text}
-              </Label>{" "}
-              <br />
-              <Label className="text-gray-600">Comment: {c.comment}</Label>
-              <div className="flex flex-col w-full h-full justify-between">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => handleResolveComment(c.id)}
-                >
-                  Resolve
-                </Button>
-              </div>
-            </div>
-          ))}
+
+      {/* Editor & Comments Container */}
+      <div className="flex w-full h-full px-3 gap-4">
+        {/* Meeting Minute Container (Centered Document) */}
+        <div className="flex-1 flex w-full h-full justify-center">
+          <div className="meetingMinuteContainer mt-2" ref={wrapperRef}></div>
         </div>
+
+        {/* Comments Section */}
+        {comments.length > 0 && (
+          <div className="p-4 mt-4 rounded-lg w-1/4 h-full overflow-y-auto bg-gray-100 shadow">
+            <h3 className="font-bold mb-4">Comments</h3>
+            {comments.map((c) => (
+              <div key={c.id} className="mb-4 border-b pb-2">
+                <Label className="font-medium">Commenter: {userEmail}</Label>{" "}
+                <br />
+                <Label className="font-medium">
+                  Selected Text: {c.text}
+                </Label>{" "}
+                <br />
+                <Label className="text-gray-600">Comment: {c.comment}</Label>
+                <div className="flex flex-col w-full h-full justify-between">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => handleResolveComment(c.id)}
+                  >
+                    Resolve
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
