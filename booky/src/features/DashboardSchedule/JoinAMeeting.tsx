@@ -18,7 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { IoPersonCircle } from "react-icons/io5";
-import { Trash } from "lucide-react";
+import { Trash, Users } from "lucide-react";
 import { TbEdit, TbCalendarCancel } from "react-icons/tb";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -378,14 +378,22 @@ export default function JoinAMeeting({
                     <div>
                       {(adminEmail === userEmail ||
                         teamCoAdmin.includes(userEmail)) && (
-                        <Button
-                          onClick={() =>
-                            navigate(`/dashboard/${teamId}/create-meeting`)
-                          }
-                        >
-                          <IoIosAdd />
-                          New Meeting
-                        </Button>
+                        <div className="flex w-full h-full gap-2">
+                          <Button
+                            onClick={() =>
+                              navigate(`/dashboard/${teamId}/create-meeting`)
+                            }
+                          >
+                            <IoIosAdd />
+                            New Meeting
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => navigate(`/attendance/${teamId}`)}
+                          >
+                            <Users />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>

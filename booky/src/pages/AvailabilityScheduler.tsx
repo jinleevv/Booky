@@ -28,7 +28,7 @@ import {
   today,
   ZonedDateTime,
 } from "@internationalized/date";
-import { DateRangePicker } from "@nextui-org/date-picker";
+import { DateRangePicker } from "@heroui/date-picker";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

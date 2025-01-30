@@ -1,8 +1,7 @@
 import express, { Request, Response, RequestHandler } from "express";
 import ShortUniqueId from "short-uuid";
-import Team, { ISchedule, IMeetingTeam, IMeeting } from "../../models/team";
+import Team, { ISchedule, IMeeting } from "../../models/team";
 import MeetingMinute from "../../models/meetingMinute";
-import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -39,143 +38,121 @@ export const createTeamHandler: RequestHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const {
-    teamName,
-    teamDescription,
-    adminEmail,
-    adminName,
-    coadmins,
-    currentTab,
-    recurringMeeting,
-    oneTimeMeeting,
-    meetingName,
-    meetingDescription,
-    meetingType,
-    duration,
-    meetingLink,
-  } = req.body;
+  const { teamName, teamDescription, adminEmail, adminName, coadmins } =
+    req.body;
 
   try {
-    if (
-      !teamName ||
-      !adminEmail ||
-      !adminName ||
-      !currentTab ||
-      !recurringMeeting ||
-      !oneTimeMeeting ||
-      !meetingName ||
-      !meetingType
-    ) {
+    if (!teamName || !adminEmail || !adminName) {
       res.status(400).json({
         message: "Missing required fields",
       });
       return;
     }
 
-    let meetingTeam = [];
-    const uid = ShortUniqueId();
+    // let meetingTeam = [];
+    // const uid = ShortUniqueId();
 
-    if (currentTab === "recurring") {
-      const generatedMeetings: IMeeting[] = [];
-      const todayUTC = new Date();
-      const today = convertToEST(todayUTC);
+    // if (currentTab === "recurring") {
+    //   const generatedMeetings: IMeeting[] = [];
+    //   const todayUTC = new Date();
+    //   const today = convertToEST(todayUTC);
 
-      for (let i = 0; i < 14; i++) {
-        const targetDate = new Date(today);
-        targetDate.setDate(today.getDate() + i);
+    //   for (let i = 0; i < 14; i++) {
+    //     const targetDate = new Date(today);
+    //     targetDate.setDate(today.getDate() + i);
 
-        const targetDay = targetDate.toLocaleString("en-US", {
-          weekday: "long",
-        });
+    //     const targetDay = targetDate.toLocaleString("en-US", {
+    //       weekday: "long",
+    //     });
 
-        const daySchedule = recurringMeeting.find(
-          (schedule: ISchedule) =>
-            schedule.day === targetDay && schedule.enabled
-        );
+    //     const daySchedule = recurringMeeting.find(
+    //       (schedule: ISchedule) =>
+    //         schedule.day === targetDay && schedule.enabled
+    //     );
 
-        if (daySchedule) {
-          for (const timeRange of daySchedule.times) {
-            const meetingId = `meeting-${uid.generate()}`;
+    //     if (daySchedule) {
+    //       for (const timeRange of daySchedule.times) {
+    //         const meetingId = `meeting-${uid.generate()}`;
 
-            const meetingMinute = await MeetingMinute.create({
-              _id: meetingId,
-              data: {},
-              createdAt: new Date(),
-            });
+    //         const meetingMinute = await MeetingMinute.create({
+    //           _id: meetingId,
+    //           data: {},
+    //           createdAt: new Date(),
+    //         });
 
-            generatedMeetings.push({
-              _id: meetingId,
-              date: targetDate.toISOString().split("T")[0],
-              time: timeRange,
-              attendees: [],
-            });
-          }
-        }
-      }
+    //         generatedMeetings.push({
+    //           _id: meetingId,
+    //           date: targetDate.toISOString().split("T")[0],
+    //           time: timeRange,
+    //           attendees: [],
+    //         });
+    //       }
+    //     }
+    //   }
 
-      meetingTeam = [
-        {
-          schedule: "recurring",
-          hostName: adminName,
-          hostEmail: adminEmail,
+    //   meetingTeam = [
+    //     {
+    //       schedule: "recurring",
+    //       hostName: adminName,
+    //       hostEmail: adminEmail,
 
-          meetingName: meetingName,
-          meetingDescription: meetingDescription,
-          meeting: generatedMeetings,
+    //       meetingName: meetingName,
+    //       meetingDescription: meetingDescription,
+    //       meeting: generatedMeetings,
 
-          weekSchedule: recurringMeeting,
+    //       weekSchedule: recurringMeeting,
 
-          type: meetingType,
-          duration: meetingType === "oneOnOne" ? duration : null,
-          zoomLink: meetingLink,
-          cancelledMeetings: [],
-        },
-      ];
-    } else {
-      const oneTimeMeetingStartInfo = oneTimeMeeting.start.split("T"); // YYYY-MM-DD
-      const oneTimeMeetingEndInfo = oneTimeMeeting.end.split("T");
-      const date = oneTimeMeetingStartInfo[0];
-      const meetingId = `meeting-${uid.generate()}`;
+    //       type: meetingType,
+    //       duration: meetingType === "oneOnOne" ? duration : null,
+    //       zoomLink: meetingLink,
+    //       cancelledMeetings: [],
+    //     },
+    //   ];
+    // } else {
+    //   const oneTimeMeetingStartInfo = oneTimeMeeting.start.split("T"); // YYYY-MM-DD
+    //   const oneTimeMeetingEndInfo = oneTimeMeeting.end.split("T");
+    //   const date = oneTimeMeetingStartInfo[0];
+    //   const meetingId = `meeting-${uid.generate()}`;
 
-      const meetingMinute = await MeetingMinute.create({
-        _id: meetingId,
-        data: {},
-        createdAt: new Date(),
-      });
+    //   const meetingMinute = await MeetingMinute.create({
+    //     _id: meetingId,
+    //     data: {},
+    //     createdAt: new Date(),
+    //   });
 
-      meetingTeam = [
-        {
-          schedule: "one-time",
-          hostName: adminName,
-          hostEmail: adminEmail,
+    //   meetingTeam = [
+    //     {
+    //       schedule: "one-time",
+    //       hostName: adminName,
+    //       hostEmail: adminEmail,
 
-          meetingName: meetingName,
-          meetingDescription: meetingDescription,
-          meeting: [
-            {
-              _id: meetingId,
-              date: date,
-              time: {
-                start: oneTimeMeetingStartInfo[1],
-                end: oneTimeMeetingEndInfo[1],
-              },
-              attendees: [],
-            },
-          ],
+    //       meetingName: meetingName,
+    //       meetingDescription: meetingDescription,
+    //       meeting: [
+    //         {
+    //           _id: meetingId,
+    //           date: date,
+    //           time: {
+    //             start: oneTimeMeetingStartInfo[1],
+    //             end: oneTimeMeetingEndInfo[1],
+    //           },
+    //           attendees: [],
+    //         },
+    //       ],
 
-          date: date,
-          time: {
-            start: oneTimeMeetingStartInfo[1],
-            end: oneTimeMeetingEndInfo[1],
-          },
+    //       date: date,
+    //       time: {
+    //         start: oneTimeMeetingStartInfo[1],
+    //         end: oneTimeMeetingEndInfo[1],
+    //       },
 
-          type: meetingType,
-          duration: meetingType === "oneOnOne" ? duration : null,
-          zoomLink: meetingLink,
-          cancelledMeetings: [],
-        },
-      ];
-    }
+    //       type: meetingType,
+    //       duration: meetingType === "oneOnOne" ? duration : null,
+    //       zoomLink: meetingLink,
+    //       cancelledMeetings: [],
+    //     },
+    //   ];
+    // }
 
     // Generate unique teamId
     const _id = `team-${teamName.replaceAll(
@@ -193,8 +170,6 @@ export const createTeamHandler: RequestHandler = async (
       adminName,
       coadmins,
       members: [],
-      meetingTeam: meetingTeam,
-      duration,
     });
     await newTeam.save();
 

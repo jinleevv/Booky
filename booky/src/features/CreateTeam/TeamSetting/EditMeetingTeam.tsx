@@ -6,7 +6,7 @@ import {
     SelectItem,
   } from "@/components/ui/select";
   import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-  import { DateRangePicker } from "@nextui-org/react";
+  import { DateRangePicker } from "@heroui/react";
   import { availableTime } from "@/features/time";
   import { Switch } from "@/components/ui/switch";
   import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

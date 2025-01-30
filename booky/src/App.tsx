@@ -1,5 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthContext } from "./features/AuthContext.tsx";
@@ -20,6 +20,7 @@ import Schedule from "./pages/Schedule";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import TeamSettings from "./pages/TeamSettings.tsx";
+import AttendancePage from "./pages/AttendancePage.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -41,11 +42,12 @@ function App() {
   }
 
   return (
-    <NextUIProvider>
+    <HeroUIProvider>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<SignIn />} />
         <Route path="/register" element={<SignUp />} />
+        <Route path="/attendance/:teamId" element={<AttendancePage />} />
         <Route path="/poll" element={<CreatePoll />} />
         <Route path="/poll/:id" element={<ParticipatePoll />} />
         {/* <Route path="/search/:searchCode" element={<Search />} /> */}
@@ -126,7 +128,7 @@ function App() {
         />
       </Routes>
       <Toaster />
-    </NextUIProvider>
+    </HeroUIProvider>
   );
 }
 
