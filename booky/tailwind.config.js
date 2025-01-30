@@ -1,5 +1,5 @@
 import animate from "tailwindcss-animate";
-import { nextui } from "@nextui-org/react";
+import { heroui } from "@heroui/react";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -8,7 +8,7 @@ export default {
     "./index.html",
     "./src/**/*.{html,js,ts,jsx,tsx}",
     "./components/**/*.{ts,tsx}",
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     container: {
@@ -93,5 +93,5 @@ export default {
     },
   },
   darkMode: "class",
-  plugins: [animate, nextui()],
+  plugins: [animate, heroui()],
 };

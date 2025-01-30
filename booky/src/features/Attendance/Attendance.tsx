@@ -1,5 +1,5 @@
+import { DatePicker } from "@heroui/date-picker";
 import { getLocalTimeZone, now } from "@internationalized/date";
-import { DatePicker } from "@nextui-org/date-picker";
 import { QRCodeSVG } from "qrcode.react";
 
 export default function Attendance() {

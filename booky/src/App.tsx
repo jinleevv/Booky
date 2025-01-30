@@ -1,5 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthContext } from "./features/AuthContext.tsx";
@@ -42,7 +42,7 @@ function App() {
   }
 
   return (
-    <NextUIProvider>
+    <HeroUIProvider>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<SignIn />} />
@@ -128,7 +128,7 @@ function App() {
         />
       </Routes>
       <Toaster />
-    </NextUIProvider>
+    </HeroUIProvider>
   );
 }
 
