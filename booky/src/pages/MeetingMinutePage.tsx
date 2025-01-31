@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function MeetingMinutePage() {
-  const { teamId, date, time, meetingId } = useParams();
+  const { teamId } = useParams();
   const { server, userEmail } = useHook();
   const navigate = useNavigate();
 
