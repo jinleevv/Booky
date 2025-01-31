@@ -27,7 +27,7 @@ interface IAppointment {
 }
 
 export function Appointment() {
-  const { team: teamId, code: appointmentToken } = useParams();
+  const { teamId, code: appointmentToken } = useParams();
   const { server } = useHook();
   const [appointment, setAppointment] = useState<IAppointment>({
     day: "",

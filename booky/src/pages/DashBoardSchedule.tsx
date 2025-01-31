@@ -8,7 +8,7 @@ import { useHook } from "@/hooks";
 import ViewDetails from "@/features/DashboardSchedule/ViewDetails/ViewDetails";
 
 export default function DashBoardSchedule() {
-  const { team: teamId } = useParams();
+  const { teamId } = useParams();
   const { server } = useHook();
 
   const [teamName, setTeamName] = useState<string>("Loading...");

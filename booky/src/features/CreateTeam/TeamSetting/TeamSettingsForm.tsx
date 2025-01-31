@@ -20,7 +20,7 @@ import UpdateDescription from "./UpdateDescription";
 
 export default function TeamSettings() {
   const navigate = useNavigate();
-  const { team: teamId } = useParams();
+  const { teamId } = useParams();
   const { server } = useHook(); // Use global state from the hook
   const [teamAdmin, setTeamAdmin] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string | null>(null);
