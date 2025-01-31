@@ -74,7 +74,6 @@ export default function ParticipatePoll() {
         }
 
         const data = await response.json();
-
         setPollName(data.pollName);
         setStartTime(data.time.start);
         setEndTime(data.time.end);
@@ -85,9 +84,11 @@ export default function ParticipatePoll() {
 
         // Convert participants data to Map
         const availabilityMap = new Map<string, Set<string>>();
-        for (const participant of participants) {
+        for (const participant of data.participants) {
           availabilityMap.set(participant.email, new Set(participant.schedule));
         }
+        setParticipants(data.participants);
+        setGroupAvailability(availabilityMap);
       } catch (error) {
         toast.error("Failed to load poll details");
       }

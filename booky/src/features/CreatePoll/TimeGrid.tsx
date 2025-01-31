@@ -90,7 +90,7 @@ export default function TimeGrid({
                 let cellColor = "bg-gray-100";
                 if (isUserGrid) {
                   cellColor = isSelected ? "bg-red-600" : "bg-gray-100";
-                } else if (groupAvailability && userEmail) {
+                } else if (groupAvailability) {
                   cellColor = isSelected ? "bg-red-600" : "bg-gray-100";
 
                   const { availableCount } = getCellAvailability(day, time);
