@@ -53,7 +53,7 @@ function App() {
         {/* <Route path="/search/:searchCode" element={<Search />} /> */}
         <Route path="/schedule/:code" element={<Schedule />} />
         {/* <Route path="/team/:teamId" element={<RegisterTeam />} />  */}
-        <Route path="/:team/:code" element={<Appointment />} />
+        <Route path="/:teamId/:code" element={<Appointment />} />
         <Route
           path="/dashboard"
           element={
@@ -79,7 +79,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/:team"
+          path="/dashboard/:teamId"
           element={
             <ProtectedRoute>
               <DashBoardSchedule />
@@ -111,7 +111,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/:team/settings"
+          path="/dashboard/:teamId/settings"
           element={
             <ProtectedRoute>
               <TeamSettings />
@@ -119,7 +119,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/document/:date/:time/:meetingId"
+          path="/dashboard/document/:teamId/:date/:time/:meetingId"
           element={
             <ProtectedRoute>
               <MeetingMinutePage />

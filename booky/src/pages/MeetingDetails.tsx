@@ -12,9 +12,10 @@ import { toast } from "sonner";
 export default function MeetingDetails() {
   const navigate = useNavigate();
   const { teamId, meetingTeamId, meetingTeamName, meetingId } = useParams();
-  const { server } = useHook();
+  const { server, userEmail } = useHook();
 
   const [meetingData, setMeetingData] = useState<any>(null);
+  const [accessStatus, setAccessStatus] = useState<boolean>(false);
   const [meetingMinuteData, setMeetingMinuteData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true); // Add a loading state
 
@@ -32,6 +33,7 @@ export default function MeetingDetails() {
         console.error("Failed to fetch meeting data:", error);
       }
     };
+    fetchTeamDetails();
     fetchMeetingData();
     localStorage.setItem("DisplayDashboardSchedule", "view");
   }, []);
@@ -49,6 +51,25 @@ export default function MeetingDetails() {
     };
     fetchMeetingMinuteData();
   }, [meetingData]);
+
+  async function fetchTeamDetails() {
+    try {
+      const response = await fetch(`${server}/api/teams/${teamId}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        const teamCoAdmin = data.coadmins;
+        const teamAdmin = data.adminEmail;
+        if (userEmail !== teamAdmin || !teamCoAdmin.includes(userEmail)) {
+          setAccessStatus(false);
+        } else {
+          setAccessStatus(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching team details:", error);
+    }
+  }
 
   // Convert Delta to HTML
   function renderQuillContent(delta) {
@@ -100,17 +121,21 @@ export default function MeetingDetails() {
                     Meeting Minute{" "}
                   </Label>{" "}
                   <div>
-                    <Button
-                      variant="ghost"
-                      className="w-full h-full"
-                      onClick={() =>
-                        navigate(
-                          `/dashboard/document/${meetingData.date}/${meetingData.time.start} - ${meetingData.time.end}/${meetingId}`
-                        )
-                      }
-                    >
-                      <ArrowRight size={15} />
-                    </Button>
+                    {accessStatus ? (
+                      <Button
+                        variant="ghost"
+                        className="w-full h-full"
+                        onClick={() =>
+                          navigate(
+                            `/dashboard/document/${teamId}/${meetingData.date}/${meetingData.time.start} - ${meetingData.time.end}/${meetingId}`
+                          )
+                        }
+                      >
+                        <ArrowRight size={15} />
+                      </Button>
+                    ) : (
+                      <></>
+                    )}
                   </div>
                 </div>
                 {meetingMinuteData ? (

@@ -90,7 +90,7 @@ CustomIcons["comment"] = `
 `;
 
 export default function MeetingMinute() {
-  const { date, time, meetingId } = useParams();
+  const { teamId, date, time, meetingId } = useParams();
   const { server } = useHook();
   const { userEmail } = useHook();
   const [socket, setSocket] = useState<any>(null);
