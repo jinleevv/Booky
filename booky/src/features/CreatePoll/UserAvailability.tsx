@@ -4,11 +4,13 @@ import { Label } from "@/components/ui/label";
 import { formatTime } from "@/features/time";
 import { useHook } from "@/hooks";
 import { PollData } from "@/pages/ParticipatePoll";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import ParticipatePollForm from "./ParticipatePollForm";
 import TimeGrid from "./TimeGrid";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 
 interface UserAvailabilityProps {
   poll: PollData;
@@ -53,6 +55,24 @@ export default function UserAvailability({
   const [availableUsers, setAvailableUsers] = useState<string[]>([]);
   const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<AvailableTime[]>([]);
+  const [transferData, setTransferData] = useState<any>([]);
+
+  useEffect(() => {
+    const formattedData = availableTimes
+      .slice() // Create a shallow copy to avoid mutating the original array
+      .sort((a, b) => {
+        // Sort by available participants count in descending order
+        const countA = a.participants.length;
+        const countB = b.participants.length;
+        return countB - countA; // Descending order (highest availability first)
+      })
+      .map((item) => ({
+        availableRate: `${item.participants.length} / ${groupAvailability.size}`, // Compute the availability rate
+        date: item.day, // Assuming `item.day` contains the date
+        time: `${formatTime(item.start)} - ${formatTime(item.end)}`, // Format time properly
+      }));
+    setTransferData(formattedData);
+  }, [urlPath, availableTimes]);
 
   async function updateAvailability(selectedSlots: Set<string>) {
     try {
@@ -446,43 +466,14 @@ export default function UserAvailability({
         <CardContent className="p-6">
           <div className="flex justify-between text-center px-4">
             <Label className="text-lg font-semibold">Available Times</Label>
-            <Button disabled={!loggedInUser} className="bg-gray-500" size="sm">
+            <Button disabled={!loggedInUser} size="sm">
               Manually Create Meeting
             </Button>
           </div>
-          <div className="pt-6 flex justify-between text-center text-sm text-gray-500">
-            <span className="w-1/4 text-center">Available Rate</span>
-            <span className="w-1/4 text-center">Date</span>
-            <span className="w-1/4 text-center">Time</span>
-            <span className="w-1/4 text-center">Create</span>
-          </div>
-          <hr className="my-2 border-gray-300" />
-          <div className="space-y-3">
-            {availableTimes.map((item, index) => (
-              <div key={index} className="border px-6 py-3 rounded-lg">
-                <div className="px-4 flex justify-between items-center">
-                  <p className="text-sm font-bold w-1/4 text-center">
-                    {`${item.participants.length} / ${
-                      groupAvailability.size + 1
-                    }`}
-                  </p>
-                  <p className="text-sm w-1/4 text-center">{item.day}</p>
-                  <p className="text-sm w-1/4 text-center">
-                    {formatTime(item.start)}-{formatTime(item.end)}
-                  </p>
-                  <div className="w-1/4 text-center">
-                    <Button
-                      disabled={!loggedInUser}
-                      className="bg-gray-500"
-                      size="sm"
-                    >
-                      Create Meeting
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <DataTable
+            columns={columns}
+            data={transferData.map((item) => ({ ...item, loggedInUser }))}
+          />
         </CardContent>
       </Card>
     </div>
