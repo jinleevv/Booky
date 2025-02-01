@@ -21,6 +21,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import TeamSettings from "./pages/TeamSettings.tsx";
 import AttendancePage from "./pages/AttendancePage.tsx";
+import TaskFlowPage from "./pages/TaskFlowPage.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -50,6 +51,7 @@ function App() {
         <Route path="/attendance/:teamId" element={<AttendancePage />} />
         <Route path="/poll" element={<CreatePoll />} />
         <Route path="/poll/:id" element={<ParticipatePoll />} />
+        <Route path="/taskFlow/:taskFlowId" element={<TaskFlowPage />} />
         {/* <Route path="/search/:searchCode" element={<Search />} /> */}
         <Route path="/schedule/:code" element={<Schedule />} />
         {/* <Route path="/team/:teamId" element={<RegisterTeam />} />  */}

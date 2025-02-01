@@ -17,12 +17,14 @@ import { LayoutPanelLeft, LogOut, Vote } from "lucide-react";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { Input } from "@/components/ui/input";
 import { IoSearchOutline } from "react-icons/io5";
+import ShortUniqueId from "short-uuid";
 import { useHook } from "@/hooks";
 
 export default function NavigationBar() {
   const navigate = useNavigate();
   const { loggedInUser, userName } = useHook();
   const [courseSearch, setCourseSearch] = useState<string>("");
+  const urlPath = `taskFlow-${ShortUniqueId().generate()}`;
 
   const handleSearch = () => {
     if (courseSearch === "") {
@@ -105,13 +107,13 @@ export default function NavigationBar() {
           </>
         ) : (
           <>
-            {/* <Button
-              variant="ghost"
-              className="bg-white hover:text-red-700 border-none"
-              onClick={() => navigate("/poll")}
+            <Button
+              variant="outline"
+              className="bg-white hover:text-red-700 rounded-xl"
+              onClick={() => navigate(`/taskFlow/${urlPath}`)}
             >
-              Poll
-            </Button> */}
+              Task Flow
+            </Button>
             <Button
               variant="outline"
               className="bg-white hover:text-red-700 rounded-xl"

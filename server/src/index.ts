@@ -31,6 +31,9 @@ import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
 import updateCommentsRoute from "./routes/document/updateCommentsRoute";
 import removeCommentsRoute from "./routes/document/removeCommentsRoute";
 import userRoute from "./routes/user/userRegistrationRoute";
+import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
+import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
+
 
 dotenv.config();
 
@@ -82,6 +85,8 @@ app.use("/api/document/", getMeetingMinuteRoute);
 app.use("/api/document/", mergeMeetingMinutes);
 app.use("/api/document/", updateCommentsRoute);
 app.use("/api/document/", removeCommentsRoute);
+app.use("/api/taskFlow", getTaskFlowHandler);
+app.use("/api/taskFlow", updateTaskFlowHandler);
 
 async function findOrCreateMeetingMinute(id: any) {
   if (id === null) return;
