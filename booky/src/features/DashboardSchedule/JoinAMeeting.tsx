@@ -136,7 +136,7 @@ export default function JoinAMeeting({
     const meetingDates = [];
     const meetings = selectedMeetingTeam.meeting;
     meetings.forEach((meeting) => {
-      if (meeting.cancelled != true) {
+      if (meeting.cancelled !== true) {
         meetingDates.push(meeting.date);
       }
     });
