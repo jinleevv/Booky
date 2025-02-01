@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 const router = express.Router();
 
 // Called when a professor cancels an office hour.
-// This adds the cancelled office hour to the team's cancelledMeetings list.
+// This cancels the specific meeting by setting the cancelled attribute to true.
 // Necessary to update this so we can disable that office hour on the calendar.
 export const cancelOfficeHourHandler: RequestHandler = async (
   req: Request,
@@ -27,10 +27,17 @@ export const cancelOfficeHourHandler: RequestHandler = async (
       return;
     }
 
-    const result = await Team.findOneAndUpdate(
-      { _id: teamId, "meetingTeam._id": meetingTeamId },
-      { $addToSet: { "meetingTeam.$.cancelledMeetings": { _id: meetingId } } },
-    );
+    const result = await Team.updateOne(
+      { _id: teamId, "meetingTeam._id": meetingTeamId},
+      {
+        $set: {
+          "meetingTeam.$[].meeting.$[m].cancelled": true,
+        },
+      },
+      {
+        arrayFilters: [{ "m._id": meetingId }],
+      }
+  );
 
     if (!result) {
       res.status(404).json({ message: "Team or meeting team not found" });

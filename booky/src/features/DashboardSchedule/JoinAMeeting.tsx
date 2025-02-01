@@ -136,7 +136,9 @@ export default function JoinAMeeting({
     const meetingDates = [];
     const meetings = selectedMeetingTeam.meeting;
     meetings.forEach((meeting) => {
-      meetingDates.push(meeting.date);
+      if (meeting.cancelled != true) {
+        meetingDates.push(meeting.date);
+      }
     });
 
     setEnabledDays(meetingDates);
@@ -164,12 +166,12 @@ export default function JoinAMeeting({
       });
     }
 
-    // Check for cancelled date
-    selectedMeetingTeam.cancelledMeetings.map((m) => {
-      if (m.date === date && m.time === start) {
-        return [];
-      }
-    });
+    // Check for cancelled date: unnecessary for now
+    // selectedMeetingTeam.cancelledMeetings.map((m) => {
+    //   if (m.date === date && m.time === start) {
+    //     return [];
+    //   }
+    // });
 
     while (startTime < endTime) {
       const timeSlot = startTime.toLocaleTimeString([], {
