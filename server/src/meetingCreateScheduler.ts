@@ -77,6 +77,8 @@ export const scheduleMeetings = async () => {
                     _id: meetingId,
                     date: targetDate.toISOString().split("T")[0],
                     time: timeRange,
+                    cancelled: false,
+                    merged: false,
                     attendees: [],
                   });
                 }
