@@ -15,7 +15,7 @@ import { columns } from "./columns";
 interface UserAvailabilityProps {
   poll: PollData;
   isLoggedIn: boolean;
-  handleLogin: (email: string) => void;
+  handleLogin: (email: string, passwordVerified: boolean) => void;
   timeSlots: string[];
   userEmail: string;
   selectedDays: string[];

@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import express, { Request, RequestHandler, Response } from "express";
 import Poll from "../../models/poll";
 
@@ -8,7 +9,7 @@ export const addParticipantToPoll: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const { urlPath } = req.params;
-  const { userEmail } = req.body;
+  const { userEmail, password } = req.body;
 
   try {
     if (!userEmail) {
@@ -26,17 +27,43 @@ export const addParticipantToPoll: RequestHandler = async (
       return;
     }
 
-    const participantExist = poll.participants!.some(
-      (participant) => participant.email === userEmail
+    const existingParticipant = poll.participants!.find(
+      (p) => p.email === userEmail
     );
 
-    let message = "";
-    if (participantExist) {
-      message = "Participant already in the poll";
+    let message: string;
+    if (existingParticipant) {
+      if (existingParticipant.password) {
+        // Require password validation
+        if (password === undefined) {
+          res.status(400).json({ message: "Password is required" });
+          return;
+        }
+        const isValid = await bcrypt.compare(
+          password,
+          existingParticipant.password
+        );
+        if (!isValid) {
+          res.status(401).json({ message: "Incorrect password" });
+          return;
+        }
+        message = "Participant authenticated successfully";
+      } else {
+        // No password set, allow login
+        message = "Participant already exists";
+      }
     } else {
-      poll.participants!.push({ email: userEmail, schedule: [] });
+      let hashedPassword: string | undefined;
+      if (password) {
+        hashedPassword = await bcrypt.hash(password, 10);
+      }
+      poll.participants!.push({
+        email: userEmail,
+        schedule: [],
+        password: hashedPassword,
+      });
       await poll.save();
-      message = "Participant added to the poll";
+      message = "Participant added successfully";
     }
 
     res.status(200).json({ message: message });
