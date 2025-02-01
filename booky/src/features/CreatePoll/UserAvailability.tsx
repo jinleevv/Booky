@@ -58,6 +58,10 @@ export default function UserAvailability({
   const [transferData, setTransferData] = useState<any>([]);
 
   useEffect(() => {
+    fetchAvailability();
+  }, [groupAvailability]);
+
+  useEffect(() => {
     const formattedData = availableTimes
       .slice() // Create a shallow copy to avoid mutating the original array
       .sort((a, b) => {
@@ -72,7 +76,16 @@ export default function UserAvailability({
         time: `${formatTime(item.start)} - ${formatTime(item.end)}`, // Format time properly
       }));
     setTransferData(formattedData);
-  }, [urlPath, availableTimes]);
+  }, [availableTimes]);
+
+  async function fetchAvailability() {
+    const updateAvailableTimes = await calculateAvailableTimes(
+      new Set(),
+      groupAvailability
+    );
+
+    setAvailableTimes(updateAvailableTimes);
+  }
 
   async function updateAvailability(selectedSlots: Set<string>) {
     try {
