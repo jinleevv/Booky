@@ -116,20 +116,21 @@ export default function ViewDetails({
     const sortedMeetings = [...checkedMeetings].sort((a, b) =>
       b.date.localeCompare(a.date)
     );
-    const meetingsToDelete = sortedMeetings.slice(1).map((m) => m.meetingId);
+    const meetingsToMerge = sortedMeetings.slice(1).map((m) => m.meetingId);
 
     try {
       const response = await fetch(
-        `${server}/api/teams/${teamId}/${selectedMeeting._id}/delete-meetings`,
+        `${server}/api/teams/${teamId}/${selectedMeeting._id}/merge-meetings`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ meetingsToDelete }),
+          body: JSON.stringify({ meetingsToMerge }),
         }
       );
       if (!response.ok) {
+        console.log(response)
         toast("Failed to merge the meetings");
         return;
       }
@@ -154,7 +155,7 @@ export default function ViewDetails({
       }
 
       const updatedMeetings = meetingList.filter(
-        (meeting) => !meetingsToDelete.includes(meeting._id)
+        (meeting) => !meetingsToMerge.includes(meeting._id)
       );
       setMeetingList(updatedMeetings);
       setCheckedMeetings([]);

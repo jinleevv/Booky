@@ -117,6 +117,8 @@ export const editMeetingHandler: RequestHandler = async (
               _id: meetingId,
               date: targetDate.toISOString().split("T")[0],
               time: timeRange,
+              cancelled: false,
+              merged: false,
               attendees: [],
             });
           }
@@ -149,6 +151,8 @@ export const editMeetingHandler: RequestHandler = async (
           start: oneTimeMeetingStartInfo[1],
           end: oneTimeMeetingEndInfo[1],
         },
+        cancelled: false,
+        merged: false,
         attendees: [],
       });
     }

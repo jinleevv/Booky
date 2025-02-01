@@ -3,9 +3,9 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-export const deleteMeetingsFromMeetingTeamHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const mergeMeetingsInMeetingTeamHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   const { teamId, meetingTeamId } = req.params;
-  const { meetingsToDelete } = req.body;
+  const { meetingsToMerge } = req.body;
 
   try {
     if (!teamId || !meetingTeamId) {
@@ -13,7 +13,7 @@ export const deleteMeetingsFromMeetingTeamHandler: RequestHandler = async (req: 
       return;
     }
 
-    if (!meetingsToDelete || !Array.isArray(meetingsToDelete) || meetingsToDelete.length === 0) {
+    if (!meetingsToMerge || !Array.isArray(meetingsToMerge) || meetingsToMerge.length === 0) {
       res.status(400).json({ message: "Invalid request. 'meetingsToDelete' must be a non-empty array." });
       return;
     }
@@ -21,12 +21,15 @@ export const deleteMeetingsFromMeetingTeamHandler: RequestHandler = async (req: 
     const result = await Team.updateOne(
         { _id: teamId, "meetingTeam._id": meetingTeamId },
         {
-            $pull: {
-            "meetingTeam.$.meeting": { _id: { $in: meetingsToDelete } }
-            }
+          $set: {
+            "meetingTeam.$.meeting.$[elem].merged": true
+          }
+        },
+        {
+          arrayFilters: [{ "elem._id": { $in: meetingsToMerge } }]
         }
     );
-
+    
     if (result.modifiedCount === 0) {
         res.status(404).json({ message: "No meetings deleted. Check if team and meetings exist." });
         return;
@@ -39,6 +42,6 @@ export const deleteMeetingsFromMeetingTeamHandler: RequestHandler = async (req: 
   }
 };
 
-router.patch("/:teamId/:meetingTeamId/delete-meetings", deleteMeetingsFromMeetingTeamHandler);
+router.patch("/:teamId/:meetingTeamId/merge-meetings", mergeMeetingsInMeetingTeamHandler);
 
 export default router;
