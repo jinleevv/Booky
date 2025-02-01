@@ -108,6 +108,8 @@ export const createMeetingTeamHandler: RequestHandler = async (
               _id: meetingId,
               date: targetDate.toISOString().split("T")[0],
               time: timeRange,
+              cancelled: false,
+              merged: false,
               attendees: [],
             });
           }
@@ -129,7 +131,6 @@ export const createMeetingTeamHandler: RequestHandler = async (
         type: meetingType,
         duration: meetingType === "oneOnOne" ? duration : null,
         zoomLink: meetingLink,
-        cancelledMeetings: [],
       };
     } else {
       const oneTimeMeetingStartInfo = oneTimeMeetingSchedule.start.split("T"); // YYYY-MM-DD
@@ -159,6 +160,8 @@ export const createMeetingTeamHandler: RequestHandler = async (
               start: oneTimeMeetingStartInfo[1],
               end: oneTimeMeetingEndInfo[1],
             },
+            cancelled: false,
+            merged: false,
             attendees: [],
           },
         ],
@@ -171,7 +174,6 @@ export const createMeetingTeamHandler: RequestHandler = async (
         type: meetingType,
         duration: meetingType === "oneOnOne" ? duration : null,
         zoomLink: meetingLink,
-        cancelledMeetings: [],
       };
     }
 

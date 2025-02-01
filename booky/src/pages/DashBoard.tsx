@@ -57,8 +57,9 @@ export default function DashBoard() {
         teams.forEach((team) => {
           team.meetingTeam.forEach((meetingTeam) => {
             cancelled.push(
-              ...meetingTeam.cancelledMeetings.map((meeting) => meeting._id)
+              ...meetingTeam.meeting.filter((meeting) => meeting.cancelled == true).map((meeting) => meeting._id)
             );
+            
             meetingTeam.meeting.forEach((meeting) => {
               if (meeting.date >= todayConverted) {
                 upcoming.push({

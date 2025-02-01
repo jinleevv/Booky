@@ -116,20 +116,21 @@ export default function ViewDetails({
     const sortedMeetings = [...checkedMeetings].sort((a, b) =>
       b.date.localeCompare(a.date)
     );
-    const meetingsToDelete = sortedMeetings.slice(1).map((m) => m.meetingId);
+    const meetingsToMerge = sortedMeetings.slice(1).map((m) => m.meetingId);
 
     try {
       const response = await fetch(
-        `${server}/api/teams/${teamId}/${selectedMeeting._id}/delete-meetings`,
+        `${server}/api/teams/${teamId}/${selectedMeeting._id}/merge-meetings`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ meetingsToDelete }),
+          body: JSON.stringify({ meetingsToMerge }),
         }
       );
       if (!response.ok) {
+        console.log(response)
         toast("Failed to merge the meetings");
         return;
       }
@@ -154,7 +155,7 @@ export default function ViewDetails({
       }
 
       const updatedMeetings = meetingList.filter(
-        (meeting) => !meetingsToDelete.includes(meeting._id)
+        (meeting) => !meetingsToMerge.includes(meeting._id)
       );
       setMeetingList(updatedMeetings);
       setCheckedMeetings([]);
@@ -232,7 +233,7 @@ export default function ViewDetails({
                       className="w-full border rounded-3xl shadow-md cursor-pointer"
                       onClick={() => {
                         setSelectedMeeting(meeting);
-                        setMeetingList(meeting.meeting);
+                        setMeetingList(meeting.meeting.filter((m) => m.merged === false));
                       }}
                     >
                       <CardHeader className="pt-4">
@@ -354,50 +355,49 @@ export default function ViewDetails({
               <Label className="text-lg font-bold">
                 {selectedMeeting.meetingName}
               </Label>
-
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <div className="flex justify-end mb-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-xl"
-                      disabled={checkedMeetings.length < 2}
-                    >
-                      <Merge />
-                      Merge Selected
-                    </Button>
-                  </div>
-                </DialogTrigger>
-                <DialogContent onClick={(e) => e.stopPropagation()}>
-                  <DialogHeader>
-                    <DialogTitle>Merge Meeting Minutes</DialogTitle>
-                    <DialogDescription>
-                      Are you sure you want to merge the selected meeting
-                      minutes? This action cannot be undone.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={(e) => {
-                        setIsDialogOpen(false);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      className="bg-black text-white hover:bg-gray-800"
-                      onClick={(e) => {
-                        handleMergeMeetings();
-                        setIsDialogOpen(false);
-                      }}
-                    >
-                      Merge
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <div className="flex justify-end mb-2">
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl"
+                        disabled={checkedMeetings.length < 2}
+                      >
+                        <Merge />
+                        Merge Selected
+                      </Button>
+                  </DialogTrigger>
+                  <DialogContent onClick={(e) => e.stopPropagation()}>
+                    <DialogHeader>
+                      <DialogTitle>Merge Meeting Minutes</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to merge the selected meeting
+                        minutes? This action cannot be undone.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          setIsDialogOpen(false);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        className="bg-black text-white hover:bg-gray-800"
+                        onClick={(e) => {
+                          handleMergeMeetings();
+                          setIsDialogOpen(false);
+                        }}
+                      >
+                        Merge
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
               <DataTable
                 columns={columns}
                 data={meetingList.map((meeting) => ({
