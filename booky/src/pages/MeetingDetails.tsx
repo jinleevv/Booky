@@ -60,7 +60,8 @@ export default function MeetingDetails() {
       if (response.ok) {
         const teamCoAdmin = data.coadmins;
         const teamAdmin = data.adminEmail;
-        if (userEmail !== teamAdmin || !teamCoAdmin.includes(userEmail)) {
+        const allowedUsers = [...teamCoAdmin, teamAdmin];
+        if (!allowedUsers.includes(userEmail)) {
           setAccessStatus(false);
         } else {
           setAccessStatus(true);
