@@ -9,8 +9,8 @@ import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import ParticipatePollForm from "./ParticipatePollForm";
 import TimeGrid from "./TimeGrid";
-import { DataTable } from "./data-table";
 import { columns } from "./columns";
+import { DataTable } from "./data-table";
 
 interface UserAvailabilityProps {
   poll: PollData;
@@ -57,6 +57,10 @@ export default function UserAvailability({
   const [availableTimes, setAvailableTimes] = useState<AvailableTime[]>([]);
   const [transferData, setTransferData] = useState<any>([]);
 
+  function countCurrentUser() {
+    return userEmail && !groupAvailability.has(userEmail) ? 1 : 0;
+  }
+
   useEffect(() => {
     fetchAvailability();
   }, [groupAvailability]);
@@ -71,7 +75,9 @@ export default function UserAvailability({
         return countB - countA; // Descending order (highest availability first)
       })
       .map((item) => ({
-        availableRate: `${item.participants.length} / ${groupAvailability.size}`, // Compute the availability rate
+        availableRate: `${item.participants.length} / ${
+          groupAvailability.size + countCurrentUser()
+        }`, // Compute the availability rate
         date: item.day, // Assuming `item.day` contains the date
         time: `${formatTime(item.start)} - ${formatTime(item.end)}`, // Format time properly
       }));
@@ -313,10 +319,7 @@ export default function UserAvailability({
     const cellId = getCellId(day, time);
     let availableCount = 0;
 
-    const userEmailInGroup =
-      userEmail && !groupAvailability.has(userEmail) ? 1 : 0;
-
-    const totalParticipants = groupAvailability.size + userEmailInGroup; // Include current user
+    const totalParticipants = groupAvailability.size + countCurrentUser(); // Include current user
 
     // Check group availability
     groupAvailability.forEach((availability, email) => {
@@ -356,9 +359,6 @@ export default function UserAvailability({
     setAvailableUsers(availableUsers);
     return availableUsers;
   }
-
-  const userEmailInGroup =
-    userEmail && !groupAvailability.has(userEmail) ? 1 : 0;
 
   return (
     <div className="relative z-10">
@@ -447,8 +447,8 @@ export default function UserAvailability({
                   Group's Availability
                 </Label>
                 <Label className="text-sm font-semibold mb-4">
-                  {groupAvailability.size + userEmailInGroup} Participant
-                  {groupAvailability.size + userEmailInGroup !== 1 && "s"}
+                  {groupAvailability.size + countCurrentUser()} Participant
+                  {groupAvailability.size + countCurrentUser() !== 1 && "s"}
                 </Label>
               </div>
 
