@@ -20,7 +20,8 @@ export default function MeetingMinutePage() {
       if (response.ok) {
         const teamCoAdmin = data.coadmins;
         const teamAdmin = data.adminEmail;
-        if (userEmail !== teamAdmin || !teamCoAdmin.includes(userEmail)) {
+        const allowedUsers = [...teamCoAdmin, teamAdmin];
+        if (!allowedUsers.includes(userEmail)) {
           navigate(`/dashboard/${teamId}`);
         }
       } else {

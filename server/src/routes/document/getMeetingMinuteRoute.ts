@@ -1,5 +1,4 @@
 import express, { Request, Response, RequestHandler } from "express";
-import Team from "../../models/team";
 import MeetingMinute from "../../models/meetingMinute";
 
 const router = express.Router();
