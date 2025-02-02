@@ -45,6 +45,8 @@ export const createMeetingTeamHandler: RequestHandler = async (
     meetingName,
     meetingDescription,
     recurringMeetingSchedule,
+    startDate,
+    meetingFrequency,
     oneTimeMeetingSchedule,
     meetingType,
     duration,
@@ -81,10 +83,14 @@ export const createMeetingTeamHandler: RequestHandler = async (
       const todayUTC = new Date();
       const today = convertToEST(todayUTC);
 
-      for (let i = 0; i < 14; i++) {
-        const targetDate = new Date(today);
-        targetDate.setDate(today.getDate() + i);
+      const start = new Date(`${startDate}T12:00:00`);
 
+      const oneMonthLater = new Date(today);
+      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+      const targetDate = new Date(start);
+
+      while (targetDate < oneMonthLater) {
         const targetDay = targetDate.toLocaleString("en-US", {
           weekday: "long",
         });
@@ -114,6 +120,22 @@ export const createMeetingTeamHandler: RequestHandler = async (
             });
           }
         }
+
+        if (targetDay === "Saturday") {
+          switch (meetingFrequency) {
+            case "Weekly":
+              targetDate.setDate(targetDate.getDate() + 1);
+              break;
+            case "Biweekly":
+              targetDate.setDate(targetDate.getDate() + 8);
+              break;
+            case "Monthly":
+              targetDate.setMonth(targetDate.getMonth() + 1);
+              break;
+          }
+        } else {
+          targetDate.setDate(targetDate.getDate() + 1);
+        }
       }
 
       newMeeting = {
@@ -127,6 +149,8 @@ export const createMeetingTeamHandler: RequestHandler = async (
         meeting: generatedMeetings,
 
         weekSchedule: recurringMeetingSchedule,
+        startDate: startDate,
+        frequency: meetingFrequency,
 
         type: meetingType,
         duration: meetingType === "oneOnOne" ? duration : null,

@@ -39,6 +39,8 @@ const formSchema = z.object({
       ),
     })
   ),
+  startDate: z.string(),
+  meetingFrequency: z.string(),
   oneTimeMeetingSchedule: z.object({
     start: z.any(),
     end: z.any(),
@@ -74,7 +76,9 @@ export default function CreateMeetingPage() {
         day,
         enabled: false,
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
-      })),      
+      })),
+      startDate: `${new Date().toISOString().split("T")[0]}`,
+      meetingFrequency: "Weekly",
       oneTimeMeetingSchedule: {
         start: formatDateTime(
           parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`)
@@ -104,6 +108,8 @@ export default function CreateMeetingPage() {
         meetingName: values.meetingName,
         meetingDescription: values.meetingDescription,
         recurringMeetingSchedule: values.recurringMeetingSchedule,
+        startDate: values.startDate,
+        meetingFrequency: values.meetingFrequency,
         oneTimeMeetingSchedule: values.oneTimeMeetingSchedule,
         meetingType: values.meetingType,
         duration: values.duration,
