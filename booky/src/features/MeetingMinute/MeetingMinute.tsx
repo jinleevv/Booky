@@ -1,9 +1,9 @@
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
+import ImageResize from "quill-image-resize-module-react";
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
-import { Document, ImageRun, Packer, Paragraph } from "docx";
 import { saveAs } from "file-saver";
 import "./MeetingMinute.css";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import * as quillToWord from "quill-to-word";
+import { pdfExporter } from "quill-to-pdf";
 
 const SAVE_INTERVAL_MS = 2000;
 
@@ -67,7 +69,7 @@ class CommentBlot extends InlineBlot {
 
 // Register the custom CommentBlot with Quill
 Quill.register(CommentBlot, true);
-
+Quill.register("modules/imageResize", ImageResize);
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
   [{ font: [] }],
@@ -99,6 +101,7 @@ export default function MeetingMinute() {
     { id: number; text: string; comment: string; range: any }[]
   >([]);
   const [title, setTitle] = useState<string>("");
+  const [exportType, setExportType] = useState<string | null>(null);
 
   useEffect(() => {
     if (!socket) return;
@@ -187,6 +190,10 @@ export default function MeetingMinute() {
             comment: () => handleAddComment(q),
           },
         },
+        imageResize: {
+          parchment: Quill.import("parchment"),
+          modules: ["Resize", "DisplaySize"],
+        },
       },
     });
     q.enable(false);
@@ -194,68 +201,45 @@ export default function MeetingMinute() {
     setQuill(q);
   }, []);
 
-  async function handleExport() {
+  async function handleExportToWords() {
     if (!quill) return;
-
     try {
       const delta = quill.getContents();
-      const children = [];
+      const configuration: quillToWord.Config = {
+        exportAs: "blob", // could also be 'buffer', 'base64', or 'doc'
+      };
 
-      const editorElement = document.querySelector(".ql-editor");
-
-      for (const op of delta.ops) {
-        if (op.insert && typeof op.insert === "string") {
-          children.push(
-            new Paragraph({
-              text: op.insert.trim(),
-            })
-          );
-        } else if (op.insert && op.insert.image) {
-          const src = op.insert.image;
-
-          if (src.startsWith("data:image")) {
-            const base64Data = src.split(",")[1];
-            const buffer = Uint8Array.from(atob(base64Data), (c) =>
-              c.charCodeAt(0)
-            );
-
-            // Find the corresponding image in the editor DOM
-            const imageElement = editorElement?.querySelector<HTMLImageElement>(
-              `img[src="${src}"]`
-            );
-
-            // Get image dimensions
-            const width = imageElement?.naturalWidth || 300; // Default to 300px
-            const height = imageElement?.naturalHeight || 200; // Default to 200px
-
-            children.push(
-              new Paragraph({
-                children: [
-                  new ImageRun({
-                    data: buffer,
-                    transformation: { width, height },
-                    type: "png",
-                  }),
-                ],
-              })
-            );
-          }
-        }
-      }
-
-      const doc = new Document({
-        sections: [
-          {
-            children,
-          },
-        ],
-      });
-
-      const buffer = await Packer.toBlob(doc);
-      saveAs(buffer, `Meeting_Minutes_${date}_${time}.docx`);
+      const docx_blob = await quillToWord.generateWord(delta, configuration);
+      saveAs(docx_blob, `${title}.docx`);
     } catch (error) {
-      toast("Failed to export document. Please try again.");
+      toast.error("Failed to export in .docx");
     }
+  }
+
+  async function handleExportToPDF() {
+    if (!quill) return;
+    try {
+      const delta = quill.getContents();
+      const pdfAsBlob = await pdfExporter.generatePdf(delta); // converts to PDF
+
+      saveAs(pdfAsBlob, `${title}.pdf`);
+    } catch (error) {
+      toast.error("Failed to export in .pdf");
+    }
+  }
+
+  function handleExport() {
+    if (!exportType) {
+      toast.error("Please select a document type before exporting.");
+      return;
+    }
+
+    if (exportType === "pdf") {
+      handleExportToPDF();
+    } else if (exportType === "docx") {
+      handleExportToWords();
+    }
+    setExportType(null);
   }
 
   async function fetchComments() {
@@ -395,7 +379,7 @@ export default function MeetingMinute() {
                     Please select the documentation type to export
                   </DialogDescription>
                 </DialogHeader>
-                <Select>
+                <Select onValueChange={(value) => setExportType(value)}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
