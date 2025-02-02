@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { IoPersonCircle } from "react-icons/io5";
 import { Trash, Users } from "lucide-react";
-import { TbEdit, TbCalendarCancel } from "react-icons/tb";
+import { TbEdit } from "react-icons/tb";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";

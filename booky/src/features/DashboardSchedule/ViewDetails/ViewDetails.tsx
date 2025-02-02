@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { IoPersonCircle } from "react-icons/io5";
-import { TbCalendarCancel, TbEdit } from "react-icons/tb";
+import { TbEdit } from "react-icons/tb";
 import { toast } from "sonner";
 import { Trash } from "lucide-react";
 import { useHook } from "@/hooks";
@@ -264,9 +264,9 @@ export default function ViewDetails({
                             {(adminEmail === userEmail ||
                               teamCoAdmin.includes(userEmail)) && (
                               <>
-                                <Button variant="ghost" className="w-5 h-5">
+                                {/* <Button variant="ghost" className="w-5 h-5">
                                   <TbCalendarCancel size={10} />
-                                </Button>
+                                </Button> */}
                                 <Dialog
                                   open={isDialogOpen}
                                   onOpenChange={setIsDialogOpen}
