@@ -130,7 +130,6 @@ export default function ViewDetails({
         }
       );
       if (!response.ok) {
-        console.log(response)
         toast("Failed to merge the meetings");
         return;
       }
