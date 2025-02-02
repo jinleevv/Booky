@@ -42,11 +42,15 @@ const app = express();
 
 const DB_PORT = process.env.DB_PORT;
 const SOCKET_PORT = Number(process.env.SOCKET_PORT);
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN;
+const FRONTEND_ORIGINS = [
+  "http://localhost:4000",
+  "https://booky.im",
+  "https://www.booky.im",
+];
 
 const io = new Server(SOCKET_PORT, {
   cors: {
-    origin: FRONTEND_ORIGIN,
+    origin: FRONTEND_ORIGINS,
     methods: ["GET", "POST"],
   },
 });
@@ -54,7 +58,13 @@ const io = new Server(SOCKET_PORT, {
 // Middleware
 app.use(
   cors({
-    origin: FRONTEND_ORIGIN,
+    origin: (origin, callback) => {
+      if (!origin || FRONTEND_ORIGINS.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS policy does not allow this origin"));
+      }
+    },
     methods: ["GET", "POST", "PATCH"],
     allowedHeaders: [
       "Origin",
