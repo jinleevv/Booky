@@ -7,12 +7,20 @@ interface QuillDelta {
   ops: Array<{ insert?: string | any; attributes?: any }>;
 }
 
-export const mergeMeetingMinutesHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const mergeMeetingMinutesHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { teamId, meetingTeamId } = req.params;
-  const { meetingMinutesToMerge } = req.body; 
+  const { meetingMinutesToMerge } = req.body;
 
   try {
-    if (!teamId || !meetingTeamId || !meetingMinutesToMerge || meetingMinutesToMerge.length < 2) {
+    if (
+      !teamId ||
+      !meetingTeamId ||
+      !meetingMinutesToMerge ||
+      meetingMinutesToMerge.length < 2
+    ) {
       res.status(400).json({ message: "Invalid or missing parameters" });
       return;
     }
@@ -21,7 +29,9 @@ export const mergeMeetingMinutesHandler: RequestHandler = async (req: Request, r
     const minutesToMerge = meetingMinutesToMerge.slice(1); // Merge and remove these
 
     // Fetch all meeting minutes that need to be merged
-    const meetingMinutes = await MeetingMinute.find({ _id: { $in: minutesToMerge } });
+    const meetingMinutes = await MeetingMinute.find({
+      _id: { $in: minutesToMerge },
+    });
 
     if (!meetingMinutes || meetingMinutes.length === 0) {
       res.status(404).json({ message: "No meeting minutes found to merge" });
@@ -43,14 +53,18 @@ export const mergeMeetingMinutesHandler: RequestHandler = async (req: Request, r
     }
 
     // Ensure `ops` exists in the most recent meeting minute
-    if (!mostRecentMinute.data || !Array.isArray((mostRecentMinute.data as QuillDelta).ops)) {
+    if (
+      !mostRecentMinute.data ||
+      !Array.isArray((mostRecentMinute.data as QuillDelta).ops)
+    ) {
       mostRecentMinute.data = { ops: [] }; // Initialize if empty
     }
 
     // Prepend the concatenated data
-    (mostRecentMinute.data as QuillDelta).ops = [...combinedDataOps, ...(mostRecentMinute.data as QuillDelta).ops];
-
-    console.log("Updated Data:", (mostRecentMinute.data as QuillDelta).ops);
+    (mostRecentMinute.data as QuillDelta).ops = [
+      ...combinedDataOps,
+      ...(mostRecentMinute.data as QuillDelta).ops,
+    ];
 
     // ✅ Tell Mongoose that `data` has changed
     mostRecentMinute.markModified("data");
@@ -75,6 +89,9 @@ export const mergeMeetingMinutesHandler: RequestHandler = async (req: Request, r
 };
 
 // Define the route
-router.patch("/:teamId/:meetingTeamId/merge-meeting-minutes", mergeMeetingMinutesHandler);
+router.patch(
+  "/:teamId/:meetingTeamId/merge-meeting-minutes",
+  mergeMeetingMinutesHandler
+);
 
 export default router;

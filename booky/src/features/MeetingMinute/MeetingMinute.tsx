@@ -1,9 +1,9 @@
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
+import ImageResize from "quill-image-resize-module-react";
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
-import { Document, ImageRun, Packer, Paragraph } from "docx";
 import { saveAs } from "file-saver";
 import "./MeetingMinute.css";
 import { Button } from "@/components/ui/button";
@@ -27,8 +27,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import * as quillToWord from "quill-to-word";
+import { pdfExporter } from "quill-to-pdf";
 
-const SAVE_INTERVAL_MS = 2000;
+const SAVE_INTERVAL_MS = 1000;
 
 // Extend the Inline class from Parchment
 class CommentBlot extends InlineBlot {
@@ -67,7 +69,7 @@ class CommentBlot extends InlineBlot {
 
 // Register the custom CommentBlot with Quill
 Quill.register(CommentBlot, true);
-
+Quill.register("modules/imageResize", ImageResize);
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
   [{ font: [] }],
@@ -99,15 +101,8 @@ export default function MeetingMinute() {
     { id: number; text: string; comment: string; range: any }[]
   >([]);
   const [title, setTitle] = useState<string>("");
-
-  useEffect(() => {
-    if (!socket) return;
-
-    // Listen for real-time title updates
-    socket.on("receive-title-change", (newTitle) => {
-      setTitle(newTitle);
-    });
-  }, [socket]);
+  const [isLoading, setIsLoading] = useState(true); // Track loading state
+  const [exportType, setExportType] = useState<string | null>(null);
 
   useEffect(() => {
     const s = io("http://localhost:5002");
@@ -120,11 +115,27 @@ export default function MeetingMinute() {
 
   useEffect(() => {
     if (socket === null || quill === null) return;
+
     socket.once("load-document", (document) => {
+      // Ensure document data is valid before setting contents
+      if (!document || !document.data || !document.data.ops) {
+        quill.setText("Failed to load document.");
+        setIsLoading(false);
+        return;
+      }
       setTitle(document.title || `Meeting Minute, ${date}, ${time}`); // Set title
 
-      quill.setContents(document.data);
-      quill.enable();
+      // Delay setting content to ensure Quill is ready
+
+      setTimeout(() => {
+        if (quill) {
+          quill.setContents(document.data);
+          quill.enable();
+          setIsLoading(false);
+        }
+      }, 500);
+
+      fetchComments();
     });
 
     // Listen for real-time title updates
@@ -133,7 +144,6 @@ export default function MeetingMinute() {
     });
 
     socket.emit("get-document", meetingId);
-    fetchComments();
   }, [socket, quill, meetingId]);
 
   useEffect(() => {
@@ -145,6 +155,15 @@ export default function MeetingMinute() {
       clearInterval(interval);
     };
   }, [socket, quill]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for real-time title updates
+    socket.on("receive-title-change", (newTitle) => {
+      setTitle(newTitle);
+    });
+  }, [socket]);
 
   useEffect(() => {
     if (socket === null || quill === null) {
@@ -187,75 +206,56 @@ export default function MeetingMinute() {
             comment: () => handleAddComment(q),
           },
         },
+        imageResize: {
+          parchment: Quill.import("parchment"),
+          modules: ["Resize", "DisplaySize"],
+        },
       },
     });
-    q.enable(false);
-    q.setText("Loading");
+    q.disable();
+    q.setText("Loading...");
     setQuill(q);
   }, []);
 
-  async function handleExport() {
+  async function handleExportToWords() {
     if (!quill) return;
-
     try {
       const delta = quill.getContents();
-      const children = [];
+      const configuration: quillToWord.Config = {
+        exportAs: "blob", // could also be 'buffer', 'base64', or 'doc'
+      };
 
-      const editorElement = document.querySelector(".ql-editor");
-
-      for (const op of delta.ops) {
-        if (op.insert && typeof op.insert === "string") {
-          children.push(
-            new Paragraph({
-              text: op.insert.trim(),
-            })
-          );
-        } else if (op.insert && op.insert.image) {
-          const src = op.insert.image;
-
-          if (src.startsWith("data:image")) {
-            const base64Data = src.split(",")[1];
-            const buffer = Uint8Array.from(atob(base64Data), (c) =>
-              c.charCodeAt(0)
-            );
-
-            // Find the corresponding image in the editor DOM
-            const imageElement = editorElement?.querySelector<HTMLImageElement>(
-              `img[src="${src}"]`
-            );
-
-            // Get image dimensions
-            const width = imageElement?.naturalWidth || 300; // Default to 300px
-            const height = imageElement?.naturalHeight || 200; // Default to 200px
-
-            children.push(
-              new Paragraph({
-                children: [
-                  new ImageRun({
-                    data: buffer,
-                    transformation: { width, height },
-                    type: "png",
-                  }),
-                ],
-              })
-            );
-          }
-        }
-      }
-
-      const doc = new Document({
-        sections: [
-          {
-            children,
-          },
-        ],
-      });
-
-      const buffer = await Packer.toBlob(doc);
-      saveAs(buffer, `Meeting_Minutes_${date}_${time}.docx`);
+      const docx_blob = await quillToWord.generateWord(delta, configuration);
+      saveAs(docx_blob, `${title}.docx`);
     } catch (error) {
-      toast("Failed to export document. Please try again.");
+      toast.error("Failed to export in .docx");
     }
+  }
+
+  async function handleExportToPDF() {
+    if (!quill) return;
+    try {
+      const delta = quill.getContents();
+      const pdfAsBlob = await pdfExporter.generatePdf(delta); // converts to PDF
+
+      saveAs(pdfAsBlob, `${title}.pdf`);
+    } catch (error) {
+      toast.error("Failed to export in .pdf");
+    }
+  }
+
+  function handleExport() {
+    if (!exportType) {
+      toast.error("Please select a document type before exporting.");
+      return;
+    }
+
+    if (exportType === "pdf") {
+      handleExportToPDF();
+    } else if (exportType === "docx") {
+      handleExportToWords();
+    }
+    setExportType(null);
   }
 
   async function fetchComments() {
@@ -360,7 +360,6 @@ export default function MeetingMinute() {
     }
   }
 
-  // Send title updates in real-time
   function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newTitle = e.target.value;
     setTitle(newTitle);
@@ -369,7 +368,12 @@ export default function MeetingMinute() {
 
   return (
     <>
-      {/*  */}
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-red-600"></div>
+        </div>
+      )}
+
       <div className="flex w-full h-full gap-2">
         <div className="flex w-full h-full justify-center">
           <img src="/booky_logo.png" alt="Booky Logo" className="w-26 h-14" />
@@ -395,7 +399,7 @@ export default function MeetingMinute() {
                     Please select the documentation type to export
                   </DialogDescription>
                 </DialogHeader>
-                <Select>
+                <Select onValueChange={(value) => setExportType(value)}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
