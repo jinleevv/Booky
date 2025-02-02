@@ -2,6 +2,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 import { Server } from "socket.io";
 import { startScheduler } from "./meetingCreateScheduler";
 import MeetingMinute from "./models/meetingMinute";
@@ -34,14 +36,17 @@ import userRoute from "./routes/user/userRegistrationRoute";
 import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
 import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
 
-
 dotenv.config();
 
 const app = express();
-const PORT = 5001;
-const io = new Server(5002, {
+
+const DB_PORT = process.env.DB_PORT;
+const SOCKET_PORT = Number(process.env.SOCKET_PORT);
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+
+const io = new Server(SOCKET_PORT, {
   cors: {
-    origin: "*",
+    origin: FRONTEND_ORIGIN,
     methods: ["GET", "POST"],
   },
 });
@@ -49,7 +54,7 @@ const io = new Server(5002, {
 // Middleware
 app.use(
   cors({
-    origin: "*",
+    origin: FRONTEND_ORIGIN,
     methods: ["GET", "POST", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // If cookies or credentials are involved
@@ -88,6 +93,12 @@ app.use("/api/document/", removeCommentsRoute);
 app.use("/api/taskFlow", getTaskFlowHandler);
 app.use("/api/taskFlow", updateTaskFlowHandler);
 
+app.use(express.static(path.join(__dirname, "../booky/dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../booky/dist/index.html"));
+});
+
 async function findOrCreateMeetingMinute(id: any) {
   if (id === null) return;
 
@@ -111,8 +122,8 @@ app.get("/api/health", (req, res) => {
 
 // startScheduler();
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(DB_PORT, () => {
+  console.log(`Server running on port ${DB_PORT}`);
 });
 
 io.on("connection", (socket) => {
