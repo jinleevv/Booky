@@ -42,7 +42,7 @@ const app = express();
 
 const DB_PORT = process.env.DB_PORT;
 const SOCKET_PORT = Number(process.env.SOCKET_PORT);
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN;
 
 const io = new Server(SOCKET_PORT, {
   cors: {
