@@ -56,7 +56,13 @@ app.use(
   cors({
     origin: FRONTEND_ORIGIN,
     methods: ["GET", "POST", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Origin",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+      "X-Request-With",
+    ],
     credentials: true, // If cookies or credentials are involved
   })
 );
