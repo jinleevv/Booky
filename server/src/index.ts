@@ -56,40 +56,13 @@ const io = new Server(SOCKET_PORT, {
 });
 
 // Middleware
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || FRONTEND_ORIGINS.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST", "PATCH"],
-    allowedHeaders: [
-      "Origin",
-      "Content-Type",
-      "Accept",
-      "Authorization",
-      "X-Request-With",
-    ],
-    credentials: true, // Enable cookies/auth headers
-  })
-);
+app.use(cors());
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin || "";
-
-  res.header("Access-Control-Allow-Origin", req.headers.origin);
-  res.header("Access-Control-Allow-Credentials", "true");
-
-  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-
-  next();
+app.use(function(req, res, next) {
+   res.header("Access-Control-Allow-Origin", "*");
+   res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST');
+   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+   next();
 });
 
 app.use(express.json());
