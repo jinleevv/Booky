@@ -31,14 +31,14 @@ export interface IMeetingTeam {
   type: "oneOnOne" | "group";
   duration: string;
   zoomLink?: string;
-
-  cancelledMeetings: ICancelledMeetings[];
 }
 
 export interface IMeeting {
   _id: string;
   date: string;
   time: ITimeRange;
+  cancelled: boolean;
+  merged: boolean;
   attendees: IAttendee[];
 }
 
@@ -70,13 +70,6 @@ interface IAttendee {
   tokenExpiry: Date;
 }
 
-// A professor can cancel an office hour time slot.
-// An office hour time slot can be uniquely identified within a team by the day and meeting.
-// Necessary for modifying availability in the calendar.
-interface ICancelledMeetings {
-  _id: string;
-}
-
 const TimeRangeSchema: Schema = new Schema<ITimeRange>({
   start: { type: String, required: true },
   end: { type: String, required: true },
@@ -86,10 +79,6 @@ const ScheduleSchema: Schema = new Schema<ISchedule>({
   day: { type: String, required: true },
   enabled: { type: Boolean, required: true },
   times: [TimeRangeSchema],
-});
-
-const CancelledMeetingsSchema: Schema = new Schema<ICancelledMeetings>({
-  _id: { type: String, required: true },
 });
 
 // Storing the name is optional.
@@ -107,6 +96,8 @@ const MeetingSchema: Schema = new Schema<IMeeting>({
   _id: { type: String, required: true },
   date: { type: String, required: true },
   time: { type: TimeRangeSchema, required: true },
+  cancelled: { type: Boolean, default: false, required: true },
+  merged: { type: Boolean, default: false, required: true },
   attendees: [AttendeeSchema],
 });
 
@@ -114,7 +105,6 @@ const MeetingTeamSchema: Schema = new Schema<IMeetingTeam>({
   schedule: { type: String, enum: ["recurring", "one-time"], required: true },
   hostName: { type: String, required: true },
   hostEmail: { type: String, required: true },
-  cancelledMeetings: [CancelledMeetingsSchema],
   meetingName: { type: String, required: true },
   meetingDescription: { type: String, required: false },
   weekSchedule: {

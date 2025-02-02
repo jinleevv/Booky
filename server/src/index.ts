@@ -14,7 +14,7 @@ import createMeetingTeamRoute from "./routes/team/createMeetingTeamRoute";
 import createTeamRoute from "./routes/team/createTeamRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
 import removeMeetingTeamFromTeamRoute from "./routes/team/removeMeetingTeamFromTeamRoute";
-import removeMeetingsFromMeetingTeamRoute from "./routes/team/removeMeetingsFromMeetingTeamRoute";
+import mergeMeetingsInMeetingTeamRoute from "./routes/team/mergeMeetingsInMeetingTeamRoute";
 import editMeetingTeamRoute from "./routes/team/editMeetingTeamRoute";
 import getAppointmentRoute from "./routes/team/getAppointmentRoute";
 import getMeetingRoute from "./routes/team/getMeetingRoute";
@@ -31,6 +31,9 @@ import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
 import updateCommentsRoute from "./routes/document/updateCommentsRoute";
 import removeCommentsRoute from "./routes/document/removeCommentsRoute";
 import userRoute from "./routes/user/userRegistrationRoute";
+import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
+import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
+
 
 dotenv.config();
 
@@ -67,7 +70,7 @@ app.use("/api/teams", createMeetingTeamRoute);
 app.use("/api/teams", getMeetingTeamRoute);
 app.use("/api/teams", editMeetingTeamRoute);
 app.use("/api/teams", removeMeetingTeamFromTeamRoute);
-app.use("/api/teams", removeMeetingsFromMeetingTeamRoute);
+app.use("/api/teams", mergeMeetingsInMeetingTeamRoute);
 app.use("/api/teams", updateCoadminRoute);
 app.use("/api/teams", updatePermissionRoute);
 app.use("/api/teams", updateTeamDescriptionRoute);
@@ -82,6 +85,8 @@ app.use("/api/document/", getMeetingMinuteRoute);
 app.use("/api/document/", mergeMeetingMinutes);
 app.use("/api/document/", updateCommentsRoute);
 app.use("/api/document/", removeCommentsRoute);
+app.use("/api/taskFlow", getTaskFlowHandler);
+app.use("/api/taskFlow", updateTaskFlowHandler);
 
 async function findOrCreateMeetingMinute(id: any) {
   if (id === null) return;
