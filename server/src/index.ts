@@ -55,8 +55,33 @@ const io = new Server(SOCKET_PORT, {
   },
 });
 
-app.use(cors());
-app.options("*", cors());
+app.use((req, res, next) => {
+  console.log(`🔹 Incoming request from: ${req.headers.origin}`);
+  next();
+});
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        console.log(`✅ Allowed origin: ${origin}`);
+        callback(null, true);
+      } else {
+        console.warn(`❌ Blocked origin: ${origin}`);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PATCH"],
+    allowedHeaders: [
+      "Origin",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+      "X-Requested-With",
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
