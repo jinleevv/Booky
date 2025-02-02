@@ -56,27 +56,6 @@ const io = new Server(SOCKET_PORT, {
 });
 
 // Middleware
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-//       if (!origin || FRONTEND_ORIGINS.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("CORS policy does not allow this origin"));
-//       }
-//     },
-//     methods: ["GET", "POST", "PATCH"],
-//     allowedHeaders: [
-//       "Origin",
-//       "Content-Type",
-//       "Accept",
-//       "Authorization",
-//       "X-Request-With",
-//     ],
-//     credentials: true, // If cookies or credentials are involved
-//   })
-// );
-
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -98,15 +77,11 @@ app.use(
   })
 );
 
-app.use(express.json());
-
 app.use((req, res, next) => {
   const origin = req.headers.origin || "";
 
-  if (FRONTEND_ORIGINS.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Credentials", "true");
-  }
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
+  res.header("Access-Control-Allow-Credentials", "true");
 
   res.header("Access-Control-Allow-Methods", "GET, POST, PATCH");
   res.header(
@@ -116,6 +91,8 @@ app.use((req, res, next) => {
 
   next();
 });
+
+app.use(express.json());
 
 // Routes
 app.use("/api/users", userRoute);
