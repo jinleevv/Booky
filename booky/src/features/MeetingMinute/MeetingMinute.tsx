@@ -30,7 +30,7 @@ import {
 import * as quillToWord from "quill-to-word";
 import { pdfExporter } from "quill-to-pdf";
 
-const SAVE_INTERVAL_MS = 2000;
+const SAVE_INTERVAL_MS = 1000;
 
 // Extend the Inline class from Parchment
 class CommentBlot extends InlineBlot {
@@ -101,16 +101,8 @@ export default function MeetingMinute() {
     { id: number; text: string; comment: string; range: any }[]
   >([]);
   const [title, setTitle] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true); // Track loading state
   const [exportType, setExportType] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    // Listen for real-time title updates
-    socket.on("receive-title-change", (newTitle) => {
-      setTitle(newTitle);
-    });
-  }, [socket]);
 
   useEffect(() => {
     const s = io("http://localhost:5002");
@@ -123,11 +115,27 @@ export default function MeetingMinute() {
 
   useEffect(() => {
     if (socket === null || quill === null) return;
+
     socket.once("load-document", (document) => {
+      // Ensure document data is valid before setting contents
+      if (!document || !document.data || !document.data.ops) {
+        quill.setText("Failed to load document.");
+        setIsLoading(false);
+        return;
+      }
       setTitle(document.title || `Meeting Minute, ${date}, ${time}`); // Set title
 
-      quill.setContents(document.data);
-      quill.enable();
+      // Delay setting content to ensure Quill is ready
+
+      setTimeout(() => {
+        if (quill) {
+          quill.setContents(document.data);
+          quill.enable();
+          setIsLoading(false);
+        }
+      }, 500);
+
+      fetchComments();
     });
 
     // Listen for real-time title updates
@@ -136,7 +144,6 @@ export default function MeetingMinute() {
     });
 
     socket.emit("get-document", meetingId);
-    fetchComments();
   }, [socket, quill, meetingId]);
 
   useEffect(() => {
@@ -148,6 +155,15 @@ export default function MeetingMinute() {
       clearInterval(interval);
     };
   }, [socket, quill]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for real-time title updates
+    socket.on("receive-title-change", (newTitle) => {
+      setTitle(newTitle);
+    });
+  }, [socket]);
 
   useEffect(() => {
     if (socket === null || quill === null) {
@@ -196,8 +212,8 @@ export default function MeetingMinute() {
         },
       },
     });
-    q.enable(false);
-    q.setText("Loading");
+    q.disable();
+    q.setText("Loading...");
     setQuill(q);
   }, []);
 
@@ -344,7 +360,6 @@ export default function MeetingMinute() {
     }
   }
 
-  // Send title updates in real-time
   function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newTitle = e.target.value;
     setTitle(newTitle);
@@ -353,7 +368,12 @@ export default function MeetingMinute() {
 
   return (
     <>
-      {/*  */}
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-red-600"></div>
+        </div>
+      )}
+
       <div className="flex w-full h-full gap-2">
         <div className="flex w-full h-full justify-center">
           <img src="/booky_logo.png" alt="Booky Logo" className="w-26 h-14" />
