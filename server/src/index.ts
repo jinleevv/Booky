@@ -42,7 +42,7 @@ const app = express();
 
 const DB_PORT = process.env.DB_PORT;
 const SOCKET_PORT = Number(process.env.SOCKET_PORT);
-const FRONTEND_ORIGINS = [
+const allowedOrigins = [
   "http://localhost:4000",
   "https://booky.im",
   "https://www.booky.im",
@@ -50,19 +50,15 @@ const FRONTEND_ORIGINS = [
 
 const io = new Server(SOCKET_PORT, {
   cors: {
-    origin: FRONTEND_ORIGINS,
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
 
-// Middleware
-app.use(cors());
-
-app.use(function(req, res, next) {
-   res.header("Access-Control-Allow-Origin", "*");
-   res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST');
-   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-   next();
+app.all("/*", function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
 });
 
 app.use(express.json());
