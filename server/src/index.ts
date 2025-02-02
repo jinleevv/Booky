@@ -56,13 +56,34 @@ const io = new Server(SOCKET_PORT, {
 });
 
 // Middleware
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       if (!origin || FRONTEND_ORIGINS.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("CORS policy does not allow this origin"));
+//       }
+//     },
+//     methods: ["GET", "POST", "PATCH"],
+//     allowedHeaders: [
+//       "Origin",
+//       "Content-Type",
+//       "Accept",
+//       "Authorization",
+//       "X-Request-With",
+//     ],
+//     credentials: true, // If cookies or credentials are involved
+//   })
+// );
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || FRONTEND_ORIGINS.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("CORS policy does not allow this origin"));
+        callback(new Error("Not allowed by CORS"));
       }
     },
     methods: ["GET", "POST", "PATCH"],
@@ -73,10 +94,21 @@ app.use(
       "Authorization",
       "X-Request-With",
     ],
-    credentials: true, // If cookies or credentials are involved
+    credentials: true, // Enable cookies/auth headers
   })
 );
 
+// Handle Preflight Requests Manually
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, Content-Type, Accept, Authorization, X-Request-With"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(204);
+});
 app.use(express.json());
 
 // Routes
