@@ -28,6 +28,7 @@ interface IDaySchedule {
 interface IParticipantSchedule {
   email: string;
   schedule: string[];
+  password?: string;
 }
 
 // Main Poll interface
@@ -78,6 +79,7 @@ const ParticipantScheduleSchema = new Schema<IParticipantSchedule>(
   {
     email: { type: String, required: true },
     schedule: [{ type: String }],
+    password: { type: String },
   },
   { _id: false }
 );

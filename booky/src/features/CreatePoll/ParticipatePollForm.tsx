@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 type ParticipatePollFormProps = {
-  onLogin: (email: string) => void;
+  onLogin: (email: string, passwordVerified: boolean) => void;
 };
 
 const formSchema = z.object({
@@ -37,15 +37,11 @@ export default function ParticipatePollForm({
   // Defining participant form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "" },
   });
 
   async function onSubmit(values: FormValues) {
-    onLogin(values.email);
-
+    let passwordVerified: boolean = true;
     const response = await fetch(`${server}/api/polls/${urlPath}`, {
       method: "PATCH",
       headers: {
@@ -53,17 +49,24 @@ export default function ParticipatePollForm({
       },
       body: JSON.stringify({
         userEmail: values.email,
+        password: values.password,
         selectedSlots: [],
       }),
     });
 
     const data = await response.json();
     if (!response.ok) {
-      console.error("Failed to login user to the server", data);
+      if (data.message === "Password is required") {
+        passwordVerified = false;
+        toast.error("Failed to check in - Password required -");
+        return -1;
+      }
+      toast.error("Server error");
       return -1;
     }
 
     toast("Successfully checked into the poll");
+    onLogin(values.email, passwordVerified);
   }
 
   return (
@@ -101,7 +104,7 @@ export default function ParticipatePollForm({
                 <div className="flex w-full gap-2">
                   <FormLabel className="m-auto">Password (Optional):</FormLabel>
                   <FormControl>
-                    <Input className="w-full" type="text" {...field} />
+                    <Input className="w-full" type="password" {...field} />
                   </FormControl>
                 </div>
                 <FormMessage />

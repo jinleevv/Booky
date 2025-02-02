@@ -167,10 +167,12 @@ export default function ParticipatePoll() {
     }
   }
 
-  function handleLogin(email: string) {
-    setIsLoggedIn(true);
-    setUserEmail(email);
-    getAvailability(email);
+  function handleLogin(email: string, passwordVerified: boolean) {
+    if (passwordVerified) {
+      setIsLoggedIn(true);
+      setUserEmail(email);
+      getAvailability(email);
+    }
   }
 
   return (
