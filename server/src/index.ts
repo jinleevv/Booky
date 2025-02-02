@@ -98,18 +98,24 @@ app.use(
   })
 );
 
-// Handle Preflight Requests Manually
-app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "");
+app.use(express.json());
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin || "";
+
+  if (FRONTEND_ORIGINS.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Credentials", "true");
+  }
+
   res.header("Access-Control-Allow-Methods", "GET, POST, PATCH");
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, Content-Type, Accept, Authorization, X-Request-With"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(204);
+
+  next();
 });
-app.use(express.json());
 
 // Routes
 app.use("/api/users", userRoute);
