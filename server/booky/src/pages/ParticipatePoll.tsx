@@ -1,7 +1,9 @@
+import { Button } from "@/components/ui/button";
 import UserAvailability from "@/features/CreatePoll/UserAvailability";
 import NavigationBar from "@/features/NavigationBar/NavigationBar";
 import { days, parseStringTimeToInt } from "@/features/time";
 import { AnimatePresence, motion } from "framer-motion";
+import { ClipboardCopy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -35,7 +37,6 @@ export interface PollData {
 
 export default function ParticipatePoll() {
   const { id: urlPath } = useParams<{ id: string }>();
-
   // Crucial states
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -170,16 +171,37 @@ export default function ParticipatePoll() {
     }
   }
 
+  // Function to copy text to clipboard
+  function copyToClipboard(text: string) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.success("Copied to clipboard!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy to clipboard.");
+      });
+  }
+
   return (
     <section className="h-screen min-w-screen bg-white font-outfit">
       <NavigationBar />
       <main className="container mx-auto py-8 px-12">
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 translate-x-1/2"></div>
-        <div className="flex gap-4 items-baseline">
+        <div className="flex items-center gap-2">
           <h2 className="text-2xl font-bold">{pollName}</h2>
-          <p className="">
-            <span>Share link:</span> {urlPath}
-          </p>
+          <div className="pl-4 pt-1 flex items-center gap-2">
+            <p>Share link:</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                copyToClipboard(`${window.location.origin}/poll/${urlPath}`);
+              }}
+            >
+              <ClipboardCopy />
+            </Button>
+          </div>
         </div>
         <div className="pt-2 flex flex-col gap-8">
           {/* Poll details */}
