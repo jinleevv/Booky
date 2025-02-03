@@ -141,12 +141,15 @@ export default function MeetingDetails() {
                 </div>
                 {meetingMinuteData ? (
                   meetingMinuteData.data ? (
-                    <div
-                      className="w-full h-[650px] p-4 mt-3 border rounded-lg text-sm" // Optional: To mimic Quill editor styling
-                      dangerouslySetInnerHTML={{
-                        __html: renderQuillContent(meetingMinuteData.data),
-                      }}
-                    />
+                    <div className="relative w-full h-[650px] overflow-hidden">
+                      <div
+                        className="w-full h-full p-4 border rounded-lg text-sm overflow-auto overflow-y-auto"
+                        tabIndex={0}
+                        dangerouslySetInnerHTML={{
+                          __html: renderQuillContent(meetingMinuteData.data),
+                        }}
+                      />
+                    </div>
                   ) : (
                     <div className="flex w-full h-full items-center justify-center">
                       <Label className="text-sm">No meeting data found.</Label>
