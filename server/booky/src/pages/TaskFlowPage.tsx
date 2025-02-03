@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import TaskNode from "@/features/TaskFlow/CustomNode";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { Plus, Save } from "lucide-react";
 
 const initialNodes = [
   {
@@ -52,9 +53,11 @@ export default function TaskFlowPage() {
   async function fetchTaskFlow() {
     try {
       const response = await fetch(`/api/taskFlow/${taskFlowId}`);
-      const data = await response.json();
-      setNodes(data.nodes);
-      setEdges(data.edges);
+      if (response.ok) {
+        const data = await response.json();
+        setNodes(data.nodes);
+        setEdges(data.edges);
+      }
     } catch (error) {
       toast.error("Failed to fetch task flow");
     }
@@ -129,6 +132,7 @@ export default function TaskFlowPage() {
         toast.error("Failed to update task flow");
       }
     } catch (error) {
+      console.log(error);
       toast.error("Failed to update task flow");
     }
   }
@@ -139,14 +143,22 @@ export default function TaskFlowPage() {
       <main className="container">
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 translate-x-1/2"></div>
         <div className="p-10">
-          {/* Button Container - Positioned Absolute */}
-          <div className="absolute top-36 right-14 z-50">
-            <Button onClick={addTaskNode} className="rounded-xl">
-              Add Node
-            </Button>
-          </div>
-          <Button onClick={handleSaveTaskFlow}>Save</Button>
-          <div className="h-[800px] w-[1600px] z-10 border rounded-lg">
+          <div className="relative h-[800px] w-[1600px] z-10 border rounded-lg">
+            <div className="absolute top-4 right-4 z-50 flex flex-col gap-2">
+              <Button
+                onClick={handleSaveTaskFlow}
+                className="rounded-xl shadow-lg"
+              >
+                <Save color="#ffffff" />
+              </Button>
+              <Button
+                onClick={addTaskNode}
+                className="rounded-xl shadow-lg flex items-center justify-center"
+              >
+                <Plus color="#ffffff" />
+              </Button>
+            </div>
+
             <ReactFlow
               nodes={nodes}
               edges={edges}
