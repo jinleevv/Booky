@@ -472,7 +472,7 @@ export default function UserAvailability({
         </Card>
       </div>
       {/*Available Time list*/}
-      <Card className="mt-6 shadow-none">
+      {/* <Card className="mt-6 shadow-none">
         <CardContent className="p-6">
           <div className="flex justify-between text-center px-4">
             <Label className="text-lg font-semibold">Available Times</Label>
@@ -485,7 +485,7 @@ export default function UserAvailability({
             data={transferData.map((item) => ({ ...item, loggedInUser }))}
           />
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }

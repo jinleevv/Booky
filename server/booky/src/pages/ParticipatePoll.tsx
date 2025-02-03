@@ -188,18 +188,18 @@ export default function ParticipatePoll() {
       <NavigationBar />
       <main className="container mx-auto py-8 px-12">
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 translate-x-1/2"></div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2">
           <h2 className="text-2xl font-bold">{pollName}</h2>
-          <div className="pl-4 pt-1 flex items-center gap-2">
-            <p>Share link:</p>
+          <div className="flex w-full pl-4 pt-1 justify-end">
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              className="rounded-xl"
               onClick={() => {
                 copyToClipboard(`${window.location.origin}/poll/${urlPath}`);
               }}
             >
               <ClipboardCopy />
+              Copy URL
             </Button>
           </div>
         </div>
