@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { formatTime } from "@/features/time";
-import { useHook } from "@/hooks";
 import { PollData } from "@/pages/ParticipatePoll";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -50,7 +49,7 @@ export default function UserAvailability({
   }>(null);
   const [availableUsers, setAvailableUsers] = useState<string[]>([]);
   const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
-  const [availableTimes, setAvailableTimes] = useState<AvailableTime[]>([]);
+  // const [availableTimes, setAvailableTimes] = useState<AvailableTime[]>([]);
   // const [transferData, setTransferData] = useState<any>([]);
 
   function countCurrentUser() {
@@ -61,32 +60,12 @@ export default function UserAvailability({
     fetchAvailability();
   }, [groupAvailability]);
 
-  useEffect(() => {
-    const formattedData = availableTimes
-      .slice() // Create a shallow copy to avoid mutating the original array
-      .sort((a, b) => {
-        // Sort by available participants count in descending order
-        const countA = a.participants.length;
-        const countB = b.participants.length;
-        return countB - countA; // Descending order (highest availability first)
-      })
-      .map((item) => ({
-        availableRate: `${item.participants.length} / ${
-          groupAvailability.size + countCurrentUser()
-        }`, // Compute the availability rate
-        date: item.day, // Assuming `item.day` contains the date
-        time: `${formatTime(item.start)} - ${formatTime(item.end)}`, // Format time properly
-      }));
-    // setTransferData(formattedData);
-  }, [availableTimes]);
-
   async function fetchAvailability() {
-    const updateAvailableTimes = await calculateAvailableTimes(
-      new Set(),
-      groupAvailability
-    );
-
-    setAvailableTimes(updateAvailableTimes);
+    // const updateAvailableTimes = await calculateAvailableTimes(
+    //   new Set(),
+    //   groupAvailability
+    // );
+    // setAvailableTimes(updateAvailableTimes);
   }
 
   async function updateAvailability(selectedSlots: Set<string>) {
@@ -107,11 +86,11 @@ export default function UserAvailability({
         return;
       }
 
-      const updateAvailableTimes = await calculateAvailableTimes(
+      await calculateAvailableTimes(
         selectedSlots,
         groupAvailability
       );
-      setAvailableTimes(updateAvailableTimes);
+      // setAvailableTimes(updateAvailableTimes);
     } catch (error) {
       console.error("Error updating availability", error);
     }
