@@ -419,23 +419,21 @@ export default function MeetingMinute() {
       </div>
 
       {/* Editor & Comments Container */}
-      <div className="flex w-full h-full px-3 gap-4">
+      <div className="relative flex w-full h-full px-3">
         {/* Meeting Minute Container (Centered Document) */}
         <div className="flex-1 flex w-full h-full justify-center">
           <div className="meetingMinuteContainer mt-2" ref={wrapperRef}></div>
         </div>
 
-        {/* Comments Section */}
+        {/* Comments Section - Positioned Absolutely */}
         {comments.length > 0 && (
-          <div className="p-4 mt-4 rounded-lg w-1/4 h-full overflow-y-auto bg-gray-100 shadow">
+          <div className="absolute right-0 top-16 h-fit w-1/6 p-4 overflow-y-auto bg-gray-50 shadow-lg border rounded-2xl">
             <h3 className="font-bold mb-4">Comments</h3>
             {comments.map((c) => (
               <div key={c.id} className="mb-4 border-b pb-2">
-                <Label className="font-medium">Commenter: {userEmail}</Label>{" "}
+                <Label className="text-xs">Commenter: {userEmail}</Label>
                 <br />
-                <Label className="font-medium">
-                  Selected Text: {c.text}
-                </Label>{" "}
+                <Label className="font-medium">Selected Text: {c.text}</Label>
                 <br />
                 <Label className="text-gray-600">Comment: {c.comment}</Label>
                 <div className="flex flex-col w-full h-full justify-between">
