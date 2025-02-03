@@ -55,17 +55,18 @@ const io = new Server(SOCKET_PORT, {
   },
 });
 
-app.use((req, res, next) => {
-  console.log(`🔹 Incoming request from: ${req.headers.origin}`);
-  next();
-});
-
 app.use(
   cors({
     origin: (origin, callback) => {
-      console.log(`🔹 Incoming request from: ${origin}`);
-      if (allowedOrigins.includes(origin!)) {
-        console.log(`✅ Allowed origin: ${origin}`);
+      console.log(
+        `🔹 Incoming request from: ${
+          origin || "undefined (Same-Origin or CURL)"
+        }`
+      );
+
+      // Allow same-origin requests and explicitly listed origins
+      if (!origin || allowedOrigins.includes(origin)) {
+        console.log(`✅ Allowed origin: ${origin || "Same-Origin"}`);
         callback(null, true);
       } else {
         console.warn(`❌ Blocked origin: ${origin}`);

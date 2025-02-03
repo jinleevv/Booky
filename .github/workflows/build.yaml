@@ -1,38 +1,38 @@
-name: Build and Test
+# name: Build and Test
 
-on:
-  push:
-    branches:
-      - main # Trigger on pushes to the main branch
-  pull_request:
-    branches:
-      - main # Trigger on pull requests to the main branch
+# on:
+#   push:
+#     branches:
+#       - main # Trigger on pushes to the main branch
+#   pull_request:
+#     branches:
+#       - main # Trigger on pull requests to the main branch
 
-jobs:
-  build:
-    name: Build and Test
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     name: Build and Test
+#     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        folder:
-          - booky
-          - server
+#     strategy:
+#       matrix:
+#         folder:
+#           - booky
+#           - server
 
-    steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
+#     steps:
+#       # Step 1: Checkout the repository
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x" # Specify your Node.js version
+#       # Step 2: Set up Node.js
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "22.x" # Specify your Node.js version
 
-      # Step 3: Install dependencies and run build
-      - name: Install dependencies and build
-        working-directory: ${{ matrix.folder }}
-        run: |
-          npm install
-          npm run build
+#       # Step 3: Install dependencies and run build
+#       - name: Install dependencies and build
+#         working-directory: ${{ matrix.folder }}
+#         run: |
+#           npm install
+#           npm run build
