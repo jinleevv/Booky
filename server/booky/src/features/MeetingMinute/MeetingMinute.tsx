@@ -1,6 +1,6 @@
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import ImageResize from "quill-image-resize-module-react";
+// import ImageResize from "quill-image-resize-module-react";
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
@@ -27,7 +27,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import * as quillToWord from "quill-to-word";
+import quillToWord from "quill-to-word";
 import { pdfExporter } from "quill-to-pdf";
 
 const SAVE_INTERVAL_MS = 1000;
@@ -69,7 +69,7 @@ class CommentBlot extends InlineBlot {
 
 // Register the custom CommentBlot with Quill
 Quill.register(CommentBlot, true);
-Quill.register("modules/imageResize", ImageResize);
+// Quill.register("modules/imageResize", ImageResize);
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
   [{ font: [] }],
@@ -197,6 +197,7 @@ export default function MeetingMinute() {
     wrapper.innerHTML = "";
     const editor = document.createElement("div");
     wrapper.append(editor);
+
     const q = new Quill(editor, {
       theme: "snow",
       modules: {

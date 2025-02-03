@@ -34,14 +34,7 @@ export default function DashBoard() {
     const fetchOfficeHours = async () => {
       try {
         const response = await fetch(
-          `${server}/api/teams/by-user?userEmail=${userEmail}`,
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
+          `/api/teams/by-user?userEmail=${userEmail}`
         );
 
         if (!response.ok) {
@@ -50,6 +43,7 @@ export default function DashBoard() {
         }
 
         const teams = await response.json();
+        console.log(teams);
 
         const today = convertToEST(new Date());
         const month = (today.getMonth() + 1).toString().padStart(2, "0");
@@ -129,6 +123,7 @@ export default function DashBoard() {
         setPastMeetings(filteredPast);
         setCancelledMeetings(cancelled);
       } catch (error) {
+        console.log(error);
         toast("Unable to fetch the meeting information");
       }
     };

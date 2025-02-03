@@ -41,29 +41,25 @@ dotenv.config();
 const app = express();
 
 const DB_PORT = process.env.DB_PORT;
-const SOCKET_PORT = Number(process.env.SOCKET_PORT);
+// const SOCKET_PORT = Number(process.env.SOCKET_PORT);
 const allowedOrigins = [
+  "http://localhost:5173",
   "http://localhost:4000",
+  "http://localhost:4001",
   "https://booky.im",
   "https://www.booky.im",
 ];
 
-const io = new Server(SOCKET_PORT, {
+const io = new Server(4001, {
   cors: {
-    origin: allowedOrigins,
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      console.log(
-        `🔹 Incoming request from: ${
-          origin || "undefined (Same-Origin or CURL)"
-        }`
-      );
-
+    origin: (origin: any, callback: any) => {
       // Allow same-origin requests and explicitly listed origins
       if (!origin || allowedOrigins.includes(origin)) {
         console.log(`✅ Allowed origin: ${origin || "Same-Origin"}`);
@@ -82,7 +78,6 @@ app.use(
       "X-Requested-With",
     ],
     credentials: true,
-    optionsSuccessStatus: 204,
   })
 );
 
@@ -92,6 +87,10 @@ app.options("*", cors());
 app.use(express.json());
 
 // Routes
+// Basic route
+app.get("/api/health", (req: any, res: any) => {
+  res.json({ status: "ok" });
+});
 app.use("/api/users", userRoute);
 app.use("/api/teams/by-user", getUserTeamsRoute);
 app.use("/api/teams/create", createTeamRoute);
@@ -123,7 +122,7 @@ app.use("/api/taskFlow", updateTaskFlowHandler);
 
 app.use(express.static(path.join(__dirname, "../booky/dist")));
 
-app.get("*", (req, res) => {
+app.get("*", (req: any, res: any) => {
   res.sendFile(path.join(__dirname, "../booky/dist/index.html"));
 });
 
@@ -143,20 +142,15 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((error) => console.error("MongoDB connection error:", error));
 
-// Basic route
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-
 // startScheduler();
 
 app.listen(DB_PORT, () => {
   console.log(`Server running on port ${DB_PORT}`);
 });
 
-io.on("connection", (socket) => {
+io.on("connection", (socket: any) => {
   console.log("Socket Connected");
-  socket.on("get-document", async (meeting) => {
+  socket.on("get-document", async (meeting: any) => {
     const meetingMinute = await findOrCreateMeetingMinute(meeting);
     if (meetingMinute === undefined) {
       console.log("meeting minute is undefined");
@@ -169,16 +163,16 @@ io.on("connection", (socket) => {
       title: meetingMinute.title, // Send title
     });
 
-    socket.on("send-changes", (delta) => {
+    socket.on("send-changes", (delta: any) => {
       socket.broadcast.to(meeting).emit("receive-changes", delta);
     });
 
-    socket.on("save-document", async (data) => {
+    socket.on("save-document", async (data: any) => {
       await MeetingMinute.findByIdAndUpdate(meeting, { data });
     });
 
     // Handle title changes
-    socket.on("send-title-change", async (title) => {
+    socket.on("send-title-change", async (title: any) => {
       await MeetingMinute.findByIdAndUpdate(meeting, { title });
       socket.broadcast.to(meeting).emit("receive-title-change", title);
     });
