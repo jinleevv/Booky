@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { IoPersonCircle } from "react-icons/io5";
 import { Trash, Users } from "lucide-react";
-import { TbEdit, TbCalendarCancel } from "react-icons/tb";
+import { TbEdit } from "react-icons/tb";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -74,6 +74,7 @@ export default function JoinAMeeting({
   const [selectedMeetingTeam, setSelectedMeetingTeam] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [enabledDays, setEnabledDays] = useState<Array<string>>([]);
+  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null); 
 
   useEffect(() => {
     setTimeSlots([]);
@@ -228,6 +229,7 @@ export default function JoinAMeeting({
 
   async function handleRemoveMeetingTeam(meetingTeamId: string) {
     try {
+      console.log(meetingTeamId);
       const response = await fetch(
         `/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
         {
@@ -443,12 +445,12 @@ export default function JoinAMeeting({
                                     {(adminEmail === userEmail ||
                                       teamCoAdmin.includes(userEmail)) && (
                                       <>
-                                        <Button
+                                        {/* <Button
                                           variant="ghost"
                                           className="w-5 h-5"
                                         >
                                           <TbCalendarCancel size={10} />
-                                        </Button>
+                                        </Button> */}
                                         <Dialog
                                           open={isDialogOpen}
                                           onOpenChange={setIsDialogOpen}
@@ -459,6 +461,7 @@ export default function JoinAMeeting({
                                               className="text-red-700 hover:text-red-700 w-5 h-5"
                                               onClick={(e) => {
                                                 e.stopPropagation();
+                                                setMeetingToDelete(meetingTeam._id);
                                                 setIsDialogOpen(true);
                                               }}
                                             >
@@ -491,7 +494,7 @@ export default function JoinAMeeting({
                                                 variant="destructive"
                                                 onClick={(e) => {
                                                   handleRemoveMeetingTeam(
-                                                    meetingTeam._id
+                                                    meetingToDelete
                                                   );
                                                   setIsDialogOpen(false);
                                                 }}

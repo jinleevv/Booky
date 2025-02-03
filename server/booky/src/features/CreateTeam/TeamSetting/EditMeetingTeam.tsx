@@ -1,4 +1,11 @@
 import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
     Select,
     SelectTrigger,
     SelectValue,
@@ -17,10 +24,13 @@ import {
     FormLabel,
     FormMessage,
   } from "@/components/ui/form";
-  import { parseZonedDateTime } from "@internationalized/date";
+  import { parseZonedDateTime, parseDate } from "@internationalized/date";
   import { Input } from "@/components/ui/input";
   import { Button } from "@/components/ui/button";
   import { Plus, Trash } from "lucide-react";
+  import { DatePicker } from "@heroui/react";
+  import { TbRepeat } from "react-icons/tb";
+  import { Label } from "@/components/ui/label";
   
   export default function EditMeetingTeam({
     form,
@@ -41,7 +51,7 @@ import {
         control={form.control}
         name="recurringMeetingSchedule"
         render={() => (
-          <div className="border w-full h-[590px] rounded-lg p-4 overflow-auto">
+          <div className="border w-full rounded-lg p-4 overflow-auto">
             <div className="border-b-1 mb-4">
               <div className="flex w-full space-x-6">
                 <FormField
@@ -106,6 +116,61 @@ import {
                 </TabsList>
                 <TabsContent value="recurring">
                   <div className="space-y-4">
+                    <div className="flex items-center gap-8">
+                      <FormField
+                        control={form.control}
+                        name="startDate"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>Starting from</FormLabel>
+                            <DatePicker
+                              hideTimeZone
+                              granularity="day"
+                              className="max-w-[250px]"
+                              defaultValue={parseDate(`${new Date().toISOString().split("T")[0]}`)}
+                              onChange={(date) => field.onChange(date.toString())}
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="meetingFrequency"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>Frequency</FormLabel>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger
+                                asChild
+                                className="hover:bg-[#e4e4e7] h-[40px] rounded-lg bg-[#f4f4f5] flex"
+                              >
+                                <div className="flex items-center p-2 gap-5">
+                                  <Label>
+                                    {form.watch("meetingFrequency")}
+                                  </Label>
+                                  <TbRepeat size={15} className="ml-auto" />
+                                </div>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="w-auto min-w-24">
+                                <DropdownMenuItem onClick={() => field.onChange("Weekly")}>
+                                  <span>Weekly</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => field.onChange("Biweekly")}>
+                                  <span>Biweekly</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => field.onChange("Monthly")}>
+                                  <span>Monthly</span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     {form.watch("recurringMeetingSchedule").map((day, dayIndex) => (
                       <div key={day.day} className="flex items-center space-x-4">
                         <FormField

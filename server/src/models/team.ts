@@ -25,6 +25,8 @@ export interface IMeetingTeam {
   meeting: IMeeting[];
 
   weekSchedule?: ISchedule[]; // For recurring
+  startDate?: string; // For recurring
+  frequency?: string; // For recurring
   date?: string; // For one-time
   time?: ITimeRange; // For one-time
 
@@ -112,6 +114,16 @@ const MeetingTeamSchema: Schema = new Schema<IMeetingTeam>({
     required: function () {
       return this.schedule === "recurring";
     },
+  },
+  startDate: { 
+    type: String,
+    required: false
+  },
+  frequency: { 
+    type: String,
+    required: function () {
+      return this.schedule === "recurring";
+    }
   },
   date: {
     type: String,
