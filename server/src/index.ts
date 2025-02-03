@@ -2,6 +2,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 import { Server } from "socket.io";
 import { startScheduler } from "./meetingCreateScheduler";
 import MeetingMinute from "./models/meetingMinute";
@@ -34,31 +36,61 @@ import userRoute from "./routes/user/userRegistrationRoute";
 import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
 import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
 
-
 dotenv.config();
 
 const app = express();
-const PORT = 5001;
-const io = new Server(5002, {
+
+const DB_PORT = process.env.DB_PORT;
+// const SOCKET_PORT = Number(process.env.SOCKET_PORT);
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:4000",
+  "http://localhost:4001",
+  "https://booky.im",
+  "https://www.booky.im",
+];
+
+const io = new Server(4001, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
-// Middleware
 app.use(
   cors({
-    origin: "*",
+    origin: (origin: any, callback: any) => {
+      // Allow same-origin requests and explicitly listed origins
+      if (!origin || allowedOrigins.includes(origin)) {
+        console.log(`✅ Allowed origin: ${origin || "Same-Origin"}`);
+        callback(null, true);
+      } else {
+        console.warn(`❌ Blocked origin: ${origin}`);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // If cookies or credentials are involved
+    allowedHeaders: [
+      "Origin",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+      "X-Requested-With",
+    ],
+    credentials: true,
   })
 );
+
+// ✅ Add this to explicitly handle preflight requests (for OPTIONS)
+app.options("*", cors());
 
 app.use(express.json());
 
 // Routes
+// Basic route
+app.get("/api/health", (req: any, res: any) => {
+  res.json({ status: "ok" });
+});
 app.use("/api/users", userRoute);
 app.use("/api/teams/by-user", getUserTeamsRoute);
 app.use("/api/teams/create", createTeamRoute);
@@ -88,6 +120,12 @@ app.use("/api/document/", removeCommentsRoute);
 app.use("/api/taskFlow", getTaskFlowHandler);
 app.use("/api/taskFlow", updateTaskFlowHandler);
 
+app.use(express.static(path.join(__dirname, "../booky/dist")));
+
+app.get("*", (req: any, res: any) => {
+  res.sendFile(path.join(__dirname, "../booky/dist/index.html"));
+});
+
 async function findOrCreateMeetingMinute(id: any) {
   if (id === null) return;
 
@@ -104,20 +142,15 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((error) => console.error("MongoDB connection error:", error));
 
-// Basic route
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-
 // startScheduler();
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(DB_PORT, () => {
+  console.log(`Server running on port ${DB_PORT}`);
 });
 
-io.on("connection", (socket) => {
+io.on("connection", (socket: any) => {
   console.log("Socket Connected");
-  socket.on("get-document", async (meeting) => {
+  socket.on("get-document", async (meeting: any) => {
     const meetingMinute = await findOrCreateMeetingMinute(meeting);
     if (meetingMinute === undefined) {
       console.log("meeting minute is undefined");
@@ -130,16 +163,16 @@ io.on("connection", (socket) => {
       title: meetingMinute.title, // Send title
     });
 
-    socket.on("send-changes", (delta) => {
+    socket.on("send-changes", (delta: any) => {
       socket.broadcast.to(meeting).emit("receive-changes", delta);
     });
 
-    socket.on("save-document", async (data) => {
+    socket.on("save-document", async (data: any) => {
       await MeetingMinute.findByIdAndUpdate(meeting, { data });
     });
 
     // Handle title changes
-    socket.on("send-title-change", async (title) => {
+    socket.on("send-title-change", async (title: any) => {
       await MeetingMinute.findByIdAndUpdate(meeting, { title });
       socket.broadcast.to(meeting).emit("receive-title-change", title);
     });

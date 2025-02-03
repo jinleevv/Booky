@@ -20,7 +20,8 @@ export const getTeamsByUserHandler: RequestHandler = async (
     const teams = await Team.find({
       $or: [{ adminEmail: userEmail }, { members: userEmail }],
     }).exec();
-
+    
+    res.setHeader("Content-Type", "application/json");
     res.status(200).json(teams);
   } catch (error) {
     console.error("Error querying teams:", error);

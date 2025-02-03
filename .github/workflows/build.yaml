@@ -3,21 +3,15 @@ name: Build and Test
 on:
   push:
     branches:
-      - main # Trigger on pushes to the main branch
+      - dev # Trigger on pushes to the dev branch
   pull_request:
     branches:
-      - main # Trigger on pull requests to the main branch
+      - dev # Trigger on pull requests to the dev branch
 
 jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        folder:
-          - booky
-          - server
 
     steps:
       # Step 1: Checkout the repository
@@ -30,9 +24,9 @@ jobs:
         with:
           node-version: "22.x" # Specify your Node.js version
 
-      # Step 3: Install dependencies and run build
+      # Step 3: Install dependencies and build in server folder only
       - name: Install dependencies and build
-        working-directory: ${{ matrix.folder }}
         run: |
+          cd server
           npm install
           npm run build

@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
-    "build": "tsc"
+    "build": "npm install --prefix ./booky && npm run build --prefix ./booky && npm install && tsc"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +23,7 @@
     "mongoose": ">=8.8.3",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
+    "quill-image-resize-module-react": "^3.0.0",
     "short-uuid": "^5.2.0",
     "socket.io": "^4.8.1",
     "uuid": "^11.0.3"
@@ -35,8 +36,8 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.9.0",
     "@types/node-cron": "^3.0.11",
-    "nodemon": "^3.1.7",
+    "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.3"
   }
 }
