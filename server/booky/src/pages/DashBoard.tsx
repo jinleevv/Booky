@@ -34,7 +34,14 @@ export default function DashBoard() {
     const fetchOfficeHours = async () => {
       try {
         const response = await fetch(
-          `${server}/api/teams/by-user?userEmail=${userEmail}`
+          `${server}/api/teams/by-user?userEmail=${userEmail}`,
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
 
         if (!response.ok) {
@@ -57,9 +64,11 @@ export default function DashBoard() {
         teams.forEach((team) => {
           team.meetingTeam.forEach((meetingTeam) => {
             cancelled.push(
-              ...meetingTeam.meeting.filter((meeting) => meeting.cancelled == true).map((meeting) => meeting._id)
+              ...meetingTeam.meeting
+                .filter((meeting) => meeting.cancelled == true)
+                .map((meeting) => meeting._id)
             );
-            
+
             meetingTeam.meeting.forEach((meeting) => {
               if (meeting.date >= todayConverted) {
                 upcoming.push({

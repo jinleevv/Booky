@@ -63,7 +63,8 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      console.log(`🔹 Incoming request from: ${origin}`);
+      if (allowedOrigins.includes(origin!)) {
         console.log(`✅ Allowed origin: ${origin}`);
         callback(null, true);
       } else {
@@ -82,6 +83,9 @@ app.use(
     credentials: true,
   })
 );
+
+// ✅ Add this to explicitly handle preflight requests (for OPTIONS)
+app.options("*", cors());
 
 app.use(express.json());
 
