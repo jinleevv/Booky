@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useHook } from "@/hooks";
 import { toast } from "sonner";
 
 const formSchema = z.object({
@@ -31,11 +30,10 @@ export default function InviteCoAdmin({
       coadmin: "",
     },
   });
-  const { server } = useHook();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (teamId !== "CreateTeam") {
-      const response = await fetch(`${server}/api/teams/${teamId}/coadmins`, {
+      const response = await fetch(`/api/teams/${teamId}/coadmins`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

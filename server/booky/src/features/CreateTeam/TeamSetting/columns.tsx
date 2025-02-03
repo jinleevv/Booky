@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
-import { useHook } from "@/hooks";
 
 export type TeamMembers = {
   teamId: string;
@@ -35,22 +34,18 @@ export const columns: ColumnDef<TeamMembers>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const { server } = useHook();
       const member = row.original;
       async function handleCoAdminToMember() {
-        const response = await fetch(
-          `${server}/api/teams/${member.teamId}/permission`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              permission: "CoAdminToMember",
-              user: member.email,
-            }),
-          }
-        );
+        const response = await fetch(`/api/teams/${member.teamId}/permission`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            permission: "CoAdminToMember",
+            user: member.email,
+          }),
+        });
 
         if (!response.ok) {
           toast.error("Failed to update permission");
@@ -60,19 +55,16 @@ export const columns: ColumnDef<TeamMembers>[] = [
       }
 
       async function handleMemberToCoAdmin() {
-        const response = await fetch(
-          `${server}/api/teams/${member.teamId}/permission`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              permission: "MemberToCoAdmin",
-              user: member.email,
-            }),
-          }
-        );
+        const response = await fetch(`/api/teams/${member.teamId}/permission`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            permission: "MemberToCoAdmin",
+            user: member.email,
+          }),
+        });
 
         if (!response.ok) {
           toast.error("Failed to update permission");

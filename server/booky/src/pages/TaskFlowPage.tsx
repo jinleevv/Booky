@@ -12,7 +12,6 @@ import "@xyflow/react/dist/style.css";
 import { useCallback, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import TaskNode from "@/features/TaskFlow/CustomNode";
-import { useHook } from "@/hooks";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -34,7 +33,6 @@ const initialNodes = [
 const initialEdges = [{ id: "e1-2", source: "1", target: "2" }];
 
 export default function TaskFlowPage() {
-  const { server } = useHook();
   const { taskFlowId } = useParams();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -53,7 +51,7 @@ export default function TaskFlowPage() {
 
   async function fetchTaskFlow() {
     try {
-      const response = await fetch(`${server}/api/taskFlow/${taskFlowId}`);
+      const response = await fetch(`/api/taskFlow/${taskFlowId}`);
       const data = await response.json();
       setNodes(data.nodes);
       setEdges(data.edges);
@@ -112,7 +110,7 @@ export default function TaskFlowPage() {
   async function handleSaveTaskFlow() {
     try {
       const response = await fetch(
-        `${server}/api/taskFlow/updateTaskFlow/${taskFlowId}`,
+        `/api/taskFlow/updateTaskFlow/${taskFlowId}`,
         {
           method: "PATCH",
           headers: {

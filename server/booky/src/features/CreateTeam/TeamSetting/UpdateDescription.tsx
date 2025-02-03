@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useHook } from "@/hooks";
 import { toast } from "sonner";
 
 const formSchema = z.object({
@@ -25,20 +24,15 @@ export default function UpdateDescription({ teamId, onSuccess }) {
       description: "",
     },
   });
-  const { server } = useHook();
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (teamId) {
-      const response = await fetch(
-        `${server}/api/teams/${teamId}/teamDescription`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ teamDescription: values.description }),
-        }
-      );
+      const response = await fetch(`/api/teams/${teamId}/teamDescription`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ teamDescription: values.description }),
+      });
 
       if (!response.ok) {
         toast.error("Failed to update team description");

@@ -56,7 +56,7 @@ export default function ViewDetails({
   setSelectedHost,
 }: IViewDetailsProps) {
   const navigate = useNavigate();
-  const { server, userEmail } = useHook();
+  const { userEmail } = useHook();
   const [selectedMeeting, setSelectedMeeting] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [meetingData, setMeetingData] = useState<any>(null);
@@ -88,7 +88,7 @@ export default function ViewDetails({
   async function handleRemoveMeetingTeam(meetingTeamId: string) {
     try {
       const response = await fetch(
-        `${server}/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
+        `/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
         {
           method: "PATCH",
           headers: {
@@ -120,7 +120,7 @@ export default function ViewDetails({
 
     try {
       const response = await fetch(
-        `${server}/api/teams/${teamId}/${selectedMeeting._id}/merge-meetings`,
+        `/api/teams/${teamId}/${selectedMeeting._id}/merge-meetings`,
         {
           method: "PATCH",
           headers: {
@@ -136,7 +136,7 @@ export default function ViewDetails({
 
       // Merge meeting minutes
       const mergeMinutesResponse = await fetch(
-        `${server}/api/document/${teamId}/${selectedMeeting._id}/merge-meeting-minutes`,
+        `/api/document/${teamId}/${selectedMeeting._id}/merge-meeting-minutes`,
         {
           method: "PATCH",
           headers: {
@@ -232,7 +232,9 @@ export default function ViewDetails({
                       className="w-full border rounded-3xl shadow-md cursor-pointer"
                       onClick={() => {
                         setSelectedMeeting(meeting);
-                        setMeetingList(meeting.meeting.filter((m) => m.merged === false));
+                        setMeetingList(
+                          meeting.meeting.filter((m) => m.merged === false)
+                        );
                       }}
                     >
                       <CardHeader className="pt-4">
@@ -357,15 +359,15 @@ export default function ViewDetails({
               <div className="flex justify-end mb-2">
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-xl"
-                        disabled={checkedMeetings.length < 2}
-                      >
-                        <Merge />
-                        Merge Selected
-                      </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl"
+                      disabled={checkedMeetings.length < 2}
+                    >
+                      <Merge />
+                      Merge Selected
+                    </Button>
                   </DialogTrigger>
                   <DialogContent onClick={(e) => e.stopPropagation()}>
                     <DialogHeader>

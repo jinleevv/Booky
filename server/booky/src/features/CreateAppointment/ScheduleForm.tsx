@@ -43,7 +43,7 @@ export default function ScheduleForm({
   timeSlots,
   setTimeSlots,
 }: ScheduleFormProps) {
-  const { server, userName, userEmail, loggedInUser } = useHook();
+  const { userName, userEmail, loggedInUser } = useHook();
 
   useEffect(() => {
     if (loggedInUser) {
@@ -86,21 +86,18 @@ export default function ScheduleForm({
     };
 
     try {
-      const response = await fetch(
-        `${server}/api/teams/${teamId}/appointments`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            meetingTeamId: selectedMeetingTeam._id,
-            day: selectedDay,
-            time: newSelectedTime,
-            attend: newAttend,
-          }),
-        }
-      );
+      const response = await fetch(`/api/teams/${teamId}/appointments`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          meetingTeamId: selectedMeetingTeam._id,
+          day: selectedDay,
+          time: newSelectedTime,
+          attend: newAttend,
+        }),
+      });
 
       if (response.ok) {
         const updateTimeSlots = timeSlots.map((timeSlot) => {

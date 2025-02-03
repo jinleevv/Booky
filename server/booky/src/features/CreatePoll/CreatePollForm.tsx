@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { availableTime, convertTo24Hour } from "@/features/time";
-import { useHook } from "@/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   getDayOfWeek,
@@ -84,8 +83,6 @@ export default function CreatePollForm() {
     },
   });
 
-  const { server } = useHook();
-
   const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -94,7 +91,7 @@ export default function CreatePollForm() {
 
     const urlPath = uuid();
 
-    const response = await fetch(`${server}/api/polls/create`, {
+    const response = await fetch(`/api/polls/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

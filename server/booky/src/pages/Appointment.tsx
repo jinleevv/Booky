@@ -19,7 +19,6 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useHook } from "@/hooks";
 
 interface IAppointment {
   day: string;
@@ -28,7 +27,6 @@ interface IAppointment {
 
 export function Appointment() {
   const { teamId, code: appointmentToken } = useParams();
-  const { server } = useHook();
   const [appointment, setAppointment] = useState<IAppointment>({
     day: "",
     time: "",
@@ -40,7 +38,7 @@ export function Appointment() {
       try {
         // Send GET request to backend API
         const response = await fetch(
-          `${server}/api/appointment/get-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`
+          `/api/appointment/get-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`
         );
 
         if (!response.ok) {
@@ -66,7 +64,7 @@ export function Appointment() {
 
   async function handleCancel() {
     const response = await fetch(
-      `${server}/api/appointment/delete-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`,
+      `/api/appointment/delete-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`,
       {
         method: "PATCH",
         headers: {

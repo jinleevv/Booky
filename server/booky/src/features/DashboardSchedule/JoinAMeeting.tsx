@@ -61,7 +61,7 @@ export default function JoinAMeeting({
   selectedHost,
   setSelectedHost,
 }: IJoinAMeetingProps) {
-  const { server, userEmail, loggedInUser } = useHook();
+  const { userEmail, loggedInUser } = useHook();
 
   const navigate = useNavigate();
 
@@ -205,7 +205,7 @@ export default function JoinAMeeting({
 
   async function handleJoinTeam() {
     try {
-      const response = await fetch(`${server}/api/teams/${teamId}/members`, {
+      const response = await fetch(`/api/teams/${teamId}/members`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -229,7 +229,7 @@ export default function JoinAMeeting({
   async function handleRemoveMeetingTeam(meetingTeamId: string) {
     try {
       const response = await fetch(
-        `${server}/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
+        `/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
         {
           method: "PATCH",
           headers: {

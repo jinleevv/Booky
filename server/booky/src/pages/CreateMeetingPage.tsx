@@ -60,7 +60,7 @@ const formatDateTime = (dateObject: any): string => {
 
 export default function CreateMeetingPage() {
   const { teamId } = useParams();
-  const { server, userEmail, userName } = useHook();
+  const { userEmail, userName } = useHook();
   const [currentTab, setCurrentTab] = useState<string>("recurring");
   const navigate = useNavigate();
 
@@ -74,13 +74,17 @@ export default function CreateMeetingPage() {
         day,
         enabled: false,
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
-      })),      
+      })),
       oneTimeMeetingSchedule: {
         start: formatDateTime(
-          parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`)
+          parseZonedDateTime(
+            `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
+          )
         ),
         end: formatDateTime(
-          parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`)
+          parseZonedDateTime(
+            `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
+          )
         ),
       },
       duration: "",
@@ -92,9 +96,9 @@ export default function CreateMeetingPage() {
       toast("Please select duration");
       return;
     }
-    
-    const response = await fetch(`${server}/api/teams/${teamId}/meetingTeam`, {
-      method:"POST",
+
+    const response = await fetch(`/api/teams/${teamId}/meetingTeam`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
@@ -109,11 +113,11 @@ export default function CreateMeetingPage() {
         duration: values.duration,
         meetingLink: values.meetingLink,
         currentTab: currentTab,
-      })
+      }),
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error("Failed to save meeting", data);
       return -1;
@@ -139,16 +143,17 @@ export default function CreateMeetingPage() {
           </div>
           <div className="mt-4">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <CreateMeeting
                   form={form}
                   currentTab={currentTab}
                   setCurrentTab={setCurrentTab}
                 />
                 <div className="flex w-full justify-end">
-                  <Button type="submit">
-                    Submit
-                  </Button>
+                  <Button type="submit">Submit</Button>
                 </div>
               </form>
             </Form>

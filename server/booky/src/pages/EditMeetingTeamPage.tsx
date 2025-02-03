@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { parseZonedDateTime } from "@internationalized/date";
 import { toast } from "sonner";
-import { useHook } from "@/hooks";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -59,16 +58,17 @@ const formatDateTime = (dateObject: any): string => {
 };
 
 function formatZonedDateTime(date, time) {
-  const [year, month, day] = date.split('-').map((value) => value.padStart(2, '0'));
+  const [year, month, day] = date
+    .split("-")
+    .map((value) => value.padStart(2, "0"));
 
-  const [hour, minute] = time.split(':').map((value) => value.padStart(2, '0'));
+  const [hour, minute] = time.split(":").map((value) => value.padStart(2, "0"));
 
   return `${year}-${month}-${day}T${hour}:${minute}[America/Toronto]`;
 }
 
 export default function EditMeetingTeamPage() {
   const { teamId, meetingTeamId } = useParams();
-  const { server } = useHook();
   const [meetingData, setMeetingData] = useState<null | any>(null);
   const [currentTab, setCurrentTab] = useState<string>("recurring");
   const navigate = useNavigate();
@@ -77,13 +77,15 @@ export default function EditMeetingTeamPage() {
     const fetchMeetingData = async () => {
       if (!meetingTeamId) return;
       try {
-        const response = await fetch(`${server}/api/teams/${teamId}/meetingTeams/${meetingTeamId}`);
+        const response = await fetch(
+          `/api/teams/${teamId}/meetingTeams/${meetingTeamId}`
+        );
         const data = await response.json();
         setMeetingData(data);
       } catch (error) {
         console.error("Failed to fetch meeting data:", error);
       }
-    }
+    };
     fetchMeetingData();
   }, [meetingTeamId, teamId]);
 
@@ -97,22 +99,28 @@ export default function EditMeetingTeamPage() {
         day,
         enabled: false,
         times: [{ start: "09:00 AM", end: "05:00 PM" }],
-      })),      
+      })),
       oneTimeMeetingSchedule: {
         start: formatDateTime(
-          parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`)
+          parseZonedDateTime(
+            `${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`
+          )
         ),
         end: formatDateTime(
-          parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`)
+          parseZonedDateTime(
+            `${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`
+          )
         ),
       },
       duration: "",
     },
   });
-  
+
   useEffect(() => {
     if (meetingData) {
-      setCurrentTab(meetingData.schedule === "recurring" ? "recurring" : "one-time");
+      setCurrentTab(
+        meetingData.schedule === "recurring" ? "recurring" : "one-time"
+      );
 
       if (meetingData.schedule === "recurring") {
         const formattedData = {
@@ -122,19 +130,26 @@ export default function EditMeetingTeamPage() {
           recurringMeetingSchedule: meetingData.weekSchedule || [],
           oneTimeMeetingSchedule: {
             start: formatDateTime(
-              parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T09:00[America/Toronto]`)
+              parseZonedDateTime(
+                `${
+                  new Date().toISOString().split("T")[0]
+                }T09:00[America/Toronto]`
+              )
             ),
             end: formatDateTime(
-              parseZonedDateTime(`${new Date().toISOString().split("T")[0]}T17:00[America/Toronto]`)
+              parseZonedDateTime(
+                `${
+                  new Date().toISOString().split("T")[0]
+                }T17:00[America/Toronto]`
+              )
             ),
           },
           meetingType: meetingData.type || "oneOnOne",
           duration: meetingData.duration || "",
         };
-  
+
         form.reset(formattedData);
-      }
-      else {
+      } else {
         const formattedData = {
           meetingName: meetingData.meetingName || "",
           meetingDescription: meetingData.meetingDescription || "",
@@ -142,25 +157,19 @@ export default function EditMeetingTeamPage() {
           oneTimeMeetingSchedule: {
             start: formatDateTime(
               parseZonedDateTime(
-                formatZonedDateTime(
-                  meetingData.date,
-                  meetingData.time.start
-                )
+                formatZonedDateTime(meetingData.date, meetingData.time.start)
               )
             ),
             end: formatDateTime(
               parseZonedDateTime(
-                formatZonedDateTime(
-                  meetingData.date,
-                  meetingData.time.end
-                )
+                formatZonedDateTime(meetingData.date, meetingData.time.end)
               )
             ),
           },
           meetingType: meetingData.type || "oneOnOne",
           duration: meetingData.duration || "",
         };
-  
+
         form.reset(formattedData);
       }
     }
@@ -171,26 +180,29 @@ export default function EditMeetingTeamPage() {
       toast("Please select duration");
       return;
     }
-    
-    const response = await fetch(`${server}/api/teams/${teamId}/meetingTeams/${meetingTeamId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        meetingName: values.meetingName,
-        meetingDescription: values.meetingDescription,
-        recurringMeetingSchedule: values.recurringMeetingSchedule,
-        oneTimeMeetingSchedule: values.oneTimeMeetingSchedule,
-        meetingType: values.meetingType,
-        duration: values.duration,
-        meetingLink: values.meetingLink,
-        currentTab: currentTab,
-      })
-    });
+
+    const response = await fetch(
+      `/api/teams/${teamId}/meetingTeams/${meetingTeamId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          meetingName: values.meetingName,
+          meetingDescription: values.meetingDescription,
+          recurringMeetingSchedule: values.recurringMeetingSchedule,
+          oneTimeMeetingSchedule: values.oneTimeMeetingSchedule,
+          meetingType: values.meetingType,
+          duration: values.duration,
+          meetingLink: values.meetingLink,
+          currentTab: currentTab,
+        }),
+      }
+    );
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error("Failed to save meetingTeam", data);
       return -1;
@@ -216,7 +228,10 @@ export default function EditMeetingTeamPage() {
           </div>
           <div className="mt-4">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <EditMeetingTeam
                   form={form}
                   currentTab={currentTab}

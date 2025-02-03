@@ -11,7 +11,6 @@ import {
 import { Edit, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useHook } from "@/hooks";
 import { Label } from "@/components/ui/label";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
@@ -21,7 +20,6 @@ import UpdateDescription from "./UpdateDescription";
 export default function TeamSettings() {
   const navigate = useNavigate();
   const { teamId } = useParams();
-  const { server } = useHook(); // Use global state from the hook
   const [teamAdmin, setTeamAdmin] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string | null>(null);
   const [teamDescription, setTeamDescription] = useState<string | null>(null);
@@ -31,7 +29,7 @@ export default function TeamSettings() {
   // Fetch team name on load
   useEffect(() => {
     const fetchTeam = async () => {
-      const response = await fetch(`${server}/api/teams/${teamId}`);
+      const response = await fetch(`/api/teams/${teamId}`);
       const data = await response.json();
       if (response.ok) {
         const dataTeamMembers: [string, string][] = [
@@ -56,7 +54,7 @@ export default function TeamSettings() {
       }
     };
     fetchTeam();
-  }, [teamId, server, navigate]);
+  }, [teamId, navigate]);
 
   const handleFormSubmitSuccess = () => {
     setIsDialogOpen(false);

@@ -16,7 +16,6 @@ import { auth } from "../../../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { useHook } from "@/hooks";
 import { Label } from "@/components/ui/label";
 
 interface PasswordRequirement {
@@ -54,7 +53,6 @@ export default function SignUpForm() {
     resolver: zodResolver(formSchema),
   });
   const navigate = useNavigate();
-  const { server } = useHook();
   const [password, setPassword] = useState<string>("");
   const [requirements, setRequirements] = useState<PasswordRequirements>({
     length: { match: false, text: "At least 8 characters" },
@@ -112,7 +110,7 @@ export default function SignUpForm() {
   }
 
   async function saveUserToDatabase(uid: string, email: string, name: string) {
-    const response = await fetch(`${server}/api/users/register`, {
+    const response = await fetch(`/api/users/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

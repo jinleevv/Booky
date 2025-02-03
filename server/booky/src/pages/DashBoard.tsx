@@ -22,7 +22,7 @@ import { useHook } from "@/hooks";
 import { toast } from "sonner";
 
 export default function DashBoard() {
-  const { server, userEmail } = useHook();
+  const { userEmail } = useHook();
 
   const [upcomingMeetings, setUpcomingMeetings] = useState<any[]>([]);
   const [pastMeetings, setPastMeetings] = useState<any[]>([]);
@@ -141,7 +141,7 @@ export default function DashBoard() {
   ) {
     try {
       const response = await fetch(
-        `${server}/api/teams/cancel/${teamId}/${meetingTeamId}/${meetingId}`,
+        `/api/teams/cancel/${teamId}/${meetingTeamId}/${meetingId}`,
         {
           method: "PATCH",
           headers: {

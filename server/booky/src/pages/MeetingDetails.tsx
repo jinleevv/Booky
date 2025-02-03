@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export default function MeetingDetails() {
   const navigate = useNavigate();
   const { teamId, meetingTeamId, meetingTeamName, meetingId } = useParams();
-  const { server, userEmail } = useHook();
+  const { userEmail } = useHook();
 
   const [meetingData, setMeetingData] = useState<any>(null);
   const [accessStatus, setAccessStatus] = useState<boolean>(false);
@@ -24,7 +24,7 @@ export default function MeetingDetails() {
       if (!meetingId) return;
       try {
         const response = await fetch(
-          `${server}/api/teams/${teamId}/${meetingTeamId}/meetings/${meetingId}`
+          `/api/teams/${teamId}/${meetingTeamId}/meetings/${meetingId}`
         );
         const data = await response.json();
         setMeetingData(data);
@@ -42,7 +42,7 @@ export default function MeetingDetails() {
     const fetchMeetingMinuteData = async () => {
       if (!meetingId) return;
       try {
-        const response = await fetch(`${server}/api/document/${meetingId}`);
+        const response = await fetch(`/api/document/${meetingId}`);
         const data = await response.json();
         setMeetingMinuteData(data);
       } catch (error) {
@@ -54,7 +54,7 @@ export default function MeetingDetails() {
 
   async function fetchTeamDetails() {
     try {
-      const response = await fetch(`${server}/api/teams/${teamId}`);
+      const response = await fetch(`/api/teams/${teamId}`);
       const data = await response.json();
 
       if (response.ok) {

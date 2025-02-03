@@ -42,7 +42,7 @@ export default function UserAvailability({
   setSelectedCells,
 }: UserAvailabilityProps) {
   const { id: urlPath } = useParams<string>();
-  const { server, loggedInUser } = useHook();
+  const { loggedInUser } = useHook();
 
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isSelecting, setIsSelecting] = useState(true);
@@ -95,19 +95,16 @@ export default function UserAvailability({
 
   async function updateAvailability(selectedSlots: Set<string>) {
     try {
-      const response = await fetch(
-        `${server}/api/polls/${urlPath}/availability`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userEmail: userEmail,
-            selectedSlots: Array.from(selectedSlots),
-          }),
-        }
-      );
+      const response = await fetch(`/api/polls/${urlPath}/availability`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userEmail: userEmail,
+          selectedSlots: Array.from(selectedSlots),
+        }),
+      });
 
       if (!response.ok) {
         toast.error("Failed to update availabilities");

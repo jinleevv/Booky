@@ -93,7 +93,6 @@ CustomIcons["comment"] = `
 
 export default function MeetingMinute() {
   const { date, time, meetingId } = useParams();
-  const { server } = useHook();
   const { userEmail } = useHook();
   const [socket, setSocket] = useState<any>(null);
   const [quill, setQuill] = useState<any>(null);
@@ -262,7 +261,7 @@ export default function MeetingMinute() {
   async function fetchComments() {
     if (!meetingId) return;
     try {
-      const response = await fetch(`${server}/api/document/${meetingId}`);
+      const response = await fetch(`/api/document/${meetingId}`);
       const data = await response.json();
       setComments(data.comments);
       if (quill) {
@@ -292,7 +291,7 @@ export default function MeetingMinute() {
       const commentId = Date.now(); // Generate a unique ID for each comment
 
       const response = await fetch(
-        `${server}/api/document/updateComments/${meetingId}`,
+        `/api/document/updateComments/${meetingId}`,
         {
           method: "PATCH",
           headers: {
@@ -328,7 +327,7 @@ export default function MeetingMinute() {
       const { range } = commentToRemove;
 
       const response = await fetch(
-        `${server}/api/document/removeComments/${meetingId}`,
+        `/api/document/removeComments/${meetingId}`,
         {
           method: "PATCH",
           headers: {

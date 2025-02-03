@@ -1,12 +1,10 @@
 import NavigationBar from "@/features/NavigationBar";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useHook } from "@/hooks";
 import JoinAMeeting from "@/features/DashboardSchedule/JoinAMeeting";
 
 export default function Schedule() {
   const { code: teamId } = useParams();
-  const { server } = useHook();
   const [teamName, setTeamName] = useState<string>("Loading...");
   const [adminEmail, setAdminEmail] = useState<string>("");
   const [teamDescription, setTeamDescription] = useState<string>("");
@@ -21,7 +19,7 @@ export default function Schedule() {
 
   async function fetchTeamDetails() {
     try {
-      const response = await fetch(`${server}/api/teams/${teamId}`);
+      const response = await fetch(`/api/teams/${teamId}`);
       const data = await response.json();
 
       if (response.ok) {

@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 export default function DashBoardTeams() {
   const navigate = useNavigate();
-  const { server, userEmail } = useHook();
+  const { userEmail } = useHook();
   const [teams, setTeams] = useState<any[]>([]);
 
   // Retrieve teams that the user is a part of
@@ -25,7 +25,7 @@ export default function DashBoardTeams() {
       const fetchTeams = async () => {
         try {
           const response = await fetch(
-            `${server}/api/teams/by-user?userEmail=${userEmail}`
+            `/api/teams/by-user?userEmail=${userEmail}`
           );
           const data = await response.json();
 
@@ -48,7 +48,7 @@ export default function DashBoardTeams() {
 
   async function handleRemoveTeam(teamId: string) {
     const response = await fetch(
-      `${server}/api/team/remove-user-from-team?teamId=${teamId}&userEmail=${userEmail}`,
+      `/api/team/remove-user-from-team?teamId=${teamId}&userEmail=${userEmail}`,
       {
         method: "PATCH",
         headers: {

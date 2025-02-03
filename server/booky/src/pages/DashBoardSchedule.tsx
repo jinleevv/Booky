@@ -4,13 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import JoinAMeeting from "@/features/DashboardSchedule/JoinAMeeting";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useHook } from "@/hooks";
 import ViewDetails from "@/features/DashboardSchedule/ViewDetails/ViewDetails";
 
 export default function DashBoardSchedule() {
   const { teamId } = useParams();
-  const { server } = useHook();
-
   const [teamName, setTeamName] = useState<string>("Loading...");
   const [adminEmail, setAdminEmail] = useState<string>("");
   const [teamDescription, setTeamDescription] = useState<string>("");
@@ -37,7 +34,7 @@ export default function DashBoardSchedule() {
 
   async function fetchTeamDetails() {
     try {
-      const response = await fetch(`${server}/api/teams/${teamId}`);
+      const response = await fetch(`/api/teams/${teamId}`);
       const data = await response.json();
 
       if (response.ok) {

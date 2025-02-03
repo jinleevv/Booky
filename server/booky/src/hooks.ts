@@ -10,10 +10,7 @@ export function useHook() {
   const [userName, setUserName] = useAtom(userNameAtom);
   const [userEmail, setUserEmail] = useAtom(userEmailAtom);
 
-  const server = import.meta.env.VITE_SERVER_NAME;
-
   return {
-    server,
     loggedInUser,
     setLoggedInUser,
     userName,

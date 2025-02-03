@@ -42,7 +42,7 @@ export default function CreateTeamForm() {
     },
   });
 
-  const { server, loggedInUser, userEmail, userName } = useHook();
+  const { loggedInUser, userEmail, userName } = useHook();
   const [pendingCoAdmin, setPendingCoAdmin] = useState<string[]>([]);
   const navigate = useNavigate();
 
@@ -52,7 +52,7 @@ export default function CreateTeamForm() {
       return;
     }
 
-    const response = await fetch(`${server}/api/teams/create`, {
+    const response = await fetch(`/api/teams/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

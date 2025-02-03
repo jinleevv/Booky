@@ -8,7 +8,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useHook } from "@/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
@@ -31,7 +30,6 @@ type FormValues = z.infer<typeof formSchema>;
 export default function ParticipatePollForm({
   onLogin,
 }: ParticipatePollFormProps) {
-  const { server } = useHook();
   const { id: urlPath } = useParams<string>();
 
   // Defining participant form
@@ -42,7 +40,7 @@ export default function ParticipatePollForm({
 
   async function onSubmit(values: FormValues) {
     let passwordVerified: boolean = true;
-    const response = await fetch(`${server}/api/polls/${urlPath}`, {
+    const response = await fetch(`/api/polls/${urlPath}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

@@ -1,7 +1,6 @@
 import UserAvailability from "@/features/CreatePoll/UserAvailability";
 import NavigationBar from "@/features/NavigationBar";
 import { days, parseStringTimeToInt } from "@/features/time";
-import { useHook } from "@/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -36,7 +35,6 @@ export interface PollData {
 
 export default function ParticipatePoll() {
   const { id: urlPath } = useParams<{ id: string }>();
-  const { server } = useHook();
 
   // Crucial states
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -61,7 +59,7 @@ export default function ParticipatePoll() {
   useEffect(() => {
     async function fetchPollDetails() {
       try {
-        const response = await fetch(`${server}/api/polls/${urlPath}`, {
+        const response = await fetch(`/api/polls/${urlPath}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -96,19 +94,16 @@ export default function ParticipatePoll() {
     if (urlPath && poll === undefined) {
       fetchPollDetails();
     }
-  }, [server, urlPath]);
+  }, [urlPath]);
 
   async function getAvailability(email: string) {
     try {
-      const response = await fetch(
-        `${server}/api/polls/${urlPath}/availability`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`/api/polls/${urlPath}/availability`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         toast.error("Failed to fetch cell availability");
