@@ -1,5 +1,5 @@
 import CreatePollForm from "@/features/CreatePoll/CreatePollForm";
-import NavigationBar from "@/features/NavigationBar";
+import NavigationBar from "@/features/NavigationBar/NavigationBar";
 
 export default function CreatePoll() {
   return (

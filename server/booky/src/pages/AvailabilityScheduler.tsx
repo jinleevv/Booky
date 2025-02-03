@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import NavigationBar from "@/features/NavigationBar";
+import NavigationBar from "@/features/NavigationBar/NavigationBar";
 import { availableTime, convertTo24Hour, formatTime } from "@/features/time";
 import { useHook } from "@/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";

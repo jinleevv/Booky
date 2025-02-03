@@ -1,5 +1,5 @@
 import { Label } from "@/components/ui/label";
-import NavigationBar from "@/features/NavigationBar";
+import NavigationBar from "@/features/NavigationBar/NavigationBar";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -102,7 +102,9 @@ export default function Search() {
               <CardFooter className="flex justify-end">
                 <Button
                   variant="ghost"
-                  onClick={() => handleSchedule("team-4eacdaed-2524-46dd-b3ac-d9b47d693ed1")}
+                  onClick={() =>
+                    handleSchedule("team-4eacdaed-2524-46dd-b3ac-d9b47d693ed1")
+                  }
                 >
                   <IoIosAdd />
                   Add to My Schedule

@@ -1,4 +1,4 @@
-import NavigationBar from "@/features/NavigationBar";
+import NavigationBar from "@/features/NavigationBar/NavigationBar";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import JoinAMeeting from "@/features/DashboardSchedule/JoinAMeeting";

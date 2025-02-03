@@ -10,20 +10,44 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { IoPersonCircle } from "react-icons/io5";
 import { useState } from "react";
-import { auth } from "../../firebase";
+import { auth } from "../../../firebase";
 import { Label } from "@/components/ui/label";
 import { signOut } from "firebase/auth";
 import { LayoutPanelLeft, LogOut, Vote } from "lucide-react";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { Input } from "@/components/ui/input";
 import { IoSearchOutline } from "react-icons/io5";
+import { motion, useCycle } from "framer-motion";
 import ShortUniqueId from "short-uuid";
 import { useHook } from "@/hooks";
+import { MenuToggle } from "./Toggles";
+import MobileNavMenu from "./MobileNavMenu";
+
+const sidebar = {
+  open: (height = 1000) => ({
+    clipPath: `circle(${height * 2 + 200}px at calc(100% - 40px) 40px)`,
+    transition: {
+      type: "spring",
+      stiffness: 20,
+      restDelta: 2,
+    },
+  }),
+  closed: {
+    clipPath: "circle(30px at calc(100% - 40px) 40px)",
+    transition: {
+      delay: 0.5,
+      type: "spring",
+      stiffness: 400,
+      damping: 40,
+    },
+  },
+};
 
 export default function NavigationBar() {
   const navigate = useNavigate();
   const { loggedInUser, userName } = useHook();
   const [courseSearch, setCourseSearch] = useState<string>("");
+  const [isOpen, toggleOpen] = useCycle(false, true);
   const urlPath = `taskFlow-${ShortUniqueId().generate()}`;
 
   const handleSearch = () => {
@@ -107,26 +131,59 @@ export default function NavigationBar() {
           </>
         ) : (
           <>
-            <Button
-              variant="outline"
-              className="bg-white hover:text-red-700 rounded-xl"
-              onClick={() => navigate(`/taskFlow/${urlPath}`)}
-            >
-              Task Flow
-            </Button>
-            <Button
-              variant="outline"
-              className="bg-white hover:text-red-700 rounded-xl"
-              onClick={() => navigate("/poll")}
-            >
-              Availability Poll
-            </Button>
-            <Button
-              onClick={() => navigate("/register")}
-              className="rounded-xl"
-            >
-              Get Started
-            </Button>
+            <div className="flex w-full gap-2">
+              <div className="hidden lg:flex w-full gap-2">
+                <Button
+                  variant="outline"
+                  className="bg-white hover:text-red-700 rounded-xl"
+                  onClick={() => navigate(`/taskFlow/${urlPath}`)}
+                >
+                  Task Flow
+                </Button>
+                <Button
+                  variant="outline"
+                  className="bg-white hover:text-red-700 rounded-xl"
+                  onClick={() => navigate("/poll")}
+                >
+                  Availability Poll
+                </Button>
+                <Button
+                  onClick={() => navigate("/register")}
+                  className="rounded-xl"
+                >
+                  Get Started
+                </Button>
+              </div>
+              <div className="flex lg:hidden items-center justify-between w-full gap-2">
+                {/* Get Started Button */}
+                {/* <Button
+                  onClick={() => navigate("/register")}
+                  className="rounded-xl flex-shrink-0"
+                >
+                  Get Started
+                </Button> */}
+
+                {/* Sidebar & Toggle Button */}
+                <motion.nav
+                  initial={false}
+                  animate={isOpen ? "open" : "closed"}
+                  className="relative z-50"
+                >
+                  {/* Sidebar Menu */}
+                  <motion.div
+                    className="fixed top-0 right-0 w-[300px] h-screen bg-gradient-to-b from-[#fffdfd] to-red-100 rounded-l-2xl shadow-lg border-l"
+                    variants={sidebar}
+                  >
+                    <MobileNavMenu />
+                  </motion.div>
+
+                  {/* ✅ Ensure `MenuToggle` is properly positioned */}
+                  <div className="relative z-50">
+                    <MenuToggle toggle={() => toggleOpen()} />
+                  </div>
+                </motion.nav>
+              </div>
+            </div>
           </>
         )}
       </div>

@@ -1,5 +1,5 @@
 import UserAvailability from "@/features/CreatePoll/UserAvailability";
-import NavigationBar from "@/features/NavigationBar";
+import NavigationBar from "@/features/NavigationBar/NavigationBar";
 import { days, parseStringTimeToInt } from "@/features/time";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
