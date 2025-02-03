@@ -23,6 +23,7 @@
     "mongoose": ">=8.8.3",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
+    "quill-image-resize-module-react": "^3.0.0",
     "short-uuid": "^5.2.0",
     "socket.io": "^4.8.1",
     "uuid": "^11.0.3"

@@ -1,6 +1,5 @@
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-// import ImageResize from "quill-image-resize-module-react";
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
@@ -68,7 +67,9 @@ class CommentBlot extends InlineBlot {
 }
 
 // Register the custom CommentBlot with Quill
+// Quill.register("modules/imageResize", ImageResize);
 Quill.register(CommentBlot, true);
+// Quill.register("modules/resize", window.QuillResizeImage);
 // Quill.register("modules/imageResize", ImageResize);
 const TOOLBAR_OPTIONS = [
   [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -191,7 +192,10 @@ export default function MeetingMinute() {
     };
   }, [socket, quill]);
 
-  const wrapperRef: any = useCallback((wrapper) => {
+  const wrapperRef: any = useCallback(async (wrapper) => {
+    const ImageResize = (await import("quill-image-resize-module-react"))
+      .default;
+    Quill.register("modules/imageResize", ImageResize);
     if (wrapper == null) return;
     wrapper.innerHTML = "";
     const editor = document.createElement("div");
@@ -207,7 +211,6 @@ export default function MeetingMinute() {
           },
         },
         imageResize: {
-          parchment: Quill.import("parchment"),
           modules: ["Resize", "DisplaySize"],
         },
       },
