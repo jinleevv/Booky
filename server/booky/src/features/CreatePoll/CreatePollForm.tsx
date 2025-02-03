@@ -87,6 +87,10 @@ export default function CreatePollForm() {
   const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (invalidRange) {
+      toast.error("Date range cannot exceed 7 days");
+      return;
+    }
     values.startTime = convertTo24Hour(values.startTime);
     values.endTime = convertTo24Hour(values.endTime);
 

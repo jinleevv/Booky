@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { formatTime } from "@/features/time";
@@ -9,8 +8,6 @@ import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import ParticipatePollForm from "./ParticipatePollForm";
 import TimeGrid from "./TimeGrid";
-import { columns } from "./columns";
-import { DataTable } from "./data-table";
 
 interface UserAvailabilityProps {
   poll: PollData;
@@ -42,7 +39,6 @@ export default function UserAvailability({
   setSelectedCells,
 }: UserAvailabilityProps) {
   const { id: urlPath } = useParams<string>();
-  const { loggedInUser } = useHook();
 
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [isSelecting, setIsSelecting] = useState(true);
@@ -55,7 +51,7 @@ export default function UserAvailability({
   const [availableUsers, setAvailableUsers] = useState<string[]>([]);
   const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<AvailableTime[]>([]);
-  const [transferData, setTransferData] = useState<any>([]);
+  // const [transferData, setTransferData] = useState<any>([]);
 
   function countCurrentUser() {
     return userEmail && !groupAvailability.has(userEmail) ? 1 : 0;
@@ -81,7 +77,7 @@ export default function UserAvailability({
         date: item.day, // Assuming `item.day` contains the date
         time: `${formatTime(item.start)} - ${formatTime(item.end)}`, // Format time properly
       }));
-    setTransferData(formattedData);
+    // setTransferData(formattedData);
   }, [availableTimes]);
 
   async function fetchAvailability() {
