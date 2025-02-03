@@ -1,4 +1,4 @@
-import NavigationBar from "@/features/NavigationBar";
+import NavigationBar from "@/features/NavigationBar/NavigationBar";
 import {
   ReactFlow,
   Controls,
@@ -142,8 +142,8 @@ export default function TaskFlowPage() {
       <NavigationBar />
       <main className="container">
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 translate-x-1/2"></div>
-        <div className="p-10">
-          <div className="relative h-[800px] w-[1600px] z-10 border rounded-lg">
+        <div className="p-8">
+          <div className="relative h-[750px] w-[1200px] z-10 border rounded-lg">
             <div className="absolute top-4 right-4 z-50 flex flex-col gap-2">
               <Button
                 onClick={handleSaveTaskFlow}

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { availableTime, convertTo24Hour } from "@/features/time";
+import { DateRangePicker } from "@heroui/date-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   getDayOfWeek,
@@ -26,10 +27,9 @@ import {
   today,
   ZonedDateTime,
 } from "@internationalized/date";
-import { DateRangePicker } from "@heroui/date-picker";
-import { useNavigate } from "react-router-dom";
-
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 import { z } from "zod";
@@ -62,6 +62,7 @@ const formatDateTime = (dateObject: ZonedDateTime): string => {
 
 export default function CreatePollForm() {
   const now = today(getLocalTimeZone());
+  const [invalidRange, setInvalidRange] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -86,6 +87,10 @@ export default function CreatePollForm() {
   const navigate = useNavigate();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (invalidRange) {
+      toast.error("Date range cannot exceed 7 days");
+      return;
+    }
     values.startTime = convertTo24Hour(values.startTime);
     values.endTime = convertTo24Hour(values.endTime);
 
@@ -170,11 +175,24 @@ export default function CreatePollForm() {
                       <DateRangePicker
                         isRequired
                         hideTimeZone
+                        errorMessage={
+                          invalidRange
+                            ? "Date range cannot exceed 7 days"
+                            : undefined
+                        }
+                        isInvalid={invalidRange}
                         minValue={now}
                         labelPlacement="inside"
                         label="Meeting / Event"
                         className="max-w-md rounded-md"
                         onChange={(value) => {
+                          if (!value.start || !value.end) return;
+                          const diffInDays = value.end.compare(value.start);
+                          if (diffInDays > 6) {
+                            setInvalidRange(true);
+                            return;
+                          }
+                          setInvalidRange(false);
                           const formattedStart = value.start
                             ? formatDateTime(
                                 parseZonedDateTime(

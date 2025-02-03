@@ -43,6 +43,8 @@ export const editMeetingHandler: RequestHandler = async (
     meetingName,
     meetingDescription,
     recurringMeetingSchedule,
+    startDate,
+    meetingFrequency,
     oneTimeMeetingSchedule,
     meetingType,
     duration,
@@ -90,10 +92,17 @@ export const editMeetingHandler: RequestHandler = async (
 
       //   const todayDate = new Date();
 
-      for (let i = 0; i < 14; i++) {
-        const targetDate = new Date(today);
-        targetDate.setDate(today.getDate() + i);
+      const todayUTC = new Date();
+      const today = convertToEST(todayUTC);
 
+      const start = new Date(`${startDate}T12:00:00`);
+
+      const oneMonthLater = new Date(today);
+      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+      const targetDate = new Date(start);
+
+      while (targetDate < oneMonthLater) {
         const targetDay = targetDate.toLocaleString("en-US", {
           weekday: "long",
         });
@@ -122,6 +131,22 @@ export const editMeetingHandler: RequestHandler = async (
               attendees: [],
             });
           }
+        }
+
+        if (targetDay === "Saturday") {
+          switch (meetingFrequency) {
+            case "Weekly":
+              targetDate.setDate(targetDate.getDate() + 1);
+              break;
+            case "Biweekly":
+              targetDate.setDate(targetDate.getDate() + 8);
+              break;
+            case "Monthly":
+              targetDate.setMonth(targetDate.getMonth() + 1);
+              break;
+          }
+        } else {
+          targetDate.setDate(targetDate.getDate() + 1);
         }
       }
     } else {

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import NavigationBar from "@/features/NavigationBar";
+import NavigationBar from "@/features/NavigationBar/NavigationBar";
 import {
   GoogleAuthProvider,
   GithubAuthProvider,
@@ -56,9 +56,9 @@ export default function Home() {
         <NavigationBar />
       </div>
       <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 translate-x-1/2"></div>
-      <div className="relative grid lg:grid-cols-2 gap-10 w-full h-5/6">
+      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-10 w-full h-5/6">
         <div className="grid gap-10 w-full h-fit z-10 mt-8 px-8 text-center lg:text-start">
-          <div className="w-full lg:w-4/5 h-fit mt-16">
+          <div className="flex flex-col w-full lg:w-4/5 h-fit mt-16">
             <Label className="text-6xl font-bold text-black">
               Easily Collaborate & Manage Your Schedules
             </Label>{" "}
@@ -84,7 +84,7 @@ export default function Home() {
               </>
             ) : (
               <>
-                <div className="flex lg:flex-col w-full gap-2">
+                <div className="flex flex-col mt-10 lg:mt-0 w-full gap-2">
                   <Button
                     className="w-full h-12 text-lg flex items-center gap-3"
                     onClick={handleGoogleLogin}
@@ -92,7 +92,7 @@ export default function Home() {
                     <img src="/google_logo.png" className="w-5 h-5" />
                     Sign Up with Google
                   </Button>
-                  <Button className="w-full h-12 text-lg flex items-center gap-3">
+                  {/* <Button className="w-full h-12 text-lg flex items-center gap-3">
                     <img
                       width="20"
                       height="20"
@@ -100,7 +100,7 @@ export default function Home() {
                       alt="microsoft"
                     />
                     Sign Up with Microsoft
-                  </Button>
+                  </Button> */}
                   <Button
                     className="w-full h-12 text-lg flex items-center gap-3"
                     onClick={handleGithubLogin}

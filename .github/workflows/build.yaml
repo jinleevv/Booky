@@ -1,0 +1,32 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - dev # Trigger on pushes to the dev branch
+  pull_request:
+    branches:
+      - dev # Trigger on pull requests to the dev branch
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x" # Specify your Node.js version
+
+      # Step 3: Install dependencies and build in server folder only
+      - name: Install dependencies and build
+        run: |
+          cd server
+          npm install
+          npm run build
