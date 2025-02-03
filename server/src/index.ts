@@ -82,6 +82,7 @@ app.use(
       "X-Requested-With",
     ],
     credentials: true,
+    optionsSuccessStatus: 204,
   })
 );
 
