@@ -3,11 +3,11 @@ import { Label } from "@/components/ui/label";
 import NavigationBar from "@/features/NavigationBar/NavigationBar";
 import {
   GoogleAuthProvider,
-  GithubAuthProvider,
+  // GithubAuthProvider,
   signInWithPopup,
 } from "@firebase/auth";
 import { auth } from "@/../firebase";
-import { IoLogoGithub } from "react-icons/io5";
+// import { IoLogoGithub } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -34,21 +34,21 @@ export default function Home() {
     }
   }
 
-  async function handleGithubLogin() {
-    try {
-      const provider = new GithubAuthProvider();
-      const response = await signInWithPopup(auth, provider);
-      toast("Sign-In Successful");
-      setLoggedInUser(true);
-      setUserName(response.user.displayName);
-    } catch (error) {
-      if (error.code === "auth/invalid-credential") {
-        toast("Invalid email or password");
-      } else {
-        toast("Unable to log in due to an error");
-      }
-    }
-  }
+  // async function handleGithubLogin() {
+  //   try {
+  //     const provider = new GithubAuthProvider();
+  //     const response = await signInWithPopup(auth, provider);
+  //     toast("Sign-In Successful");
+  //     setLoggedInUser(true);
+  //     setUserName(response.user.displayName);
+  //   } catch (error) {
+  //     if (error.code === "auth/invalid-credential") {
+  //       toast("Invalid email or password");
+  //     } else {
+  //       toast("Unable to log in due to an error");
+  //     }
+  //   }
+  // }
 
   return (
     <section className="h-screen w-screen bg-white font-outfit">
@@ -101,13 +101,13 @@ export default function Home() {
                     />
                     Sign Up with Microsoft
                   </Button> */}
-                  <Button
+                  {/* <Button
                     className="w-full h-12 text-lg flex items-center gap-3"
                     onClick={handleGithubLogin}
                   >
                     <IoLogoGithub size={24} />
                     Sign Up with Github
-                  </Button>
+                  </Button> */}
                 </div>
                 <div className="w-full border border-t-1 border-black rounded-full"></div>
                 <div className="w-full text-center">
