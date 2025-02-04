@@ -150,12 +150,12 @@ mongoose
 
 // startScheduler();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`🚀 Server running on port ${PORT}`);
+// });
 
 server.listen(PORT, () => {
-  console.log(`🚀 Socket running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
 
 io.on("connection", (socket: any) => {
