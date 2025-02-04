@@ -14,8 +14,8 @@ const variants = {
 };
 
 const Items = [
-  { id: "0", text: "Task Flow", icon: <Workflow /> },
-  { id: "1", text: "Availability Poll", icon: <Vote /> },
+  { id: "0", text: "Task Flow", icon: <Workflow />, link: "/taskFlow" },
+  { id: "1", text: "Availability Poll", icon: <Vote />, link: "/poll" },
 ];
 
 export default function MobileNavMenu() {
@@ -33,6 +33,7 @@ export default function MobileNavMenu() {
             key={item.id}
             text={item.text}
             icon={item.icon}
+            link={item.link}
           />
         ))}
       </motion.ul>

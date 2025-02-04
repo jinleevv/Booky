@@ -137,6 +137,7 @@ export default function NavigationBar() {
                   variant="outline"
                   className="bg-white hover:text-red-700 rounded-xl"
                   onClick={() => navigate(`/taskFlow/${urlPath}`)}
+                  disabled={true}
                 >
                   Task Flow
                 </Button>
@@ -155,15 +156,6 @@ export default function NavigationBar() {
                 </Button>
               </div>
               <div className="flex lg:hidden items-center justify-between w-full gap-2">
-                {/* Get Started Button */}
-                {/* <Button
-                  onClick={() => navigate("/register")}
-                  className="rounded-xl flex-shrink-0"
-                >
-                  Get Started
-                </Button> */}
-
-                {/* Sidebar & Toggle Button */}
                 <motion.nav
                   initial={false}
                   animate={isOpen ? "open" : "closed"}
