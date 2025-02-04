@@ -106,8 +106,7 @@ export default function MeetingMinute() {
 
   useEffect(() => {
     // const s = io("http://localhost:4001");
-    // const s = io("http://localhost:4001");
-    const s = io("https://www.booky.im");
+    const s = io("/");
     setSocket(s);
 
     return () => {
