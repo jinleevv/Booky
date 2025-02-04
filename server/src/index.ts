@@ -40,7 +40,7 @@ dotenv.config();
 
 const app = express();
 
-const DB_PORT = process.env.DB_PORT;
+const PORT = process.env.PORT;
 // const SOCKET_PORT = Number(process.env.SOCKET_PORT);
 const allowedOrigins = [
   "http://localhost:5173",
@@ -150,8 +150,8 @@ mongoose
 
 // startScheduler();
 
-app.listen(DB_PORT, () => {
-  console.log(`🚀Server running on port ${DB_PORT}`);
+app.listen(PORT, () => {
+  console.log(`🚀Server running on port ${PORT}`);
 });
 
 io.on("connection", (socket: any) => {
@@ -183,9 +183,4 @@ io.on("connection", (socket: any) => {
       socket.broadcast.to(meeting).emit("receive-title-change", title);
     });
   });
-});
-
-// Start server
-server.listen(4001, () => {
-  console.log(`🚀 Socket running on port 4001`);
 });
