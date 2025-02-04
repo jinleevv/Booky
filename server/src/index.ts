@@ -50,7 +50,7 @@ const allowedOrigins = [
   "https://www.booky.im",
 ];
 
-const server = http.createServer();
+const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -187,5 +187,5 @@ io.on("connection", (socket: any) => {
 
 // Start server
 server.listen(4001, () => {
-  console.log(`🚀 Server running on port 4001`);
+  console.log(`🚀 Socket running on port 4001`);
 });
