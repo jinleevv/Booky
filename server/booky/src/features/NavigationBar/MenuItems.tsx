@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const variants = {
   open: {
@@ -18,7 +19,8 @@ const variants = {
   },
 };
 
-export const MenuItem = ({ id, text, icon }) => {
+export const MenuItem = ({ id, text, icon, link }) => {
+  const navigate = useNavigate();
   return (
     <>
       <motion.li
@@ -28,6 +30,8 @@ export const MenuItem = ({ id, text, icon }) => {
         <Button
           className="flex w-full h-12 rounded-2xl justify-start gap-4"
           variant="outline"
+          onClick={() => navigate(link)}
+          disabled={text === "Task Flow"}
         >
           {icon}
           {text}
