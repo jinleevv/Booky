@@ -81,6 +81,11 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  next();
+});
+
 // ✅ Add this to explicitly handle preflight requests (for OPTIONS)
 app.options("*", cors());
 
