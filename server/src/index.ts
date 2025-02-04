@@ -154,6 +154,10 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
+server.listen(PORT, () => {
+  console.log(`🚀 Socket running on port ${PORT}`);
+});
+
 io.on("connection", (socket: any) => {
   console.log("Socket Connected");
   socket.on("get-document", async (meeting: any) => {
