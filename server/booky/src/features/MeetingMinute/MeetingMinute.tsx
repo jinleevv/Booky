@@ -3,7 +3,7 @@ import "quill/dist/quill.snow.css";
 import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
-import { saveAs } from "file-saver";
+// import { saveAs } from "file-saver";
 import "./MeetingMinute.css";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -11,23 +11,23 @@ import InlineBlot from "quill/blots/inline";
 import { useHook } from "@/hooks";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import quillToWord from "quill-to-word";
-import { pdfExporter } from "quill-to-pdf";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog";
+// import quillToWord from "quill-to-word";
+// import { pdfExporter } from "quill-to-pdf";
 
 const SAVE_INTERVAL_MS = 1000;
 
@@ -102,7 +102,7 @@ export default function MeetingMinute() {
   >([]);
   const [title, setTitle] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true); // Track loading state
-  const [exportType, setExportType] = useState<string | null>(null);
+  // const [exportType, setExportType] = useState<string | null>(null);
 
   useEffect(() => {
     const s = io("http://localhost:4001");
@@ -220,46 +220,46 @@ export default function MeetingMinute() {
     setQuill(q);
   }, []);
 
-  async function handleExportToWords() {
-    if (!quill) return;
-    try {
-      const delta = quill.getContents();
-      const configuration: quillToWord.Config = {
-        exportAs: "blob", // could also be 'buffer', 'base64', or 'doc'
-      };
+  // async function handleExportToWords() {
+  //   if (!quill) return;
+  //   try {
+  //     const delta = quill.getContents();
+  //     const configuration: quillToWord.Config = {
+  //       exportAs: "blob", // could also be 'buffer', 'base64', or 'doc'
+  //     };
 
-      const docx_blob = await quillToWord.generateWord(delta, configuration);
-      saveAs(docx_blob, `${title}.docx`);
-    } catch (error) {
-      toast.error("Failed to export in .docx");
-    }
-  }
+  //     const docx_blob = await quillToWord.generateWord(delta, configuration);
+  //     saveAs(docx_blob, `${title}.docx`);
+  //   } catch (error) {
+  //     toast.error("Failed to export in .docx");
+  //   }
+  // }
 
-  async function handleExportToPDF() {
-    if (!quill) return;
-    try {
-      const delta = quill.getContents();
-      const pdfAsBlob = await pdfExporter.generatePdf(delta); // converts to PDF
+  // async function handleExportToPDF() {
+  //   if (!quill) return;
+  //   try {
+  //     const delta = quill.getContents();
+  //     const pdfAsBlob = await pdfExporter.generatePdf(delta); // converts to PDF
 
-      saveAs(pdfAsBlob, `${title}.pdf`);
-    } catch (error) {
-      toast.error("Failed to export in .pdf");
-    }
-  }
+  //     saveAs(pdfAsBlob, `${title}.pdf`);
+  //   } catch (error) {
+  //     toast.error("Failed to export in .pdf");
+  //   }
+  // }
 
-  function handleExport() {
-    if (!exportType) {
-      toast.error("Please select a document type before exporting.");
-      return;
-    }
+  // function handleExport() {
+  //   if (!exportType) {
+  //     toast.error("Please select a document type before exporting.");
+  //     return;
+  //   }
 
-    if (exportType === "pdf") {
-      handleExportToPDF();
-    } else if (exportType === "docx") {
-      handleExportToWords();
-    }
-    setExportType(null);
-  }
+  //   if (exportType === "pdf") {
+  //     handleExportToPDF();
+  //   } else if (exportType === "docx") {
+  //     handleExportToWords();
+  //   }
+  //   setExportType(null);
+  // }
 
   async function fetchComments() {
     if (!meetingId) return;
@@ -388,7 +388,7 @@ export default function MeetingMinute() {
             onChange={handleTitleChange}
             placeholder="Enter document title..."
           />
-          <div className="flex w-2/12 h-full justify-end my-auto">
+          {/* <div className="flex w-2/12 h-full justify-end my-auto">
             <Dialog>
               <DialogTrigger>
                 <Button className="rounded-2xl">Export</Button>
@@ -414,7 +414,7 @@ export default function MeetingMinute() {
                 <Button onClick={handleExport}>Export</Button>
               </DialogContent>
             </Dialog>
-          </div>
+          </div> */}
         </div>
       </div>
 
