@@ -34,6 +34,7 @@ import removeCommentsRoute from "./routes/document/removeCommentsRoute";
 import userRoute from "./routes/user/userRegistrationRoute";
 import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
 import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
+import http from "http";
 
 dotenv.config();
 
@@ -49,12 +50,12 @@ const allowedOrigins = [
   "https://www.booky.im",
 ];
 
-const io = new Server(4001, {
+const server = http.createServer();
+const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
-  transports: ["websocket", "polling"],
 });
 
 app.use(
@@ -150,7 +151,7 @@ mongoose
 // startScheduler();
 
 app.listen(DB_PORT, () => {
-  console.log(`Server running on port ${DB_PORT}`);
+  console.log(`🚀Server running on port ${DB_PORT}`);
 });
 
 io.on("connection", (socket: any) => {
@@ -182,4 +183,9 @@ io.on("connection", (socket: any) => {
       socket.broadcast.to(meeting).emit("receive-title-change", title);
     });
   });
+});
+
+// Start server
+server.listen(4001, () => {
+  console.log(`🚀 Server running on port 4001`);
 });
