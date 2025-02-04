@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import path from "path";
-import { fileURLToPath } from "url";
 import { Server } from "socket.io";
 import { startScheduler } from "./meetingCreateScheduler";
 import MeetingMinute from "./models/meetingMinute";
@@ -35,8 +34,6 @@ import removeCommentsRoute from "./routes/document/removeCommentsRoute";
 import userRoute from "./routes/user/userRegistrationRoute";
 import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
 import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
-import { readFileSync } from "fs";
-import { createServer } from "https";
 
 dotenv.config();
 
@@ -52,25 +49,10 @@ const allowedOrigins = [
   "https://www.booky.im",
 ];
 
-// const io = new Server(4001, {
-//   cors: {
-//     origin: "*",
-//     methods: ["GET", "POST"],
-//   },
-// });
-// ✅ Load TLS/SSL certificate (make sure paths are correct)
-const options = {
-  key: readFileSync("/etc/letsencrypt/live/booky.im/privkey.pem"),
-  cert: readFileSync("/etc/letsencrypt/live/booky.im/fullchain.pem"),
-};
-
-const httpsServer = createServer(options, app); // ✅ Create secure HTTPS server
-
-const io = new Server(httpsServer, {
+const io = new Server(4001, {
   cors: {
-    origin: ["https://www.booky.im", "https://booky.im"],
+    origin: "*",
     methods: ["GET", "POST"],
-    credentials: true,
   },
   transports: ["websocket", "polling"],
 });
@@ -169,10 +151,6 @@ mongoose
 
 app.listen(DB_PORT, () => {
   console.log(`Server running on port ${DB_PORT}`);
-});
-
-httpsServer.listen(4001, () => {
-  console.log("✅ Secure WebSocket server running on port 4001");
 });
 
 io.on("connection", (socket: any) => {
