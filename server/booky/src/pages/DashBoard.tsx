@@ -330,7 +330,8 @@ export default function DashBoard() {
                                   <Label className="w-36 border-r-1 border-gray-500">{`${formatDateWithOrdinal(
                                     meeting.date
                                   )}`}</Label>
-                                  <Label>{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+                                  <Label className="pr-2 border-r-1 border-gray-500">{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+                                  <Label>Total Participants: {meeting.attendees.length}</Label>
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}

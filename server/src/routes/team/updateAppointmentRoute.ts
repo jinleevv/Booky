@@ -35,13 +35,13 @@ export const updateAppointmentsHandler: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const { teamId } = req.params;
-  const { meetingTeamId, day, time, attend } = req.body;
+  const { meetingTeamId, day, attend } = req.body;
   try {
-    if (!meetingTeamId || !attend || !day || !time) {
+    if (!meetingTeamId || !attend || !day) {
       res.status(400).json({ message: "Invalid or missing appointments data" });
       return;
     }
-
+    
     const team = await Team.findById(teamId);
     if (!team) {
       res.status(404).json({ message: "Team not found" });
@@ -58,22 +58,23 @@ export const updateAppointmentsHandler: RequestHandler = async (
     }
 
     let appointmentUpdated = true;
-
+    console.log(attend.time);
     if (findMeetingTeam.type !== "group") {
       findMeetingTeam.meeting.forEach((m: any) => {
-        if (m.date === day && isTimeInRange(time, m.time.start, m.time.end)) {
+        if (m.date === day && isTimeInRange(attend.time, m.time.start, m.time.end)) {
           m.attendees.push(attend);
           appointmentUpdated = true;
         }
       });
     }
-    // else {
-    //   findMeetingTeam.meeting.forEach((m: any) => {
-    //     if (m.date === day) {
-    //       m.attendees.push(attend);
-    //       appointmentUpdated = true;
-    //     }
-    // })}
+    else {
+      findMeetingTeam.meeting.forEach((m: any) => {
+        if (m.date === day) {
+          attend.time = m.time.start;
+          m.attendees.push(attend);
+          appointmentUpdated = true;
+        }
+    })}
 
     if (!appointmentUpdated) {
       res
