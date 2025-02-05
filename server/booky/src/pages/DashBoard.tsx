@@ -340,10 +340,10 @@ export default function DashBoard() {
                             </AccordionTrigger>
                             <AccordionContent>
                               <div className="flex w-full justify-between items-center mb-3">
-                                <div className="w-full space-y-2">
+                                <div className="w-full space-y-2 max-h-[calc(3.5*1.7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
                                   {meeting.attendees.map(
                                     (attendee, subIndex) => (
-                                      <div className="flex w-full justify-between text-sm">
+                                      <div className="flex w-full justify-between text-sm h-5">
                                         <div>
                                           <Label className="font-bold text-black">
                                             Email:{" "}
