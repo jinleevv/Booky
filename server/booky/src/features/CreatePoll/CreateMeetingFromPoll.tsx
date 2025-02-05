@@ -109,8 +109,7 @@ export default function CreateMeetingFromPoll({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        hostEmail: userEmail,
-        hostName: userName,
+        // !TODO: this needs to be fixed
         meetingName: values.meetingName,
         meetingDescription: values.meetingDescription,
         recurringMeetingSchedule: values.recurringMeetingSchedule,
