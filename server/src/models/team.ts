@@ -63,7 +63,7 @@ interface ITimeRange {
 // The token/tokenExpirey is necessary to allow users to cancel their appointments.
 interface IAttendee {
   // To check which meeting they are attending
-  time: ITimeRange;
+  time: string;
 
   participantName?: string;
   participantEmail: string;
