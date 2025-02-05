@@ -119,11 +119,7 @@ export default function MeetingMinute() {
 
     socket.once("load-document", (document) => {
       // Ensure document data is valid before setting contents
-      if (!document || !document.data || !document.data.ops) {
-        quill.setText("");
-        setIsLoading(false);
-        return;
-      }
+
       setTitle(document.title || `Meeting Minute, ${date}, ${time}`); // Set title
 
       // Delay setting content to ensure Quill is ready

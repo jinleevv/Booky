@@ -22,7 +22,7 @@ export default function NavigationBar() {
   const { userName } = useHook();
 
   return (
-    <nav className="flex flex-col h-screen w-1/6 min-w-[147px] py-4 bg-zinc-50 border-r border-gray-200">
+    <nav className="flex flex-col h-screen w-1/6 min-w-[230px] py-4 bg-zinc-50 border-r border-gray-200">
       <div
         className="flex items-center gap-2 px-8"
         onClick={() => navigate("/")}

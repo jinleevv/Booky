@@ -20,6 +20,7 @@ import { TbCalendar } from "react-icons/tb";
 import { useEffect, useState } from "react";
 import { useHook } from "@/hooks";
 import { toast } from "sonner";
+import MobileNavBar from "@/features/NavigationBar/MobileNavBar";
 
 export default function DashBoard() {
   const { userEmail } = useHook();
@@ -237,9 +238,15 @@ export default function DashBoard() {
   return (
     <section className="h-screen w-screen bg-white">
       <div className="absolute w-3/6 h-2/6 bg-red-200 blur-[600px] top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4"></div>
-      <div className="flex h-screen">
-        <DashboardNavBar />
-        <div className="w-full px-3 py-4 relative z-20 font-outfit overflow-y-auto">
+      <div className="grid lg:flex lg:h-screen">
+        <div className="hidden lg:flex">
+          <DashboardNavBar />
+        </div>
+        <div className="lg:hidden z-50">
+          <MobileNavBar />
+        </div>
+
+        <div className="h-full w-full px-3 py-4 lg:relative z-20 font-outfit lg:overflow-y-auto">
           <Label className="text-2xl font-bold text-black">Meetings</Label>
           <div className="w-full h-5/6 mt-3 space-y-3">
             <div className="flex gap-1">
@@ -315,7 +322,7 @@ export default function DashBoard() {
                           <AccordionItem key={index} value={`item-${index}`}>
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
-                                <Label className="flex gap-2">
+                                <Label className="flex gap-1">
                                   {cancelledMeetings.some(
                                     (cancelled) =>
                                       cancelled === meeting.meetingId
@@ -327,11 +334,14 @@ export default function DashBoard() {
                                   ) : (
                                     <></>
                                   )}
-                                  <Label className="w-36 border-r-1 border-gray-500">{`${formatDateWithOrdinal(
-                                    meeting.date
-                                  )}`}</Label>
-                                  <Label className="pr-2 border-r-1 border-gray-500">{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
-                                  <Label>Total Participants: {meeting.attendees.length}</Label>
+                                  <Label className="w-36 font-normal">
+                                    {`${formatDateWithOrdinal(meeting.date)}`}:
+                                  </Label>
+                                  <Label className="-ml-3 font-medium">{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+                                  <Label className="text-xs text-gray-500">
+                                    Total Participants:{" "}
+                                    {meeting.attendees.length}
+                                  </Label>
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}
@@ -367,7 +377,10 @@ export default function DashBoard() {
                               </div>
                               {meeting.meetingHostEmail === userEmail ? (
                                 <div className="flex w-full justify-end mt-2">
-                                  {!cancelledMeetings.some((cancelled) => cancelled === meeting.meetingId) && (
+                                  {!cancelledMeetings.some(
+                                    (cancelled) =>
+                                      cancelled === meeting.meetingId
+                                  ) && (
                                     <Button
                                       variant="outline"
                                       className="ml-4"

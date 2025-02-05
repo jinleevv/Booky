@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useHook } from "@/hooks";
 import { motion } from "framer-motion";
-import { LayoutPanelLeft } from "lucide-react";
+import { CalendarCheck, LayoutPanelLeft, Waypoints } from "lucide-react";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -93,22 +93,6 @@ export default function Home() {
                     <img src="/google_logo.png" className="w-5 h-5" />
                     Sign Up with Google
                   </Button>
-                  {/* <Button className="w-full h-12 text-lg flex items-center gap-3">
-                    <img
-                      width="20"
-                      height="20"
-                      src="https://img.icons8.com/color/48/microsoft.png"
-                      alt="microsoft"
-                    />
-                    Sign Up with Microsoft
-                  </Button> */}
-                  {/* <Button
-                    className="w-full h-12 text-lg flex items-center gap-3"
-                    onClick={handleGithubLogin}
-                  >
-                    <IoLogoGithub size={24} />
-                    Sign Up with Github
-                  </Button> */}
                 </div>
                 <div className="w-full border border-t-1 border-black rounded-full"></div>
                 <div className="w-full text-center">
@@ -144,7 +128,9 @@ export default function Home() {
                     <Button
                       variant="outline"
                       className="text-black w-full mt-4"
+                      onClick={() => navigate("/register")}
                     >
+                      <CalendarCheck />
                       Start Scheduling
                     </Button>
                   </div>
@@ -202,7 +188,9 @@ export default function Home() {
                     <Button
                       variant="outline"
                       className="text-black w-full mt-2"
+                      onClick={() => navigate("/poll")}
                     >
+                      <Waypoints />
                       Share Your Availability
                     </Button>
                   </div>
