@@ -100,7 +100,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
       from: `Booky <${process.env.EMAIL}>`,
       to: attend.participantEmail,
       subject: "Booky Confirmation",
-      text: `Booky Confirmation Email\n\n Cancel Link: http://10.140.17.108:3000/${team._id}/${attend.token} \n\n Have a great day :) \n Booky`,
+      text: `Booky Confirmation Email\n\n Online Meeting Link: ${findMeetingTeam.zoomLink} \n\n Cancel Link: https://www.booky.im/${team._id}/${attend.token} \n\n Have a great day :) \n Booky`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
