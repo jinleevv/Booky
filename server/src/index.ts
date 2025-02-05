@@ -43,7 +43,7 @@ const app = express();
 const PORT = process.env.PORT;
 // const SOCKET_PORT = Number(process.env.SOCKET_PORT);
 const allowedOrigins = [
-  "http://localhost:5174",
+  "http://localhost:5173",
   "http://localhost:10000",
   "https://booky.im",
   "https://www.booky.im",
