@@ -367,26 +367,24 @@ export default function DashBoard() {
                               </div>
                               {meeting.meetingHostEmail === userEmail ? (
                                 <div className="flex w-full justify-end mt-2">
-                                  <Button
-                                    variant="outline"
-                                    className="ml-4"
-                                    onClick={() =>
-                                      handleCancel(
-                                        meeting.teamId,
-                                        meeting.meetingTeamId,
-                                        meeting.meetingId,
-                                        meeting.date,
-                                        meeting.time.start,
-                                        meeting.time.end
-                                      )
-                                    }
-                                    disabled={cancelledMeetings.some(
-                                      (cancelled) =>
-                                        cancelled === meeting.meetingId
-                                    )}
-                                  >
-                                    Cancel the Meeting
-                                  </Button>
+                                  {!cancelledMeetings.some((cancelled) => cancelled === meeting.meetingId) && (
+                                    <Button
+                                      variant="outline"
+                                      className="ml-4"
+                                      onClick={() =>
+                                        handleCancel(
+                                          meeting.teamId,
+                                          meeting.meetingTeamId,
+                                          meeting.meetingId,
+                                          meeting.date,
+                                          meeting.time.start,
+                                          meeting.time.end
+                                        )
+                                      }
+                                    >
+                                      Cancel the Meeting
+                                    </Button>
+                                  )}
                                 </div>
                               ) : (
                                 <></>
