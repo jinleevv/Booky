@@ -136,8 +136,13 @@ export default function JoinAMeeting({
   function updateEnabledDaysAndDisabledDates(selectedMeetingTeam) {
     const meetingDates = [];
     const meetings = selectedMeetingTeam.meeting;
+    
+    const today = new Date();
+    today.setDate(today.getDate() + 7);
+    const oneWeekFromToday = today.toISOString().split("T")[0];
+    
     meetings.forEach((meeting) => {
-      if (meeting.cancelled !== true) {
+      if (meeting.cancelled !== true && meeting.date < oneWeekFromToday) {
         meetingDates.push(meeting.date);
       }
     });
@@ -166,13 +171,6 @@ export default function JoinAMeeting({
         }
       });
     }
-
-    // Check for cancelled date: unnecessary for now
-    // selectedMeetingTeam.cancelledMeetings.map((m) => {
-    //   if (m.date === date && m.time === start) {
-    //     return [];
-    //   }
-    // });
 
     while (startTime < endTime) {
       const timeSlot = startTime.toLocaleTimeString([], {
