@@ -120,7 +120,7 @@ export default function MeetingMinute() {
     socket.once("load-document", (document) => {
       // Ensure document data is valid before setting contents
       if (!document || !document.data || !document.data.ops) {
-        quill.setText("Failed to load document.");
+        quill.setText("");
         setIsLoading(false);
         return;
       }

@@ -330,7 +330,8 @@ export default function DashBoard() {
                                   <Label className="w-36 border-r-1 border-gray-500">{`${formatDateWithOrdinal(
                                     meeting.date
                                   )}`}</Label>
-                                  <Label>{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+                                  <Label className="pr-2 border-r-1 border-gray-500">{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+                                  <Label>Total Participants: {meeting.attendees.length}</Label>
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}
@@ -339,10 +340,10 @@ export default function DashBoard() {
                             </AccordionTrigger>
                             <AccordionContent>
                               <div className="flex w-full justify-between items-center mb-3">
-                                <div className="w-full space-y-2">
+                                <div className="w-full space-y-2 max-h-[calc(3.5*1.7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
                                   {meeting.attendees.map(
                                     (attendee, subIndex) => (
-                                      <div className="flex w-full justify-between text-sm">
+                                      <div className="flex w-full justify-between text-sm h-5">
                                         <div>
                                           <Label className="font-bold text-black">
                                             Email:{" "}
@@ -366,26 +367,24 @@ export default function DashBoard() {
                               </div>
                               {meeting.meetingHostEmail === userEmail ? (
                                 <div className="flex w-full justify-end mt-2">
-                                  <Button
-                                    variant="outline"
-                                    className="ml-4"
-                                    onClick={() =>
-                                      handleCancel(
-                                        meeting.teamId,
-                                        meeting.meetingTeamId,
-                                        meeting.meetingId,
-                                        meeting.date,
-                                        meeting.time.start,
-                                        meeting.time.end
-                                      )
-                                    }
-                                    disabled={cancelledMeetings.some(
-                                      (cancelled) =>
-                                        cancelled === meeting.meetingId
-                                    )}
-                                  >
-                                    Cancel the Meeting
-                                  </Button>
+                                  {!cancelledMeetings.some((cancelled) => cancelled === meeting.meetingId) && (
+                                    <Button
+                                      variant="outline"
+                                      className="ml-4"
+                                      onClick={() =>
+                                        handleCancel(
+                                          meeting.teamId,
+                                          meeting.meetingTeamId,
+                                          meeting.meetingId,
+                                          meeting.date,
+                                          meeting.time.start,
+                                          meeting.time.end
+                                        )
+                                      }
+                                    >
+                                      Cancel the Meeting
+                                    </Button>
+                                  )}
                                 </div>
                               ) : (
                                 <></>

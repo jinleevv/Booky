@@ -29,19 +29,23 @@ function isTimeInRange(time: string, startTime: string, endTime: string) {
   return timeDate >= startDate && timeDate <= endDate;
 }
 
+function isAlreadyBooked(attendees: any[], participantEmail: string): boolean {
+  return attendees.some((attendee) => attendee.participantEmail === participantEmail);
+}
+
 // Called when a user makes an appointment. Adds the appointment to the team appointments list.
 export const updateAppointmentsHandler: RequestHandler = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   const { teamId } = req.params;
-  const { meetingTeamId, day, time, attend } = req.body;
+  const { meetingTeamId, day, attend } = req.body;
   try {
-    if (!meetingTeamId || !attend || !day || !time) {
+    if (!meetingTeamId || !attend || !day) {
       res.status(400).json({ message: "Invalid or missing appointments data" });
       return;
     }
-
+    
     const team = await Team.findById(teamId);
     if (!team) {
       res.status(404).json({ message: "Team not found" });
@@ -57,23 +61,37 @@ export const updateAppointmentsHandler: RequestHandler = async (
       return;
     }
 
-    let appointmentUpdated = true;
-
+    let appointmentUpdated = false;
+    
     if (findMeetingTeam.type !== "group") {
-      findMeetingTeam.meeting.forEach((m: any) => {
-        if (m.date === day && isTimeInRange(time, m.time.start, m.time.end)) {
+      for (const m of findMeetingTeam.meeting) {
+        if (m.date === day && isTimeInRange(attend.time, m.time.start, m.time.end)) {
+          if (isAlreadyBooked(m.attendees, attend.participantEmail)) {
+            res.status(409).json({ message: "You have already booked this appointment." });
+            return;
+          }
+
           m.attendees.push(attend);
           appointmentUpdated = true;
+          break;
         }
-      });
+      };
     }
-    // else {
-    //   findMeetingTeam.meeting.forEach((m: any) => {
-    //     if (m.date === day) {
-    //       m.attendees.push(attend);
-    //       appointmentUpdated = true;
-    //     }
-    // })}
+    else {
+      for (const m of findMeetingTeam.meeting) {
+        if (m.date === day) {
+          if (isAlreadyBooked(m.attendees, attend.participantEmail)) {
+            res.status(409).json({ message: "You have already booked this appointment." });
+            return;
+          }
+
+          attend.time = m.time.start;
+          m.attendees.push(attend);
+          appointmentUpdated = true;
+          break;
+        }
+      }
+    }
 
     if (!appointmentUpdated) {
       res
@@ -99,7 +117,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
       from: `Booky <${process.env.EMAIL}>`,
       to: attend.participantEmail,
       subject: "Booky Confirmation",
-      text: `Booky Confirmation Email\n\n Cancel Link: http://10.140.17.108:3000/${team._id}/${attend.token} \n\n Have a great day :) \n Booky`,
+      text: `Booky Confirmation Email\n\n Online Meeting Link: ${findMeetingTeam.zoomLink} \n\n Cancel Link: https://www.booky.im/${team._id}/${attend.token} \n\n Have a great day :) \n Booky`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {

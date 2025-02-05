@@ -64,19 +64,8 @@ export default function ScheduleForm({
       }
     }
 
-    let newSelectedTime;
-
-    if (selectedMeetingTeam.type == "group") {
-      newSelectedTime = {
-        start: "10:00 AM",
-        end: "10:00 AM",
-      };
-    } else {
-      newSelectedTime = selectedTime;
-    }
-
     const newAttend = {
-      time: newSelectedTime,
+      time: selectedTime,
 
       participantName: values.name,
       participantEmail: values.email,
@@ -94,7 +83,6 @@ export default function ScheduleForm({
         body: JSON.stringify({
           meetingTeamId: selectedMeetingTeam._id,
           day: selectedDay,
-          time: newSelectedTime,
           attend: newAttend,
         }),
       });
@@ -112,6 +100,8 @@ export default function ScheduleForm({
 
         setTimeSlots(updateTimeSlots);
         toast.success("Meeting submitted successfully!");
+      } else if (response.status === 409) {
+        toast.warning("You already booked an appointment for this meeting.");
       } else {
         throw new Error("Failed to submit email");
       }

@@ -43,7 +43,6 @@ const PORT = process.env.PORT;
 // const SOCKET_PORT = Number(process.env.SOCKET_PORT);
 const allowedOrigins = [
   "http://localhost:10000",
-  "http://localhost:5173",
   "https://booky.im",
   "https://www.booky.im",
 ];
@@ -59,9 +58,7 @@ const io = new Server(server, {
 app.use(
   cors({
     origin: (origin: any, callback: any) => {
-      // Allow same-origin requests and explicitly listed origins
       if (!origin || allowedOrigins.includes(origin)) {
-        console.log(`✅ Allowed origin: ${origin || "Same-Origin"}`);
         callback(null, true);
       } else {
         console.warn(`❌ Blocked origin: ${origin}`);
