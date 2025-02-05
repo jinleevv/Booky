@@ -1,27 +1,31 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import http from "http";
 import mongoose from "mongoose";
 import path from "path";
 import { Server } from "socket.io";
-import { startScheduler } from "./meetingCreateScheduler";
 import MeetingMinute from "./models/meetingMinute";
 import getMeetingMinuteRoute from "./routes/document/getMeetingMinuteRoute";
 import mergeMeetingMinutes from "./routes/document/mergeMeetingMinutesRoute";
+import removeCommentsRoute from "./routes/document/removeCommentsRoute";
+import updateCommentsRoute from "./routes/document/updateCommentsRoute";
 import createPollRoute from "./routes/poll/createPollRoute";
 import getPollRoute from "./routes/poll/getPollRoute";
 import updatePollRoute from "./routes/poll/updatePollRoute";
+import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
+import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
 import createMeetingTeamRoute from "./routes/team/createMeetingTeamRoute";
 import createTeamRoute from "./routes/team/createTeamRoute";
 import deleteAppointmentRoute from "./routes/team/deleteAppointmentRoute";
-import removeMeetingTeamFromTeamRoute from "./routes/team/removeMeetingTeamFromTeamRoute";
-import mergeMeetingsInMeetingTeamRoute from "./routes/team/mergeMeetingsInMeetingTeamRoute";
 import editMeetingTeamRoute from "./routes/team/editMeetingTeamRoute";
 import getAppointmentRoute from "./routes/team/getAppointmentRoute";
 import getMeetingRoute from "./routes/team/getMeetingRoute";
 import getMeetingTeamRoute from "./routes/team/getMeetingTeamRoute";
 import getTeamRoute from "./routes/team/getTeamRoute";
 import getUserTeamsRoute from "./routes/team/getUserTeamsRoute";
+import mergeMeetingsInMeetingTeamRoute from "./routes/team/mergeMeetingsInMeetingTeamRoute";
+import removeMeetingTeamFromTeamRoute from "./routes/team/removeMeetingTeamFromTeamRoute";
 import removeUserFromTeamRoute from "./routes/team/removeUserFromTeamRoute";
 import updateAppointmentRoute from "./routes/team/updateAppointmentRoute";
 import updateCancellationRoute from "./routes/team/updateCancellationRoute";
@@ -29,12 +33,7 @@ import updateCoadminRoute from "./routes/team/updateCoadminRoute";
 import updatePermissionRoute from "./routes/team/updatePermissionRoute";
 import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
 import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
-import updateCommentsRoute from "./routes/document/updateCommentsRoute";
-import removeCommentsRoute from "./routes/document/removeCommentsRoute";
 import userRoute from "./routes/user/userRegistrationRoute";
-import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
-import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
-import http from "http";
 
 dotenv.config();
 
@@ -43,7 +42,6 @@ const app = express();
 const PORT = process.env.PORT;
 // const SOCKET_PORT = Number(process.env.SOCKET_PORT);
 const allowedOrigins = [
-  "http://localhost:5173",
   "http://localhost:10000",
   "https://booky.im",
   "https://www.booky.im",
