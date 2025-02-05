@@ -102,6 +102,6 @@ export const startScheduler = () => {
   // cron.schedule("0 0 * * *", scheduleMeetings);
   // console.log("Meeting scheduler is running...");
 
-  cron.schedule("*/10 * * * * *", scheduleMeetings);
+  cron.schedule("*/30 * * * *", scheduleMeetings);
   console.log("Meeting scheduler is running every 10 seconds...");
 };
