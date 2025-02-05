@@ -29,6 +29,10 @@ function isTimeInRange(time: string, startTime: string, endTime: string) {
   return timeDate >= startDate && timeDate <= endDate;
 }
 
+function isAlreadyBooked(attendees: any[], participantEmail: string): boolean {
+  return attendees.some((attendee) => attendee.participantEmail === participantEmail);
+}
+
 // Called when a user makes an appointment. Adds the appointment to the team appointments list.
 export const updateAppointmentsHandler: RequestHandler = async (
   req: Request,
@@ -57,24 +61,37 @@ export const updateAppointmentsHandler: RequestHandler = async (
       return;
     }
 
-    let appointmentUpdated = true;
-    console.log(attend.time);
+    let appointmentUpdated = false;
+    
     if (findMeetingTeam.type !== "group") {
-      findMeetingTeam.meeting.forEach((m: any) => {
+      for (const m of findMeetingTeam.meeting) {
         if (m.date === day && isTimeInRange(attend.time, m.time.start, m.time.end)) {
+          if (isAlreadyBooked(m.attendees, attend.participantEmail)) {
+            res.status(409).json({ message: "You have already booked this appointment." });
+            return;
+          }
+
           m.attendees.push(attend);
           appointmentUpdated = true;
+          break;
         }
-      });
+      };
     }
     else {
-      findMeetingTeam.meeting.forEach((m: any) => {
+      for (const m of findMeetingTeam.meeting) {
         if (m.date === day) {
+          if (isAlreadyBooked(m.attendees, attend.participantEmail)) {
+            res.status(409).json({ message: "You have already booked this appointment." });
+            return;
+          }
+
           attend.time = m.time.start;
           m.attendees.push(attend);
           appointmentUpdated = true;
+          break;
         }
-    })}
+      }
+    }
 
     if (!appointmentUpdated) {
       res

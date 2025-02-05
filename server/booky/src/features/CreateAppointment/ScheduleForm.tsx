@@ -100,6 +100,8 @@ export default function ScheduleForm({
 
         setTimeSlots(updateTimeSlots);
         toast.success("Meeting submitted successfully!");
+      } else if (response.status === 409) {
+        toast.warning("You already booked an appointment for this meeting.");
       } else {
         throw new Error("Failed to submit email");
       }
