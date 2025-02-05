@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import CreateMeetingFromPoll from "@/features/CreatePoll/CreateMeetingFromPoll";
 import UserAvailability from "@/features/CreatePoll/UserAvailability";
 import NavigationBar from "@/features/NavigationBar/NavigationBar";
 import { days, parseStringTimeToInt } from "@/features/time";
@@ -7,6 +8,7 @@ import { ClipboardCopy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+
 export interface Participant {
   email: string;
   schedule: string[];
@@ -190,7 +192,7 @@ export default function ParticipatePoll() {
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 translate-x-1/2"></div>
         <div className="flex w-full items-center gap-2">
           <h2 className="text-2xl font-bold">{pollName}</h2>
-          <div className="flex w-full pl-4 pt-1 justify-end">
+          <div className="flex gap-2 w-full pl-4 pt-1 justify-end">
             <Button
               variant="outline"
               className="rounded-xl"
@@ -201,6 +203,7 @@ export default function ParticipatePoll() {
               <ClipboardCopy />
               Copy URL
             </Button>
+            <CreateMeetingFromPoll participants={participants}/>
           </div>
         </div>
         <div className="pt-2 flex flex-col gap-8">
