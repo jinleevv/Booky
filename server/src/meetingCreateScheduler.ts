@@ -43,7 +43,7 @@ export const scheduleMeetings = async () => {
     for (const team of teams) {
       for (const meetingTeam of team.meetingTeam) {
         if (meetingTeam.schedule === "recurring" && meetingTeam.weekSchedule) {
-          for (let i = 0; i < 7; i++) {
+          for (let i = 0; i < 14; i++) {
             const targetDate = new Date(today);
             targetDate.setDate(today.getDate() + i);
 
@@ -98,10 +98,10 @@ export const scheduleMeetings = async () => {
 };
 
 // Schedule the task
-export const startScheduler = () => {
-  // cron.schedule("0 0 * * *", scheduleMeetings);
-  // console.log("Meeting scheduler is running...");
-
-  cron.schedule("*/30 * * * *", scheduleMeetings);
-  console.log("Meeting scheduler is running every 10 seconds...");
+export const meetingCreateScheduler = () => {
+  // Schedule the job to run every day at **8 AM EST**
+  cron.schedule("0 8 * * *", scheduleMeetings, {
+    timezone: "America/New_York",
+  });
+  console.log("🔄 Running meeting create scheduler every day at 8 AM EST");
 };

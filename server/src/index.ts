@@ -4,7 +4,7 @@ import express from "express";
 import mongoose from "mongoose";
 import path from "path";
 import { Server } from "socket.io";
-import { startScheduler } from "./meetingCreateScheduler";
+import { meetingCreateScheduler } from "./meetingCreateScheduler";
 import MeetingMinute from "./models/meetingMinute";
 import getMeetingMinuteRoute from "./routes/document/getMeetingMinuteRoute";
 import mergeMeetingMinutes from "./routes/document/mergeMeetingMinutesRoute";
@@ -35,6 +35,7 @@ import userRoute from "./routes/user/userRegistrationRoute";
 import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
 import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
 import http from "http";
+import sendMeetingReminders from "./meetingReminderScheduler";
 
 dotenv.config();
 
@@ -142,7 +143,10 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((error) => console.error("MongoDB connection error:", error));
 
-// startScheduler();
+// -------CRON JOBS---------
+// meetingCreateScheduler();
+// sendMeetingReminders();
+// --------------------------
 
 // app.listen(PORT, () => {
 //   console.log(`🚀 Server running on port ${PORT}`);
