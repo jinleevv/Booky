@@ -66,6 +66,7 @@ export default function ViewDetails({
     { meetingId: string; date: string }[]
   >([]);
   const [meetingList, setMeetingList] = useState<any[]>([]);
+  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null); 
 
   useEffect(() => {
     if (meetingTeam && meetingTeam.length > 0) {
@@ -279,6 +280,7 @@ export default function ViewDetails({
                                       className="text-red-700 hover:text-red-700 w-5 h-5"
                                       onClick={(e) => {
                                         e.stopPropagation();
+                                        setMeetingToDelete(meeting._id);
                                         setIsDialogOpen(true);
                                       }}
                                     >
@@ -307,7 +309,7 @@ export default function ViewDetails({
                                       <Button
                                         variant="destructive"
                                         onClick={(e) => {
-                                          handleRemoveMeetingTeam(meeting._id);
+                                          handleRemoveMeetingTeam(meetingToDelete);
                                           setIsDialogOpen(false);
                                         }}
                                       >
