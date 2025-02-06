@@ -41,7 +41,6 @@ dotenv.config();
 const app = express();
 
 const PORT = process.env.PORT;
-// const SOCKET_PORT = Number(process.env.SOCKET_PORT);
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:10000",
@@ -84,13 +83,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ Add this to explicitly handle preflight requests (for OPTIONS)
 app.options("*", cors());
 
 app.use(express.json());
 
 // Routes
-// Basic route
 app.get("/api/health", (req: any, res: any) => {
   res.json({ status: "ok" });
 });

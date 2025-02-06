@@ -20,10 +20,10 @@ const formSchema = z.object({
   email: z
     .string()
     .min(1, "Email is required")
-    // .regex(
-    //   /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/,
-    //   "Email must be in the format yourname@mail.mcgill.ca or yourname@mcgill.ca"
-    // ),
+    .regex(
+      /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/,
+      "Email must be in the format name@mail.mcgill.ca or name@mcgill.ca"
+    ),
 });
 
 interface ScheduleFormProps {

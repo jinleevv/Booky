@@ -30,7 +30,9 @@ function isTimeInRange(time: string, startTime: string, endTime: string) {
 }
 
 function isAlreadyBooked(attendees: any[], participantEmail: string): boolean {
-  return attendees.some((attendee) => attendee.participantEmail === participantEmail);
+  return attendees.some(
+    (attendee) => attendee.participantEmail === participantEmail
+  );
 }
 
 // Called when a user makes an appointment. Adds the appointment to the team appointments list.
@@ -45,7 +47,16 @@ export const updateAppointmentsHandler: RequestHandler = async (
       res.status(400).json({ message: "Invalid or missing appointments data" });
       return;
     }
-    
+
+    const mcgillEmailRegex =
+      /^[a-zA-Z0-9._%+-]+@(mail\.mcgill\.ca|mcgill\.ca)$/;
+
+    if (!mcgillEmailRegex.test(attend.participantEmail)) {
+      res
+        .status(400)
+        .json({ message: "Invalid email. Only McGill emails are allowed." });
+    }
+
     const team = await Team.findById(teamId);
     if (!team) {
       res.status(404).json({ message: "Team not found" });
@@ -62,12 +73,17 @@ export const updateAppointmentsHandler: RequestHandler = async (
     }
 
     let appointmentUpdated = false;
-    
+
     if (findMeetingTeam.type !== "group") {
       for (const m of findMeetingTeam.meeting) {
-        if (m.date === day && isTimeInRange(attend.time, m.time.start, m.time.end)) {
+        if (
+          m.date === day &&
+          isTimeInRange(attend.time, m.time.start, m.time.end)
+        ) {
           if (isAlreadyBooked(m.attendees, attend.participantEmail)) {
-            res.status(409).json({ message: "You have already booked this appointment." });
+            res
+              .status(409)
+              .json({ message: "You have already booked this appointment." });
             return;
           }
 
@@ -75,13 +91,14 @@ export const updateAppointmentsHandler: RequestHandler = async (
           appointmentUpdated = true;
           break;
         }
-      };
-    }
-    else {
+      }
+    } else {
       for (const m of findMeetingTeam.meeting) {
         if (m.date === day) {
           if (isAlreadyBooked(m.attendees, attend.participantEmail)) {
-            res.status(409).json({ message: "You have already booked this appointment." });
+            res
+              .status(409)
+              .json({ message: "You have already booked this appointment." });
             return;
           }
 
@@ -94,11 +111,9 @@ export const updateAppointmentsHandler: RequestHandler = async (
     }
 
     if (!appointmentUpdated) {
-      res
-        .status(400)
-        .json({
-          message: "No matching appointment found or attendee already added",
-        });
+      res.status(400).json({
+        message: "No matching appointment found or attendee already added",
+      });
       return;
     }
 
