@@ -6,19 +6,38 @@ const router = express.Router();
 // When a user cancels their appointment via their confirmation link.
 // Delete the appointment from the team appointments list.
 export const deleteAppointmentHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-  const { teamId, appointmentToken } = req.query;
+  const { teamId, meetingTeamId, meetingId, appointmentToken } = req.query;
 
-  if (!appointmentToken || typeof appointmentToken !== "string") {
-    res.status(400).json({ message: "Invalid or missing token" });
+  if (!teamId || !meetingTeamId || !meetingId || !appointmentToken) {
+    res.status(400).json({ message: "Missing teamId, meetingTeamId, meetingId, or token" });
     return;
   }
 
   try {
-    await Team.updateOne({ _id: teamId }, { $pull: {appointments: {token: appointmentToken}} }).exec();
+    const result = await Team.updateOne(
+      {
+        _id: teamId,
+        "meetingTeam._id": meetingTeamId,
+        "meetingTeam.meeting._id": meetingId,
+      },
+      {
+        $pull: {
+          "meetingTeam.$[].meeting.$[m].attendees": { token: appointmentToken },
+        },
+      },
+      {
+        arrayFilters: [{ "m._id": meetingId }],
+      }
+    );
 
-    res.status(200).json();
+    if (result.modifiedCount === 0) {
+      res.status(404).json({ message: "Appointment not found or already removed" });
+      return;
+    }
+
+    res.status(200);
   } catch (error) {
-    console.error("Error querying teams:", error);
+    console.error("Error canceling appointment:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

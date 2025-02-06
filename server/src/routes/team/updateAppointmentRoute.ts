@@ -73,6 +73,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
     }
 
     let appointmentUpdated = false;
+    let meetingId;
 
     if (findMeetingTeam.type !== "group") {
       for (const m of findMeetingTeam.meeting) {
@@ -86,7 +87,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
               .json({ message: "You have already booked this appointment." });
             return;
           }
-
+          meetingId = m._id;
           m.attendees.push(attend);
           appointmentUpdated = true;
           break;
@@ -101,7 +102,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
               .json({ message: "You have already booked this appointment." });
             return;
           }
-
+          meetingId = m._id;
           attend.time = m.time.start;
           m.attendees.push(attend);
           appointmentUpdated = true;
@@ -132,7 +133,7 @@ export const updateAppointmentsHandler: RequestHandler = async (
       from: `Booky <${process.env.EMAIL}>`,
       to: attend.participantEmail,
       subject: "Booky Confirmation",
-      text: `Booky Confirmation Email\n\n Online Meeting Link: ${findMeetingTeam.zoomLink} \n\n Cancel Link: https://www.booky.im/${team._id}/${attend.token} \n\n Have a great day :) \n Booky`,
+      text: `Booky Confirmation Email\n\n Online Meeting Link: ${findMeetingTeam.zoomLink} \n\n Cancel Link: https://www.booky.im/${team._id}/${findMeetingTeam._id}/${meetingId}/${attend.token} \n\n Have a great day :) \n Booky`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {

@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
+  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -20,65 +21,65 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-interface IAppointment {
-  day: string;
-  time: string;
-}
-
 export function Appointment() {
-  const { teamId, code: appointmentToken } = useParams();
-  const [appointment, setAppointment] = useState<IAppointment>({
+  const { teamId, meetingTeamId, meetingId, code: appointmentToken } = useParams();
+  const [appointment, setAppointment] = useState<any>({
+    team: "",
+    meetingTeam: "",
     day: "",
     time: "",
   });
   const [error, setError] = useState<string>("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    const fetchAppointment = async () => {
-      try {
-        // Send GET request to backend API
-        const response = await fetch(
-          `/api/appointment/get-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          if (
-            response.status === 400 &&
-            errorData.message === "Expired Appointment"
-          ) {
-            setError(errorData.message);
-          }
-        }
-
-        const data = await response.json();
-        setAppointment(data);
-      } catch (err) {
-        toast("Fetch Meeting Information Failed");
-      }
-    };
-
-    // Call the fetch function
     fetchAppointment();
   }, [teamId, appointmentToken]);
 
-  async function handleCancel() {
-    const response = await fetch(
-      `/api/appointment/delete-appointment?teamId=${teamId}&appointmentToken=${appointmentToken}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+  async function fetchAppointment() {
+    try {
+      // Send GET request to backend API
+      const response = await fetch(
+        `/api/appointment/get-appointment?teamId=${teamId}&meetingTeamId=${meetingTeamId}&meetingId=${meetingId}&appointmentToken=${appointmentToken}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        setAppointment(data);
+      } else if (response.status === 409) {
+        setError("Appointment Expired");
+      } else {
+        toast("Fetch Meeting Information Failed");
       }
-    );
 
-    if (!response.ok) {
-      toast("Unable to cancel the meeting");
-      return;
+    } catch (err) {
+      toast("Fetch Meeting Information Failed");
     }
+  };
 
-    toast("Successfully cancelled the meeting");
+  async function handleCancel() {
+    try {
+      const response = await fetch(
+        `/api/appointment/delete-appointment?teamId=${teamId}&meetingTeamId=${meetingTeamId}&meetingId=${meetingId}&appointmentToken=${appointmentToken}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        toast("Unable to cancel the meeting");
+        return;
+      }
+
+      toast("Successfully cancelled the meeting");
+    } catch (error) {
+      console.error("Error canceling meeting:", error);
+      toast("An error occurred while canceling");
+    }
   }
 
   return (
@@ -88,7 +89,7 @@ export function Appointment() {
       <Card className="relative translate-y-1/4 w-1/2 z-50 items-center justify-center ml-auto mr-auto">
         <CardHeader>
           <CardTitle>Cancel the Meeting</CardTitle>
-          <CardDescription>cancel the meeting</CardDescription>
+          <CardDescription>{appointment.team}: {appointment.meetingTeam}</CardDescription>
         </CardHeader>
         <CardContent className="w-full">
           {error !== "" ? (
@@ -98,20 +99,48 @@ export function Appointment() {
               <Label>Date: {appointment.day}</Label> <br />
               <Label>Time: {appointment.time}</Label> <br />
               <div className="flex w-full justify-end">
-                <Dialog>
+                <Dialog
+                  open={isDialogOpen}
+                  onOpenChange={setIsDialogOpen}
+                >
                   <DialogTrigger>
-                    <Button variant="outline">Cancel Meeting</Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setIsDialogOpen(true)}
+                    >
+                      Cancel Meeting
+                    </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Are you absolutely sure?</DialogTitle>
+                      <DialogTitle>
+                        Cancel Meeting
+                      </DialogTitle>
                       <DialogDescription>
-                        This action cannot be undone
+                        Are you sure you want to cancel
+                        this meeting? This action cannot
+                        be undone.
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="flex w-full justify-end">
-                      <Button onClick={handleCancel}>Cancel</Button>
-                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsDialogOpen(false);
+                        }}
+                      >
+                        No
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          handleCancel();
+                          setIsDialogOpen(false);
+                        }}
+                      >
+                        Yes
+                      </Button>
+                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
