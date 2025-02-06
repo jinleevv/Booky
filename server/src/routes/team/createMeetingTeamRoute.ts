@@ -34,6 +34,13 @@ function convertToEST(date: Date): Date {
   }
 }
 
+function convertTo12Hour(time24: string) {
+  let [hours, minutes] = time24.split(":").map(Number);
+  let period = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;  // Convert 0 to 12 for midnight
+  return `${hours}:${minutes.toString().padStart(2, "0")} ${period}`;
+}
+
 export const createMeetingTeamHandler: RequestHandler = async (
   req: Request,
   res: Response
@@ -181,8 +188,8 @@ export const createMeetingTeamHandler: RequestHandler = async (
             _id: meetingId,
             date: date,
             time: {
-              start: oneTimeMeetingStartInfo[1],
-              end: oneTimeMeetingEndInfo[1],
+              start: convertTo12Hour(oneTimeMeetingStartInfo[1]),
+              end: convertTo12Hour(oneTimeMeetingEndInfo[1]),
             },
             cancelled: false,
             merged: false,
@@ -191,8 +198,8 @@ export const createMeetingTeamHandler: RequestHandler = async (
         ],
         date: date,
         time: {
-          start: oneTimeMeetingStartInfo[1],
-          end: oneTimeMeetingEndInfo[1],
+          start: convertTo12Hour(oneTimeMeetingStartInfo[1]),
+          end: convertTo12Hour(oneTimeMeetingEndInfo[1]),
         },
 
         type: meetingType,
