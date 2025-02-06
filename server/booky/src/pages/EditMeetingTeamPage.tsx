@@ -60,13 +60,27 @@ const formatDateTime = (dateObject: any): string => {
 };
 
 function formatZonedDateTime(date, time) {
-  const [year, month, day] = date
-    .split("-")
-    .map((value) => value.padStart(2, "0"));
+  const [year, month, day] = date.split("-");
 
-  const [hour, minute] = time.split(":").map((value) => value.padStart(2, "0"));
+  const timeParts = time.match(/(\d+):(\d+) (\w{2})/);
+  if (!timeParts) {
+    throw new Error("Invalid time format");
+  }
 
-  return `${year}-${month}-${day}T${hour}:${minute}[America/Toronto]`;
+  let [_, hour, minute, period] = timeParts;
+  hour = parseInt(hour, 10);
+
+  // Convert to 24-hour format
+  if (period === "PM" && hour !== 12) {
+    hour += 12;
+  } else if (period === "AM" && hour === 12) {
+    hour = 0;
+  }
+
+  const formattedHour = String(hour).padStart(2, "0");
+  const formattedMinute = String(minute).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${formattedHour}:${formattedMinute}[America/Toronto]`;
 }
 
 export default function EditMeetingTeamPage() {
