@@ -143,9 +143,9 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((error) => console.error("MongoDB connection error:", error));
 
-// -------CRONS JOBS---------
-meetingCreateScheduler();
-sendMeetingReminders();
+// -------CRON JOBS---------
+// meetingCreateScheduler();
+// sendMeetingReminders();
 // --------------------------
 
 // app.listen(PORT, () => {
