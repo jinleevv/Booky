@@ -253,7 +253,6 @@ export default function JoinAMeeting({
 
   async function handleRemoveMeetingTeam(meetingTeamId: string) {
     try {
-      console.log(meetingTeamId);
       const response = await fetch(
         `/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
         {

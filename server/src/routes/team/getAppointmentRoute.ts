@@ -3,14 +3,11 @@ import Team from "../../models/team";
 
 const router = express.Router();
 
-export const getAppointmentHandler: RequestHandler = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const { teamId, appointmentToken } = req.query;
+export const getAppointmentHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+  const { teamId, meetingTeamId, meetingId, appointmentToken } = req.query;
 
-  if (!appointmentToken || typeof appointmentToken !== "string") {
-    res.status(400).json({ message: "Invalid or missing token" });
+  if (!teamId || !meetingTeamId || !meetingId || !appointmentToken) {
+    res.status(400).json({ message: "Missing teamId, meetingTeamId, meetingId, or token" });
     return;
   }
 
@@ -23,26 +20,45 @@ export const getAppointmentHandler: RequestHandler = async (
       return;
     }
 
-    // // Find the appointment with the matching token.
-    // const appointment = team.appointments.find(
-    //   (item) => item.token === appointmentToken
-    // );
+    const meetingTeam = team.meetingTeam.find(
+      (meetingTeam) => meetingTeam._id.toString() === meetingTeamId
+    );
 
-    // TODO: only check if expire date has not been passed.
-    const isWithin7Days = (tokenExpireDate: Date) => {
-      const today = new Date();
-      const sevenDaysFromNow = new Date();
-      sevenDaysFromNow.setDate(today.getDate() + 7);
+    if (!meetingTeam) {
+      res.status(404).json({ message: "Meeting team not found" });
+      return;
+    }
 
-      return tokenExpireDate >= today && tokenExpireDate <= sevenDaysFromNow;
-    };
+    const meeting = meetingTeam.meeting.find(
+      (meeting) => meeting._id.toString() === meetingId
+    );
 
-    // if (!isWithin7Days(appointment!.tokenExpiry)) {
-    //   res.status(400).json({ message: "Expired Appointment" });
-    //   return;
-    // }
+    if (!meeting) {
+      res.status(404).json({ message: "Meeting not found" });
+      return;
+    }
 
-    // res.status(200).json(appointment);
+    const date = meeting.date;
+    
+    const attendee = meeting.attendees.find((attendee) => attendee.token === appointmentToken);
+    
+    if (!attendee) {
+      res.status(404).json({ message: "Attendee not found" });
+      return;
+    }
+
+    const today = new Date();
+    if (attendee.tokenExpiry <= today) {
+      res.status(409).json({ message: "Expired Appointment" });
+      return;
+    }
+
+    res.status(200).json({
+      team: team.teamName,
+      meetingTeam: meetingTeam.meetingName,
+      day: date, 
+      time: attendee.time
+    });
   } catch (error) {
     console.error("Error querying teams:", error);
     res.status(500).json({ message: "Server error" });
