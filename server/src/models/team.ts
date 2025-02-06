@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import { IMeetingMinute } from "./meetingMinute";
 
 // The structure of a team.
 interface ITeam extends Document {
