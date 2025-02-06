@@ -90,32 +90,58 @@ export default function JoinAMeeting({
     if (selectedMeetingTeam.type === "group") {
       return;
     }
+
+    let parsedDuration = duration;
+    if (duration === "1h") {
+      parsedDuration = "60";
+    }
+
     const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0"); // Add leading zero if needed
     const date = selectedDate.getDate().toString().padStart(2, "0"); // Add leading zero if needed
     const year = selectedDate.getFullYear();
 
-    const dayOfWeek = selectedDate.toLocaleDateString("en-US", {
-      weekday: "long",
-    });
-
-    const dayAvailability = selectedMeetingTeam.weekSchedule.find(
-      (day) => day.day === dayOfWeek
-    );
-
-    if (!dayAvailability || !dayAvailability.enabled) {
-      const updateTimeSlots = [{ day: `${year}-${month}-${date}`, slots: [] }];
-      setTimeSlots([...timeSlots, ...updateTimeSlots]);
-      return;
-    }
-
     let newTimeSlots = [...timeSlots];
+    if (selectedMeetingTeam.schedule === "recurring") {
+      const dayOfWeek = selectedDate.toLocaleDateString("en-US", {
+        weekday: "long",
+      });
 
-    dayAvailability.times.forEach((time) => {
+      const dayAvailability = selectedMeetingTeam.weekSchedule.find(
+        (day) => day.day === dayOfWeek
+      );
+
+      if (!dayAvailability || !dayAvailability.enabled) {
+        const updateTimeSlots = [{ day: `${year}-${month}-${date}`, slots: [] }];
+        setTimeSlots([...timeSlots, ...updateTimeSlots]);
+        return;
+      }
+
+      dayAvailability.times.forEach((time) => {
+        const generatedTimeSlots = generateTimeSlots(
+          year + "-" + month + "-" + date,
+          time.start,
+          time.end,
+          parseInt(parsedDuration, 10)
+        );
+
+        const existingDate = timeSlots.find(
+          (slot) => slot.day === `${year}-${month}-${date}`
+        );
+
+        if (!existingDate) {
+          // If the date doesn't exist, add a new object for this date with the generated slots
+          newTimeSlots.push({
+            day: `${year}-${month}-${date}`,
+            slots: generatedTimeSlots,
+          });
+        }
+      });
+    } else {
       const generatedTimeSlots = generateTimeSlots(
         year + "-" + month + "-" + date,
-        time.start,
-        time.end,
-        parseInt(duration, 10)
+        selectedMeetingTeam.time.start,
+        selectedMeetingTeam.time.end,
+        parseInt(parsedDuration, 10)
       );
 
       const existingDate = timeSlots.find(
@@ -123,13 +149,13 @@ export default function JoinAMeeting({
       );
 
       if (!existingDate) {
-        // If the date doesn't exist, add a new object for this date with the generated slots
         newTimeSlots.push({
           day: `${year}-${month}-${date}`,
           slots: generatedTimeSlots,
         });
       }
-    });
+    }
+
     setTimeSlots(newTimeSlots);
   }, [selectedDate]);
 
