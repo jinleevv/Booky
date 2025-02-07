@@ -68,11 +68,11 @@ export default function ParticipatePollForm({
   }
 
   return (
-    <div className="w-4/5">
+    <div className="w-full">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="bg-white py-6 px-20 space-y-4 border rounded-2xl"
+          className="bg-white py-6 px-10 lg:px-20 space-y-4 border rounded-2xl"
         >
           <FormField
             control={form.control}
@@ -80,7 +80,7 @@ export default function ParticipatePollForm({
             render={({ field }) => (
               <FormItem className="w-full">
                 <div className="flex w-full gap-2">
-                  <FormLabel className="w-28 m-auto">Email:</FormLabel>
+                  <FormLabel className="w-32 m-auto">Email:</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
@@ -100,7 +100,9 @@ export default function ParticipatePollForm({
             render={({ field }) => (
               <FormItem>
                 <div className="flex w-full gap-2">
-                  <FormLabel className="m-auto">Password (Optional):</FormLabel>
+                  <FormLabel className="w-32 m-auto">
+                    Password (Optional):
+                  </FormLabel>
                   <FormControl>
                     <Input className="w-full" type="password" {...field} />
                   </FormControl>

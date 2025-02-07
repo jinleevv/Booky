@@ -163,7 +163,7 @@ export default function NavigationBar() {
                 >
                   {/* Sidebar Menu */}
                   <motion.div
-                    className="fixed top-0 right-0 w-[300px] h-screen bg-gradient-to-b from-white to-red-100 rounded-l-2xl shadow-lg border-l"
+                    className="absolute -top-6 -right-8 w-screen h-screen bg-gradient-to-b from-white to-red-100 rounded-l-2xl shadow-lg border-l"
                     variants={sidebar}
                   >
                     <MobileNavMenu />

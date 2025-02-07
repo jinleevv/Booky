@@ -131,6 +131,28 @@ export default function ParticipatePoll() {
     }
   }
 
+  function generateDateRange(
+    startDateStr: string,
+    endDateStr: string
+  ): string[] {
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+    const dateArray: string[] = [];
+
+    while (startDate <= endDate) {
+      const formattedDate = startDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      dateArray.push(formattedDate);
+
+      // Move to the next day
+      startDate.setDate(startDate.getDate() + 1);
+    }
+
+    return dateArray;
+  }
+
   // Generate time slots from 9 AM to 5 PM with 30-minute intervals
   const timeSlots = [];
   for (
@@ -162,6 +184,10 @@ export default function ParticipatePoll() {
       }
     }
   }
+  const dateRangeArray = generateDateRange(
+    dateRange.start.date,
+    dateRange.end.date
+  );
 
   function handleLogin(email: string, passwordVerified: boolean) {
     if (passwordVerified) {
@@ -186,7 +212,7 @@ export default function ParticipatePoll() {
   return (
     <section className="h-screen min-w-screen bg-white font-outfit">
       <NavigationBar />
-      <main className="container mx-auto py-8 px-12">
+      <main className="container mx-auto py-8 px-2 lg:px-12">
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2 translate-x-1/2"></div>
         <div className="flex w-full items-center gap-2">
           <h2 className="text-2xl font-bold">{pollName}</h2>
@@ -218,6 +244,7 @@ export default function ParticipatePoll() {
                 timeSlots={timeSlots}
                 userEmail={userEmail}
                 selectedDays={selectedDays}
+                dateRangeArray={dateRangeArray}
                 groupAvailability={groupAvailability}
                 selectedCells={selectedCells}
                 setSelectedCells={setSelectedCells}

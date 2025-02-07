@@ -3,6 +3,7 @@ import { formatTime } from "@/features/time";
 export default function TimeGrid({
   timeSlots,
   selectedDays,
+  dateRangeArray,
   selectedCells,
   setHoveredCell,
   handleMouseDown,
@@ -15,6 +16,7 @@ export default function TimeGrid({
 }: {
   timeSlots: string[];
   selectedDays: string[];
+  dateRangeArray: string[];
   selectedCells: Set<string>;
   setHoveredCell: (cell: { day: string; time: string } | null) => void;
   handleMouseDown?: (day: string, time: string) => void;
@@ -69,6 +71,9 @@ export default function TimeGrid({
       <div className="flex flex-1">
         {selectedDays.map((day, index) => (
           <div key={day} className="flex-1">
+            <div className="text-center font-light text-[10px]">
+              {dateRangeArray[index]}
+            </div>
             <div className="text-center font-medium mb-2">{day}</div>
             <div key={`${day}-${index}`} className="flex flex-col">
               {timeSlots.map((time, index) => {

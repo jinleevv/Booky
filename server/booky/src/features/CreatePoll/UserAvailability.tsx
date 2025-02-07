@@ -15,6 +15,7 @@ interface UserAvailabilityProps {
   timeSlots: string[];
   userEmail: string;
   selectedDays: string[];
+  dateRangeArray: string[];
   groupAvailability: Map<string, Set<string>>;
   selectedCells: Set<string>;
   setSelectedCells: (selectedCells: Set<string>) => void;
@@ -33,6 +34,7 @@ export default function UserAvailability({
   timeSlots,
   userEmail,
   selectedDays,
+  dateRangeArray,
   groupAvailability,
   selectedCells,
   setSelectedCells,
@@ -86,10 +88,7 @@ export default function UserAvailability({
         return;
       }
 
-      await calculateAvailableTimes(
-        selectedSlots,
-        groupAvailability
-      );
+      await calculateAvailableTimes(selectedSlots, groupAvailability);
       // setAvailableTimes(updateAvailableTimes);
     } catch (error) {
       console.error("Error updating availability", error);
@@ -334,7 +333,7 @@ export default function UserAvailability({
 
   return (
     <div className="relative z-10">
-      <div className="grid grid-cols-2 w-full gap-5 py-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 w-full gap-5 py-2">
         {!isLoggedIn ? (
           <ParticipatePollForm onLogin={handleLogin} />
         ) : hoveredCell ? (
@@ -372,7 +371,7 @@ export default function UserAvailability({
             </div>
           </div>
         ) : (
-          <Card className="h-full shadow-none">
+          <Card className="w-full h-full shadow-none">
             <CardContent className="p-6">
               <Card
                 className="border-none shadow-none"
@@ -396,6 +395,7 @@ export default function UserAvailability({
                   <TimeGrid
                     timeSlots={timeSlots}
                     selectedDays={selectedDays}
+                    dateRangeArray={dateRangeArray}
                     selectedCells={selectedCells}
                     setHoveredCell={setHoveredCell}
                     handleMouseDown={handleMouseDown}
@@ -411,7 +411,7 @@ export default function UserAvailability({
             </CardContent>
           </Card>
         )}
-        <Card className="h-full shadow-none">
+        <Card className="w-full h-full shadow-none">
           <CardContent className="p-6">
             <Card className="border-none shadow-none">
               <div className="flex w-full justify-between">
@@ -431,6 +431,7 @@ export default function UserAvailability({
                 <TimeGrid
                   timeSlots={timeSlots}
                   selectedDays={selectedDays}
+                  dateRangeArray={dateRangeArray}
                   selectedCells={selectedCells}
                   setHoveredCell={setHoveredCell}
                   handleMouseDown={handleMouseDown}
