@@ -127,7 +127,7 @@ import {
                               hideTimeZone
                               granularity="day"
                               className="max-w-[250px]"
-                              defaultValue={parseDate(`${new Date().toISOString().split("T")[0]}`)}
+                              value={field.value ? parseDate(`${field.value}`) : undefined}
                               onChange={(date) => field.onChange(date.toString())}
                             />
                             <FormMessage />

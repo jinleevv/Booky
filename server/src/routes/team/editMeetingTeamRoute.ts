@@ -34,6 +34,13 @@ function convertToEST(date: Date): Date {
   }
 }
 
+function convertTo12Hour(time24: string) {
+  let [hours, minutes] = time24.split(":").map(Number);
+  let period = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;  // Convert 0 to 12 for midnight
+  return `${hours}:${minutes.toString().padStart(2, "0")} ${period}`;
+}
+
 export const editMeetingHandler: RequestHandler = async (
   req: Request,
   res: Response
@@ -87,6 +94,8 @@ export const editMeetingHandler: RequestHandler = async (
     if (currentTab === "recurring") {
       updateFields["meetingTeam.$.schedule"] = "recurring";
       updateFields["meetingTeam.$.weekSchedule"] = recurringMeetingSchedule;
+      updateFields["meetingTeam.$.startDate"] = startDate;
+      updateFields["meetingTeam.$.frequency"] = meetingFrequency;
       unsetFields["meetingTeam.$.date"] = "";
       unsetFields["meetingTeam.$.time"] = "";
 
@@ -164,17 +173,19 @@ export const editMeetingHandler: RequestHandler = async (
       updateFields["meetingTeam.$.schedule"] = "one-time";
       updateFields["meetingTeam.$.date"] = date;
       updateFields["meetingTeam.$.time"] = {
-        start: oneTimeMeetingStartInfo[1],
-        end: oneTimeMeetingEndInfo[1],
+        start: convertTo12Hour(oneTimeMeetingStartInfo[1]),
+        end: convertTo12Hour(oneTimeMeetingEndInfo[1]),
       };
       unsetFields["meetingTeam.$.weekSchedule"] = "";
+      unsetFields["meetingTeam.$.startDate"] = "";
+      unsetFields["meetingTeam.$.frequency"] = "";
 
       newMeetings.push({
         _id: `meeting-${uid.generate()}`,
         date: date,
         time: {
-          start: oneTimeMeetingStartInfo[1],
-          end: oneTimeMeetingEndInfo[1],
+          start: convertTo12Hour(oneTimeMeetingStartInfo[1]),
+          end: convertTo12Hour(oneTimeMeetingEndInfo[1]),
         },
         cancelled: false,
         merged: false,
@@ -189,8 +200,8 @@ export const editMeetingHandler: RequestHandler = async (
         "meetingTeam._id": meetingTeamId,
       },
       {
-        // $set: updateFields,
-        // $unset: unsetFields,
+        $set: updateFields,
+        $unset: unsetFields,
         $pull: {
           "meetingTeam.$.meeting": {
             date: { $gt: todayString },
