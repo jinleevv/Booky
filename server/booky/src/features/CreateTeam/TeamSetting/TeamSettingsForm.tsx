@@ -21,7 +21,6 @@ export default function TeamSettings() {
   const navigate = useNavigate();
   const { teamId } = useParams();
   const [teamAdmin, setTeamAdmin] = useState<string | null>(null);
-  const [teamName, setTeamName] = useState<string | null>(null);
   const [teamDescription, setTeamDescription] = useState<string | null>(null);
   const [teamMembers, setTeamMembers] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -45,7 +44,6 @@ export default function TeamSettings() {
           role,
         }));
         setTeamAdmin(data.adminEmail);
-        setTeamName(data.teamName);
         setTeamDescription(data.teamDescription);
         setTeamMembers(teamMembersList);
       } else {
@@ -66,42 +64,39 @@ export default function TeamSettings() {
       {/* Team Name Display */}
       <div className="flex w-full gap-2">
         <div className="flex w-full gap-2">
-          <div className="w-1/2 border rounded-2xl p-4">
-            <Label className="font-bold">
-              Team:
-              <Label className="ml-1">{teamName || "Loading..."}</Label>
-            </Label>
-          </div>
-          <div className="w-1/2 border rounded-2xl p-4">
-            <Label className="font-bold">
+          <div className="flex w-full border rounded-2xl p-4">
+            <Label className="my-auto font-bold">
               Admin:
               <Label className="ml-1">{teamAdmin || "Loading..."}</Label>
             </Label>
+            <div className="flex w-full">
+              <Dialog>
+                <DialogTrigger className="flex h-full w-full justify-end">
+                  <Button className="h-full rounded-2xl">
+                    <Plus />
+                    Co-Admin
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-4/5 rounded-lg">
+                  <DialogHeader>
+                    <DialogTitle>Invite Co-Admin</DialogTitle>
+                    <DialogDescription>
+                      <InviteCoAdmin
+                        teamId={teamId}
+                        onAddCoadmin={() => null}
+                      />
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
-        </div>
-        <div>
-          <Dialog>
-            <DialogTrigger className="h-full w-full">
-              <Button variant="outline" className="h-full rounded-2xl">
-                <Plus />
-                Co-Admin
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Invite Co-Admin</DialogTitle>
-                <DialogDescription>
-                  <InviteCoAdmin teamId={teamId} onAddCoadmin={() => null} />
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
       <div className="flex w-full justify-between border rounded-2xl p-4">
         <Label className="font-bold my-auto">
           Description:
-          <Label className="ml-1">{teamDescription || "Loading..."}</Label>
+          <Label className="ml-1">{teamDescription || ""}</Label>
         </Label>
         <div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -110,7 +105,7 @@ export default function TeamSettings() {
                 <Edit size={15} />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="w-4/5 rounded-lg">
               <DialogHeader>
                 <DialogTitle>Update Description</DialogTitle>
                 <DialogDescription>
