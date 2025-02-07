@@ -133,20 +133,27 @@ export default function NavigationBar() {
           <>
             <div className="flex w-full gap-2">
               <div className="hidden lg:flex w-full gap-2">
-                <Button
+                {/* <Button
                   variant="outline"
                   className="bg-white hover:text-red-700 rounded-xl"
                   onClick={() => navigate(`/taskFlow/${urlPath}`)}
                   disabled={true}
                 >
                   Task Flow
-                </Button>
+                </Button> */}
                 <Button
                   variant="outline"
                   className="bg-white hover:text-red-700 rounded-xl"
                   onClick={() => navigate("/poll")}
                 >
                   Availability Poll
+                </Button>
+                <Button
+                  variant="outline"
+                  className="bg-white hover:text-red-700 rounded-xl"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
                 </Button>
                 <Button
                   onClick={() => navigate("/register")}
