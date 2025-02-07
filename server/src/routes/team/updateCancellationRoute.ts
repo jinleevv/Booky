@@ -28,7 +28,7 @@ export const cancelOfficeHourHandler: RequestHandler = async (
     }
 
     const result = await Team.updateOne(
-      { _id: teamId, "meetingTeam._id": meetingTeamId},
+      { _id: teamId, "meetingTeam._id": meetingTeamId },
       {
         $set: {
           "meetingTeam.$[].meeting.$[m].cancelled": true,
@@ -37,50 +37,34 @@ export const cancelOfficeHourHandler: RequestHandler = async (
       {
         arrayFilters: [{ "m._id": meetingId }],
       }
-  );
+    );
 
     if (!result) {
       res.status(404).json({ message: "Team or meeting team not found" });
       return;
     }
 
-    // Check if the cancelledMeeting already exists.
-    // if (
-    //   team.cancelledMeetings.includes({
-    //     day: cancelledDate,
-    //     meeting: { start: start, end: end },
-    //   })
-    // ) {
-    //   res.status(400).json({ message: "Date already cancelled" });
-    //   return;
-    // }
-
-    // team.cancelledMeetings = [
-    //   ...team.cancelledMeetings,
-    //   { day: cancelledDate, meeting: { start: start, end: end } },
-    // ];
-
     // Send a cancellation notification email to all members of the team.
-    // const transporter = nodemailer.createTransport({
-    //   service: "Gmail",
-    //   auth: {
-    //     user: process.env.EMAIL,
-    //     pass: process.env.PASSWORD,
-    //   },
-    // });
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
+      },
+    });
 
-    // const mailOptions = {
-    //   from: `Booky <${process.env.EMAIL}>`,
-    //   to: [...team.members, team.adminEmail].join(","),
-    //   subject: "Booky Cancel Announcement",
-    //   text: `Booky Cancel Announcement \n\n Cancelled Date: ${cancelledDate} \n Start Time: ${start} \n End Time: ${end} \n\n We are sorry for the inconvenience,\n Booky`,
-    // };
+    const mailOptions = {
+      from: `Booky <${process.env.EMAIL}>`,
+      to: [...team.members, team.adminEmail].join(","),
+      subject: "Booky Cancel Announcement",
+      text: `Booky Cancel Announcement \n\n🏢Team: ${team.teamName}\n\n❌Cancelled Date: ${cancelledDate}\n Start Time: ${start} \nEnd Time: ${end} \n\nHost has cancelled the meeting\nWe are sorry for the inconvenience,\n Booky`,
+    };
 
-    // transporter.sendMail(mailOptions, (error, info) => {
-    //   if (error) {
-    //     console.error("Email sending failed:", error);
-    //   }
-    // });
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Email sending failed:", error);
+      }
+    });
 
     res.status(200).json({
       message: "Office hour cancelled successfully",
@@ -91,6 +75,9 @@ export const cancelOfficeHourHandler: RequestHandler = async (
   }
 };
 
-router.patch("/cancel/:teamId/:meetingTeamId/:meetingId", cancelOfficeHourHandler);
+router.patch(
+  "/cancel/:teamId/:meetingTeamId/:meetingId",
+  cancelOfficeHourHandler
+);
 
 export default router;
