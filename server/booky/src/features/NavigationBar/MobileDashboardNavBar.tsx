@@ -1,6 +1,6 @@
 import { motion, useCycle } from "framer-motion";
-import MobileNavMenu from "./MobileNavMenu";
 import { MenuToggle } from "./Toggles";
+import MobileDashboardNavMenu from "./MobileDashboardNavMenu";
 
 const sidebar = {
   open: (height = 1000) => ({
@@ -22,20 +22,20 @@ const sidebar = {
   },
 };
 
-export default function MobileNavBar() {
+export default function MobileDashboardNavBar() {
   const [isOpen, toggleOpen] = useCycle(false, true);
 
   return (
     <motion.nav
       initial={false}
       animate={isOpen ? "open" : "closed"}
-      className="flex w-full justify-end z-50 pb-3 border-b-1"
+      className="flex w-full justify-end z-50 border-b-1"
     >
       <motion.div
-        className="fixed -top-5 right-0 w-[300px] h-screen bg-gradient-to-b from-white to-red-100 rounded-l-2xl shadow-lg border-l"
+        className="absolute -top-5 right-0 w-screen h-screen bg-gradient-to-b from-white to-red-100 rounded-l-2xl shadow-lg border-l"
         variants={sidebar}
       >
-        <MobileNavMenu />
+        <MobileDashboardNavMenu />
       </motion.div>
 
       <div className="relative z-50 mt-4 mr-4">

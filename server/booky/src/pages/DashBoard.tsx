@@ -20,7 +20,7 @@ import { TbCalendar } from "react-icons/tb";
 import { useEffect, useState } from "react";
 import { useHook } from "@/hooks";
 import { toast } from "sonner";
-import MobileNavBar from "@/features/NavigationBar/MobileNavBar";
+import MobileDashboardNavBar from "@/features/NavigationBar/MobileDashboardNavBar";
 
 export default function DashBoard() {
   const { userEmail } = useHook();
@@ -44,8 +44,6 @@ export default function DashBoard() {
         }
 
         const teams = await response.json();
-        console.log(teams);
-
         const today = convertToEST(new Date());
         const month = (today.getMonth() + 1).toString().padStart(2, "0");
         const date = today.getDate().toString().padStart(2, "0");
@@ -124,7 +122,6 @@ export default function DashBoard() {
         setPastMeetings(filteredPast);
         setCancelledMeetings(cancelled);
       } catch (error) {
-        console.log(error);
         toast("Unable to fetch the meeting information");
       }
     };
@@ -243,7 +240,7 @@ export default function DashBoard() {
           <DashboardNavBar />
         </div>
         <div className="lg:hidden z-50">
-          <MobileNavBar />
+          <MobileDashboardNavBar />
         </div>
 
         <div className="h-full w-full px-3 py-4 lg:relative z-20 font-outfit lg:overflow-y-auto">

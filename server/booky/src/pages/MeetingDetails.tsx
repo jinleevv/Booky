@@ -8,6 +8,7 @@ import { HiOutlineArrowNarrowLeft } from "react-icons/hi";
 import { useParams, useNavigate } from "react-router-dom";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import { toast } from "sonner";
+import MobileDashboardNavBar from "@/features/NavigationBar/MobileDashboardNavBar";
 
 export default function MeetingDetails() {
   const navigate = useNavigate();
@@ -86,8 +87,13 @@ export default function MeetingDetails() {
   return (
     <section className="h-screen w-screen bg-white font-outfit">
       <div className="absolute w-3/6 h-2/6 bg-red-200 blur-[600px] top-1/2 left-1/2 -translate-x-1/4 -translate-y-1/4"></div>
-      <div className="flex">
-        <DashboardNavBar />
+      <div className="grid lg:flex lg:h-screen">
+        <div className="hidden lg:flex">
+          <DashboardNavBar />
+        </div>
+        <div className="lg:hidden z-50">
+          <MobileDashboardNavBar />
+        </div>
         <div className="flex flex-col w-full p-5">
           {isLoading ? (
             <>

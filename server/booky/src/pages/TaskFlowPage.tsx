@@ -132,7 +132,6 @@ export default function TaskFlowPage() {
         toast.error("Failed to update task flow");
       }
     } catch (error) {
-      console.log(error);
       toast.error("Failed to update task flow");
     }
   }

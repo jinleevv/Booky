@@ -18,7 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { IoPersonCircle } from "react-icons/io5";
-import { Trash, Users } from "lucide-react";
+import { Trash } from "lucide-react";
 import { TbEdit } from "react-icons/tb";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -74,7 +74,7 @@ export default function JoinAMeeting({
   const [selectedMeetingTeam, setSelectedMeetingTeam] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [enabledDays, setEnabledDays] = useState<Array<string>>([]);
-  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null); 
+  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     setTimeSlots([]);
@@ -111,7 +111,9 @@ export default function JoinAMeeting({
       );
 
       if (!dayAvailability || !dayAvailability.enabled) {
-        const updateTimeSlots = [{ day: `${year}-${month}-${date}`, slots: [] }];
+        const updateTimeSlots = [
+          { day: `${year}-${month}-${date}`, slots: [] },
+        ];
         setTimeSlots([...timeSlots, ...updateTimeSlots]);
         return;
       }
@@ -162,11 +164,11 @@ export default function JoinAMeeting({
   function updateEnabledDaysAndDisabledDates(selectedMeetingTeam) {
     const meetingDates = [];
     const meetings = selectedMeetingTeam.meeting;
-    
+
     const today = new Date();
     today.setDate(today.getDate() + 7);
     const oneWeekFromToday = today.toISOString().split("T")[0];
-    
+
     meetings.forEach((meeting) => {
       if (meeting.cancelled !== true && meeting.date < oneWeekFromToday) {
         meetingDates.push(meeting.date);
@@ -414,12 +416,12 @@ export default function JoinAMeeting({
                             <IoIosAdd />
                             New Meeting
                           </Button>
-                          <Button
+                          {/* <Button
                             variant="outline"
                             onClick={() => navigate(`/attendance/${teamId}`)}
                           >
                             <Users />
-                          </Button>
+                          </Button> */}
                         </div>
                       )}
                     </div>
@@ -484,7 +486,9 @@ export default function JoinAMeeting({
                                               className="text-red-700 hover:text-red-700 w-5 h-5"
                                               onClick={(e) => {
                                                 e.stopPropagation();
-                                                setMeetingToDelete(meetingTeam._id);
+                                                setMeetingToDelete(
+                                                  meetingTeam._id
+                                                );
                                                 setIsDialogOpen(true);
                                               }}
                                             >

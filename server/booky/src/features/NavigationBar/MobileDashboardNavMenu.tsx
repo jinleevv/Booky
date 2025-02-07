@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import { MenuItem } from "./MenuItems";
-import { FileUser, LogIn, Vote } from "lucide-react";
+import { Boxes, LampDesk, LogOut, Vote } from "lucide-react";
+import { signOut } from "firebase/auth";
+import { auth } from "../../../firebase";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 const variants = {
   open: {
@@ -14,12 +15,12 @@ const variants = {
 };
 
 const Items = [
-  // { id: "0", text: "Task Flow", icon: <Workflow />, link: "/taskFlow" },
-  { id: "1", text: "Availability Poll", icon: <Vote />, link: "/poll" },
+  { id: "0", text: "Meetings", icon: <LampDesk />, link: "/dashboard" },
+  { id: "1", text: "Teams", icon: <Boxes />, link: "/dashboard/teams" },
+  { id: "2", text: "Availability Poll", icon: <Vote />, link: "/poll" },
 ];
 
-export default function MobileNavMenu() {
-  const navigate = useNavigate();
+export default function MobileDashboardNavMenu() {
   return (
     <motion.div
       variants={variants}
@@ -40,21 +41,22 @@ export default function MobileNavMenu() {
 
       {/* Bottom Buttons */}
       <motion.div className="flex flex-col items-center space-y-3 pb-5 font-outfit">
-        <Button
+        {/* <Button
           variant="outline"
           className="flex w-full h-12 rounded-2xl justify-start gap-4"
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/")}
         >
-          <LogIn />
-          Log In
-        </Button>
-
+          <UserPen />
+          Profile
+        </Button> */}
         <Button
           className="flex w-full h-12 py-3 rounded-2xl justify-start gap-4"
-          onClick={() => navigate("/register")}
+          onClick={() => {
+            signOut(auth);
+          }}
         >
-          <FileUser />
-          Get Started
+          <LogOut />
+          Sign Out
         </Button>
       </motion.div>
     </motion.div>

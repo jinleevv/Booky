@@ -66,7 +66,7 @@ export default function ViewDetails({
     { meetingId: string; date: string }[]
   >([]);
   const [meetingList, setMeetingList] = useState<any[]>([]);
-  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null); 
+  const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (meetingTeam && meetingTeam.length > 0) {
@@ -168,8 +168,8 @@ export default function ViewDetails({
   }
 
   return (
-    <div className="flex w-full h-full gap-2">
-      <div className="flex flex-col w-1/6 h-5/6 gap-2">
+    <div className="grid lg:flex w-full h-full gap-2">
+      <div className="flex flex-col w-full h-full lg:w-1/6 lg:h-5/6 gap-2">
         <div className="grid w-full gap-1">
           <Label className="text-medium font-bold">Admin</Label>
           <div className="w-full h-full overflow-hidden">
@@ -221,7 +221,7 @@ export default function ViewDetails({
           </div>
         </div>
       </div>
-      <div className="flex flex-col w-5/6 h-full border border-dashed rounded-lg p-4">
+      <div className="flex flex-col w-full lg:w-5/6 h-full border border-dashed rounded-lg p-4">
         {selectedMeeting === null ? (
           <div className="flex flex-col w-full mt-1.5 p-0 gap-2">
             <Label className="text-lg font-bold">Meetings</Label>
@@ -309,7 +309,9 @@ export default function ViewDetails({
                                       <Button
                                         variant="destructive"
                                         onClick={(e) => {
-                                          handleRemoveMeetingTeam(meetingToDelete);
+                                          handleRemoveMeetingTeam(
+                                            meetingToDelete
+                                          );
                                           setIsDialogOpen(false);
                                         }}
                                       >

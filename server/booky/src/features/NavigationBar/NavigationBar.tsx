@@ -18,7 +18,7 @@ import { RiArrowDropDownLine } from "react-icons/ri";
 import { Input } from "@/components/ui/input";
 import { IoSearchOutline } from "react-icons/io5";
 import { motion, useCycle } from "framer-motion";
-import ShortUniqueId from "short-uuid";
+// import ShortUniqueId from "short-uuid";
 import { useHook } from "@/hooks";
 import { MenuToggle } from "./Toggles";
 import MobileNavMenu from "./MobileNavMenu";
@@ -48,7 +48,7 @@ export default function NavigationBar() {
   const { loggedInUser, userName } = useHook();
   const [courseSearch, setCourseSearch] = useState<string>("");
   const [isOpen, toggleOpen] = useCycle(false, true);
-  const urlPath = `taskFlow-${ShortUniqueId().generate()}`;
+  // const urlPath = `taskFlow-${ShortUniqueId().generate()}`;
 
   const handleSearch = () => {
     if (courseSearch === "") {
