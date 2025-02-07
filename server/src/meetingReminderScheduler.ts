@@ -59,7 +59,7 @@ const sendEmail = async (
       from: `"Booky" <${process.env.EMAIL}>`,
       to,
       subject: `Reminder: Upcoming Meeting - ${meetingName}`,
-      text: `Hello,\n\nThis is a reminder that your meeting "${meetingName}" hosted by ${hostName} is scheduled at ${meetingTime} today. \n\n Meeting Link: ${meetingLink} \n\nBest,\nBooky Team`,
+      text: `Hello,\n\n📅This is a reminder that your meeting "${meetingName}" hosted by ${hostName} is scheduled at ${meetingTime} today. \n\n🔗Meeting Link: ${meetingLink} \n\nBest,\nBooky Team`,
     };
 
     await transporter.sendMail(mailOptions);

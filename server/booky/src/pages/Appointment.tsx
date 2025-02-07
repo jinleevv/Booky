@@ -22,7 +22,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export function Appointment() {
-  const { teamId, meetingTeamId, meetingId, code: appointmentToken } = useParams();
+  const {
+    teamId,
+    meetingTeamId,
+    meetingId,
+    code: appointmentToken,
+  } = useParams();
   const [appointment, setAppointment] = useState<any>({
     team: "",
     meetingTeam: "",
@@ -52,11 +57,10 @@ export function Appointment() {
       } else {
         toast("Fetch Meeting Information Failed");
       }
-
     } catch (err) {
       toast("Fetch Meeting Information Failed");
     }
-  };
+  }
 
   async function handleCancel() {
     try {
@@ -69,12 +73,15 @@ export function Appointment() {
           },
         }
       );
-
       if (!response.ok) {
-        toast("Unable to cancel the meeting");
+        const data = await response.json();
+        if (data.message === "Appointment not found or already removed") {
+          toast("Appointment not found or already cancelled");
+        } else {
+          toast("Unable to cancel the meeting");
+        }
         return;
       }
-
       toast("Successfully cancelled the meeting");
     } catch (error) {
       console.error("Error canceling meeting:", error);
@@ -89,7 +96,9 @@ export function Appointment() {
       <Card className="relative translate-y-1/4 w-1/2 z-50 items-center justify-center ml-auto mr-auto">
         <CardHeader>
           <CardTitle>Cancel the Meeting</CardTitle>
-          <CardDescription>{appointment.team}: {appointment.meetingTeam}</CardDescription>
+          <CardDescription>
+            {appointment.team}: {appointment.meetingTeam}
+          </CardDescription>
         </CardHeader>
         <CardContent className="w-full">
           {error !== "" ? (
@@ -99,12 +108,9 @@ export function Appointment() {
               <Label>Date: {appointment.day}</Label> <br />
               <Label>Time: {appointment.time}</Label> <br />
               <div className="flex w-full justify-end">
-                <Dialog
-                  open={isDialogOpen}
-                  onOpenChange={setIsDialogOpen}
-                >
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger>
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => setIsDialogOpen(true)}
                     >
@@ -113,13 +119,10 @@ export function Appointment() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>
-                        Cancel Meeting
-                      </DialogTitle>
+                      <DialogTitle>Cancel Meeting</DialogTitle>
                       <DialogDescription>
-                        Are you sure you want to cancel
-                        this meeting? This action cannot
-                        be undone.
+                        Are you sure you want to cancel this meeting? This
+                        action cannot be undone.
                       </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -134,8 +137,8 @@ export function Appointment() {
                       <Button
                         variant="destructive"
                         onClick={() => {
-                          handleCancel();
                           setIsDialogOpen(false);
+                          handleCancel();
                         }}
                       >
                         Yes
