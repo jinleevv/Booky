@@ -129,6 +129,7 @@ import {
                               className="max-w-[250px]"
                               value={field.value ? parseDate(`${field.value}`) : undefined}
                               onChange={(date) => field.onChange(date.toString())}
+                              isDateUnavailable={(date) => date.toDate(`America/Toronto`).getDay() !== 0}
                             />
                             <FormMessage />
                           </FormItem>

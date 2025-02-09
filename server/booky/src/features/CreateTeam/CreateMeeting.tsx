@@ -42,6 +42,8 @@ export default function CreateMeeting({ form, currentTab, setCurrentTab }) {
     return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
   };
 
+
+
   return (
     <FormField
       control={form.control}
@@ -125,6 +127,7 @@ export default function CreateMeeting({ form, currentTab, setCurrentTab }) {
                             className="max-w-[250px]"
                             defaultValue={parseDate(`${new Date().toISOString().split("T")[0]}`)}
                             onChange={(date) => field.onChange(date.toString())}
+                            isDateUnavailable={(date) => date.toDate(`America/Toronto`).getDay() !== 0}
                           />
                           <FormMessage />
                         </FormItem>
