@@ -137,7 +137,13 @@ export default function Home() {
                     <Button
                       variant="outline"
                       className="text-black w-full mt-4"
-                      onClick={() => navigate("/register")}
+                      onClick={() => {
+                        {
+                          loggedInUser
+                            ? navigate("/dashboard")
+                            : navigate("/register");
+                        }
+                      }}
                     >
                       <CalendarCheck />
                       Start Scheduling
