@@ -1,4 +1,5 @@
 import express, { Request, Response, RequestHandler } from "express";
+import nodemailer from "nodemailer";
 import Team from "../../models/team";
 
 const router = express.Router();
@@ -10,6 +11,7 @@ export const deleteAppointmentHandler: RequestHandler = async (
   res: Response
 ): Promise<void> => {
   const { teamId, meetingTeamId, meetingId, appointmentToken } = req.query;
+  const { appointment } = req.body;
 
   if (!teamId || !meetingTeamId || !meetingId || !appointmentToken) {
     res
@@ -41,6 +43,27 @@ export const deleteAppointmentHandler: RequestHandler = async (
         .json({ message: "Appointment not found or already removed" });
       return;
     }
+
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: `Booky <${process.env.EMAIL}>`,
+      to: appointment.attendee.participantEmail,
+      subject: "Booky Cancellation Confirmation",
+      text: `Booky Confirmation Email\n\nYou have successfully cancelled a meeting.\n\n🏢Meeting: ${appointment.meetingTeam}\n\n🗓️Meeting Time: ${appointment.day}, ${appointment.attendee.time}\n\nHave a great day 😊\nBooky`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Email sending failed:", error);
+      }
+    });
 
     res.status(200).json({ message: "cancelled appointment successfully" });
   } catch (error) {
