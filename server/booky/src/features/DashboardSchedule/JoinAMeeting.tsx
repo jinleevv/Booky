@@ -228,6 +228,7 @@ export default function JoinAMeeting({
   }
 
   const isUserMember = teamMembers.includes(userEmail);
+  const isUserCoadmin = teamCoAdmin.includes(userEmail);
   const isUserAdmin = userEmail === adminEmail;
 
   async function handleJoinTeam() {
@@ -379,7 +380,7 @@ export default function JoinAMeeting({
                 </div>
               </div>
               <div className="mt-auto max-md:hidden">
-                {!isUserAdmin && !isUserMember && (
+                {!isUserAdmin && !isUserMember && !isUserCoadmin && (
                   <Button
                     className="w-full"
                     onClick={handleJoinTeam}

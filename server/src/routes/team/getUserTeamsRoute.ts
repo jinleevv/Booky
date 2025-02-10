@@ -18,7 +18,7 @@ export const getTeamsByUserHandler: RequestHandler = async (
   try {
     // Find teams where userEmail is in the admin or members attribute.
     const teams = await Team.find({
-      $or: [{ adminEmail: userEmail }, { members: userEmail }],
+      $or: [{ adminEmail: userEmail }, {coadmins: userEmail}, { members: userEmail }],
     }).exec();
     
     res.setHeader("Content-Type", "application/json");

@@ -21,7 +21,7 @@ export const updateTeamMembersHandler: RequestHandler = async (req: Request, res
       return;
     }
     
-    if (team.members.includes(members)) {
+    if (team.members.includes(members) || team.coadmins.includes(members)) {
       res.status(400).json({ message: "Member already in the team" });
       return;
     }
