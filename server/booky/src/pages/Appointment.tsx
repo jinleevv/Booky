@@ -32,7 +32,7 @@ export function Appointment() {
     team: "",
     meetingTeam: "",
     day: "",
-    time: "",
+    attendee: {},
   });
   const [error, setError] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -71,6 +71,9 @@ export function Appointment() {
           headers: {
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            appointment: appointment,
+          }),
         }
       );
       if (!response.ok) {
@@ -106,7 +109,7 @@ export function Appointment() {
           ) : (
             <>
               <Label>Date: {appointment.day}</Label> <br />
-              <Label>Time: {appointment.time}</Label> <br />
+              <Label>Time: {appointment.attendee.time}</Label> <br />
               <div className="flex w-full justify-end">
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger>

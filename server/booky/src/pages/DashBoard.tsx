@@ -420,10 +420,25 @@ export default function DashBoard() {
                             <AccordionTrigger>
                               <div className="flex w-full justify-between">
                                 <Label className="flex gap-2">
-                                  <Label className="w-36 border-r-1 border-gray-500">{`${formatDateWithOrdinal(
-                                    meeting.date
-                                  )}`}</Label>
-                                  <Label>{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+                                  {cancelledMeetings.some(
+                                    (cancelled) =>
+                                      cancelled === meeting.meetingId
+                                  ) ? (
+                                    <BanIcon
+                                      className="text-red-700"
+                                      size={15}
+                                    />
+                                  ) : (
+                                    <></>
+                                  )}
+                                  <Label className="w-36 font-normal">
+                                    {`${formatDateWithOrdinal(meeting.date)}`}:
+                                  </Label>
+                                  <Label className="-ml-3 font-medium">{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+                                  <Label className="text-xs text-gray-500">
+                                    Total Participants:{" "}
+                                    {meeting.attendees.length}
+                                  </Label>
                                 </Label>
                                 <Label className="mr-2">
                                   {meeting.time.start} - {meeting.time.end}
@@ -431,25 +446,25 @@ export default function DashBoard() {
                               </div>
                             </AccordionTrigger>
                             <AccordionContent>
-                              <div className="flex w-full justify-between items-center mt-3">
-                                <div className="w-full space-y-2">
+                              <div className="flex w-full justify-between items-center mb-3">
+                                <div className="w-full space-y-2 max-h-[calc(3.5*1.7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
                                   {meeting.attendees.map(
                                     (attendee, subIndex) => (
-                                      <div className="flex w-full justify-between text-sm">
-                                        <div>
-                                          <Label className="text-black font-bold">
-                                            Time:{" "}
-                                          </Label>
-                                          <Label className="text-gray-600">
-                                            {attendee.time}
-                                          </Label>
-                                        </div>
+                                      <div className="flex w-full justify-between text-sm h-5">
                                         <div>
                                           <Label className="font-bold text-black">
                                             Email:{" "}
                                           </Label>{" "}
                                           <Label className="text-gray-600">
                                             {attendee.participantEmail}
+                                          </Label>
+                                        </div>
+                                        <div>
+                                          <Label className="text-black font-bold">
+                                            Time:{" "}
+                                          </Label>
+                                          <Label className="text-gray-600">
+                                            {attendee.time}
                                           </Label>
                                         </div>
                                       </div>

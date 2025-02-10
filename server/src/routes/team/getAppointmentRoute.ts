@@ -56,8 +56,8 @@ export const getAppointmentHandler: RequestHandler = async (req: Request, res: R
     res.status(200).json({
       team: team.teamName,
       meetingTeam: meetingTeam.meetingName,
-      day: date, 
-      time: attendee.time
+      day: date,
+      attendee: attendee
     });
   } catch (error) {
     console.error("Error querying teams:", error);
