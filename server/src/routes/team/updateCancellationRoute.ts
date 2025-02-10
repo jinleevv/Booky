@@ -57,7 +57,7 @@ export const cancelOfficeHourHandler: RequestHandler = async (
       from: `Booky <${process.env.EMAIL}>`,
       to: [...team.members, team.adminEmail].join(","),
       subject: "Booky Cancel Announcement",
-      text: `Booky Cancel Announcement \n\n🏢Team: ${team.teamName}\n\n❌Cancelled Date: ${cancelledDate}\n Start Time: ${start} \nEnd Time: ${end} \n\nHost has cancelled the meeting\nWe are sorry for the inconvenience,\n Booky`,
+      text: `Booky Cancel Announcement \n\n🏢Team: ${team.teamName}\n\n❌Cancelled Date: ${cancelledDate}\n Start Time: ${start} \nEnd Time: ${end} \n\nHost has cancelled the meeting\nWe are sorry for the inconvenience,\nBooky`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {

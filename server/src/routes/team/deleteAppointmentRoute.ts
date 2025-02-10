@@ -56,7 +56,7 @@ export const deleteAppointmentHandler: RequestHandler = async (
       from: `Booky <${process.env.EMAIL}>`,
       to: appointment.attendee.participantEmail,
       subject: "Booky Cancellation Confirmation",
-      text: `Booky Confirmation Email\n\nYou have successfully cancelled a meeting.\n\n🏢Meeting: ${appointment.meetingTeam}\n\n🗓️Meeting Time: ${appointment.day}, ${appointment.attendee.time}\n\nHave a great day 😊\n Booky`,
+      text: `Booky Confirmation Email\n\nYou have successfully cancelled a meeting.\n\n🏢Meeting: ${appointment.meetingTeam}\n\n🗓️Meeting Time: ${appointment.day}, ${appointment.attendee.time}\n\nHave a great day 😊\nBooky`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
