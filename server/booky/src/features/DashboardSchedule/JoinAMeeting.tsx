@@ -598,15 +598,12 @@ export default function JoinAMeeting({
                     selected={selectedDate}
                     onSelect={setSelectedDate}
                     disabled={(date) => {
-                      const today = convertToEST(new Date());
+                      const today = new Date();
                       today.setHours(0, 0, 0, 0);
-
-                      const dateISO = convertToEST(date)
-                        .toISOString()
-                        .split("T")[0];
+                      const dateISO = date.toISOString().split("T")[0];
 
                       return (
-                        convertToEST(date) < today ||
+                        date < today ||
                         !enabledDays.some(
                           (enabledDate) => enabledDate === dateISO
                         )

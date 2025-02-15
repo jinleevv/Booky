@@ -19,9 +19,7 @@ export default function Schedule() {
 
   async function fetchTeamDetails() {
     try {
-      const response = await fetch(
-        `http://localhost:10000/api/teams/${teamId}`
-      );
+      const response = await fetch(`/api/teams/${teamId}`);
       const data = await response.json();
 
       if (response.ok) {
