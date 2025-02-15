@@ -123,7 +123,7 @@ export default function ScheduleForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 p-4 max-h-1/2"
+        className="space-y-4 p-4 h-1/2"
       >
         <FormField
           control={form.control}

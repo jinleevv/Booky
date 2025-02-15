@@ -19,7 +19,9 @@ export default function Schedule() {
 
   async function fetchTeamDetails() {
     try {
-      const response = await fetch(`/api/teams/${teamId}`);
+      const response = await fetch(
+        `http://localhost:10000/api/teams/${teamId}`
+      );
       const data = await response.json();
 
       if (response.ok) {
@@ -44,7 +46,7 @@ export default function Schedule() {
       <div className="flex flex-col items-center justify-center">
         <div className="absolute w-3/6 h-2/6 bg-red-700 blur-[500px] top-1/2"></div>
       </div>
-      <div className="flex relative w-4/5 h-5/6 m-auto">
+      <div className="flex relative w-full h-full m-auto p-4 px-14">
         {teamName === "Not Found" ? (
           <>
             <div className="flex w-full h-20 justify-center items-center border border-dashed rounded-lg font-outfit text-sm">

@@ -96,13 +96,18 @@ export default function JoinAMeeting({
       parsedDuration = "60";
     }
 
-    const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0"); // Add leading zero if needed
-    const date = selectedDate.getDate().toString().padStart(2, "0"); // Add leading zero if needed
-    const year = selectedDate.getFullYear();
+    const month = (convertToEST(selectedDate).getMonth() + 1)
+      .toString()
+      .padStart(2, "0"); // Add leading zero if needed
+    const date = convertToEST(selectedDate)
+      .getDate()
+      .toString()
+      .padStart(2, "0"); // Add leading zero if needed
+    const year = convertToEST(selectedDate).getFullYear();
 
     let newTimeSlots = [...timeSlots];
     if (selectedMeetingTeam.schedule === "recurring") {
-      const dayOfWeek = selectedDate.toLocaleDateString("en-US", {
+      const dayOfWeek = convertToEST(selectedDate).toLocaleDateString("en-US", {
         weekday: "long",
       });
 
@@ -161,11 +166,40 @@ export default function JoinAMeeting({
     setTimeSlots(newTimeSlots);
   }, [selectedDate]);
 
+  function convertToEST(date: Date): Date {
+    try {
+      const estString: string = date.toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        timeZoneName: "longOffset",
+      });
+
+      const offsetString: string | undefined = estString.split(" ").pop();
+
+      if (!offsetString) {
+        throw new Error("Failed to extract timezone offset");
+      }
+
+      const offsetMatch: RegExpMatchArray | null =
+        offsetString.match(/[-+]\d+/);
+
+      if (!offsetMatch) {
+        throw new Error("Invalid offset format");
+      }
+
+      const offsetHours: number = parseInt(offsetMatch[0]);
+      return new Date(date.getTime() + offsetHours * 60 * 60 * 1000);
+    } catch (error) {
+      console.error("Error converting to EST:", error);
+      // Return original date if conversion fails
+      return date;
+    }
+  }
+
   function updateEnabledDaysAndDisabledDates(selectedMeetingTeam) {
     const meetingDates = [];
     const meetings = selectedMeetingTeam.meeting;
 
-    const today = new Date();
+    const today = convertToEST(new Date());
     today.setDate(today.getDate() + 7);
     const oneWeekFromToday = today.toISOString().split("T")[0];
 
@@ -289,7 +323,7 @@ export default function JoinAMeeting({
       ) : (
         <>
           <Card className="flex flex-col md:flex-row w-full h-auto md:h-4/6 shadow-sm overflow-hidden ">
-            <CardHeader className="flex flex-col w-full border-b-[1px] md:w-1/6 md:border-r-[1px] p-4 border-gray-200 justify-between md:h-full max-w-full overflow-hidden">
+            <CardHeader className="flex flex-col w-full border-b-[1px] md:w-1/6 md:border-r-[1px] p-4 border-gray-200 justify-between md:h-full max-w-full overflow-hidden overflow-y-auto">
               <div className="flex flex-col gap-4 h-full">
                 <div>
                   <CardTitle className="text-lg font-bold">
@@ -358,7 +392,7 @@ export default function JoinAMeeting({
                     </div>
                   </div>
                 </div>
-                <div className="flex w-full mt-auto">
+                <div className="flex flex-col space-y-2 w-full mt-auto">
                   <Button
                     onClick={() => {
                       const el = document.createElement("textarea");
@@ -377,23 +411,21 @@ export default function JoinAMeeting({
                   >
                     Copy Team Code
                   </Button>
+                  {!isUserAdmin && !isUserMember && !isUserCoadmin && (
+                    <Button
+                      className="w-full"
+                      onClick={handleJoinTeam}
+                      disabled={!loggedInUser}
+                    >
+                      Join Team
+                    </Button>
+                  )}
+                  {!loggedInUser && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Log in to join a team.
+                    </p>
+                  )}
                 </div>
-              </div>
-              <div className="mt-auto max-md:hidden">
-                {!isUserAdmin && !isUserMember && !isUserCoadmin && (
-                  <Button
-                    className="w-full"
-                    onClick={handleJoinTeam}
-                    disabled={!loggedInUser}
-                  >
-                    Join Team
-                  </Button>
-                )}
-                {!loggedInUser && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Log in to join a team.
-                  </p>
-                )}
               </div>
             </CardHeader>
             <CardContent
@@ -566,13 +598,15 @@ export default function JoinAMeeting({
                     selected={selectedDate}
                     onSelect={setSelectedDate}
                     disabled={(date) => {
-                      const today = new Date();
+                      const today = convertToEST(new Date());
                       today.setHours(0, 0, 0, 0);
 
-                      const dateISO = date.toISOString().split("T")[0];
+                      const dateISO = convertToEST(date)
+                        .toISOString()
+                        .split("T")[0];
 
                       return (
-                        date < today ||
+                        convertToEST(date) < today ||
                         !enabledDays.some(
                           (enabledDate) => enabledDate === dateISO
                         )
@@ -614,7 +648,7 @@ export default function JoinAMeeting({
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6 }}
               >
-                <CardContent className="max-md:max-h-[27vh] h-1/2 w-full flex-1 py-2 border-b-[1px] border-gray-200 overflow-auto">
+                <CardContent className="h-full w-full flex-1 py-2 border-b-[1px] border-gray-200 overflow-auto">
                   <div className="grid grid-cols-2 w-full h-full items-center gap-2">
                     {selectedDate ? (
                       selectedMeetingTeam.type == "group" ? (
