@@ -96,18 +96,13 @@ export default function JoinAMeeting({
       parsedDuration = "60";
     }
 
-    const month = (convertToEST(selectedDate).getMonth() + 1)
-      .toString()
-      .padStart(2, "0"); // Add leading zero if needed
-    const date = convertToEST(selectedDate)
-      .getDate()
-      .toString()
-      .padStart(2, "0"); // Add leading zero if needed
-    const year = convertToEST(selectedDate).getFullYear();
+    const month = (selectedDate.getMonth() + 1).toString().padStart(2, "0"); // Add leading zero if needed
+    const date = selectedDate.getDate().toString().padStart(2, "0"); // Add leading zero if needed
+    const year = selectedDate.getFullYear();
 
     let newTimeSlots = [...timeSlots];
     if (selectedMeetingTeam.schedule === "recurring") {
-      const dayOfWeek = convertToEST(selectedDate).toLocaleDateString("en-US", {
+      const dayOfWeek = selectedDate.toLocaleDateString("en-US", {
         weekday: "long",
       });
 
@@ -166,40 +161,11 @@ export default function JoinAMeeting({
     setTimeSlots(newTimeSlots);
   }, [selectedDate]);
 
-  function convertToEST(date: Date): Date {
-    try {
-      const estString: string = date.toLocaleString("en-US", {
-        timeZone: "America/New_York",
-        timeZoneName: "longOffset",
-      });
-
-      const offsetString: string | undefined = estString.split(" ").pop();
-
-      if (!offsetString) {
-        throw new Error("Failed to extract timezone offset");
-      }
-
-      const offsetMatch: RegExpMatchArray | null =
-        offsetString.match(/[-+]\d+/);
-
-      if (!offsetMatch) {
-        throw new Error("Invalid offset format");
-      }
-
-      const offsetHours: number = parseInt(offsetMatch[0]);
-      return new Date(date.getTime() + offsetHours * 60 * 60 * 1000);
-    } catch (error) {
-      console.error("Error converting to EST:", error);
-      // Return original date if conversion fails
-      return date;
-    }
-  }
-
   function updateEnabledDaysAndDisabledDates(selectedMeetingTeam) {
     const meetingDates = [];
     const meetings = selectedMeetingTeam.meeting;
 
-    const today = convertToEST(new Date());
+    const today = new Date();
     today.setDate(today.getDate() + 7);
     const oneWeekFromToday = today.toISOString().split("T")[0];
 
