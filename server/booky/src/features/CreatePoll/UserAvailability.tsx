@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { formatTime } from "@/features/time";
 import { PollData } from "@/pages/ParticipatePoll";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import ParticipatePollForm from "./ParticipatePollForm";
@@ -53,6 +53,11 @@ export default function UserAvailability({
   const [notAvailableUsers, setNotAvailableUsers] = useState<string[]>([]);
   // const [availableTimes, setAvailableTimes] = useState<AvailableTime[]>([]);
   // const [transferData, setTransferData] = useState<any>([]);
+  const latestSelectionRef = useRef(selectedCells);
+
+  useEffect(() => {
+    latestSelectionRef.current = selectedCells;
+  }, [selectedCells]);
 
   function countCurrentUser() {
     return userEmail && !groupAvailability.has(userEmail) ? 1 : 0;
@@ -72,16 +77,19 @@ export default function UserAvailability({
 
   async function updateAvailability(selectedSlots: Set<string>) {
     try {
-      const response = await fetch(`http://localhost:10000/api/polls/${urlPath}/availability`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userEmail: userEmail,
-          selectedSlots: Array.from(selectedSlots),
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:10000/api/polls/${urlPath}/availability`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userEmail: userEmail,
+            selectedSlots: Array.from(selectedSlots),
+          }),
+        }
+      );
 
       if (!response.ok) {
         toast.error("Failed to update availabilities");
@@ -259,7 +267,7 @@ export default function UserAvailability({
       newSelected.delete(cellId);
     }
     setSelectedCells(newSelected);
-    updateAvailability(newSelected);
+    latestSelectionRef.current = newSelected;
   }
 
   function handleMouseEnter(day: string, time: string) {
@@ -274,12 +282,15 @@ export default function UserAvailability({
       }
 
       setSelectedCells(newSelected);
-      updateAvailability(newSelected);
+      latestSelectionRef.current = newSelected;
     }
   }
 
   function handleMouseUp() {
-    setIsMouseDown(false);
+    if (isMouseDown) {
+      setIsMouseDown(false);
+      updateAvailability(latestSelectionRef.current);
+    }
   }
 
   function getCellId(day: string, time: string) {

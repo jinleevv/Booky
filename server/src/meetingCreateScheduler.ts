@@ -1,6 +1,5 @@
 import cron from "node-cron";
 import Team from "./models/team";
-import MeetingMinute from "./models/meetingMinute";
 import ShortUniqueId from "short-uuid";
 
 function convertToEST(date: Date): Date {
@@ -67,12 +66,6 @@ export const scheduleMeetings = async () => {
                     meeting.time.end === timeRange.end
                 );
                 if (!meetingExists) {
-                  const meetingMinute = await MeetingMinute.create({
-                    _id: meetingId,
-                    data: {}, // Default data
-                    createdAt: new Date(), // Current timestamp
-                  });
-
                   meetingTeam.meeting.push({
                     _id: meetingId,
                     date: targetDate.toISOString().split("T")[0],
