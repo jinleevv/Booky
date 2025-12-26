@@ -102,7 +102,7 @@ export default function CreateMeetingPage() {
       return;
     }
 
-    const response = await fetch(`/api/teams/${teamId}/meetingTeam`, {
+    const response = await fetch(`http://localhost:10000/api/teams/${teamId}/meetingTeam`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

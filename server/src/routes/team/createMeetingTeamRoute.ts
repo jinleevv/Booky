@@ -1,5 +1,4 @@
 import express, { Request, Response, RequestHandler } from "express";
-import MeetingMinute from "../../models/meetingMinute";
 import Team, { ISchedule, IMeetingTeam, IMeeting } from "../../models/team";
 import mongoose from "mongoose";
 import ShortUniqueId from "short-uuid";
@@ -111,12 +110,6 @@ export const createMeetingTeamHandler: RequestHandler = async (
           for (const timeRange of daySchedule.times) {
             const meetingId = `meeting-${uid.generate()}`;
 
-            const meetingMinute = await MeetingMinute.create({
-              _id: meetingId,
-              data: {},
-              createdAt: new Date(),
-            });
-
             generatedMeetings.push({
               _id: meetingId,
               date: targetDate.toISOString().split("T")[0],
@@ -168,12 +161,6 @@ export const createMeetingTeamHandler: RequestHandler = async (
       const oneTimeMeetingEndInfo = oneTimeMeetingSchedule.end.split("T");
       const date = oneTimeMeetingStartInfo[0];
       const meetingId = `meeting-${uid.generate()}`;
-
-      const meetingMinute = await MeetingMinute.create({
-        _id: meetingId,
-        data: {},
-        createdAt: new Date(),
-      });
 
       newMeeting = {
         _id: new mongoose.Types.ObjectId().toString(),

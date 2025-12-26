@@ -4,10 +4,6 @@ import express from "express";
 import mongoose from "mongoose";
 import path from "path";
 import { Server } from "socket.io";
-import { meetingCreateScheduler } from "./meetingCreateScheduler";
-import MeetingMinute from "./models/meetingMinute";
-import getMeetingMinuteRoute from "./routes/document/getMeetingMinuteRoute";
-import mergeMeetingMinutes from "./routes/document/mergeMeetingMinutesRoute";
 import createPollRoute from "./routes/poll/createPollRoute";
 import getPollRoute from "./routes/poll/getPollRoute";
 import updatePollRoute from "./routes/poll/updatePollRoute";
@@ -29,13 +25,8 @@ import updateCoadminRoute from "./routes/team/updateCoadminRoute";
 import updatePermissionRoute from "./routes/team/updatePermissionRoute";
 import updateTeamDescriptionRoute from "./routes/team/updateTeamDescriptionRoute";
 import updateTeamMembersRoute from "./routes/team/updateTeamMembersRoute";
-import updateCommentsRoute from "./routes/document/updateCommentsRoute";
-import removeCommentsRoute from "./routes/document/removeCommentsRoute";
 import userRoute from "./routes/user/userRegistrationRoute";
-import getTaskFlowHandler from "./routes/taskFlow/getTaskFlow";
-import updateTaskFlowHandler from "./routes/taskFlow/updateTaskFlow";
 import http from "http";
-import sendMeetingReminders from "./meetingReminderScheduler";
 
 dotenv.config();
 
@@ -92,6 +83,7 @@ app.use(express.json());
 app.get("/api/health", (req: any, res: any) => {
   res.json({ status: "ok" });
 });
+
 app.use("/api/users", userRoute);
 app.use("/api/teams/by-user", getUserTeamsRoute);
 app.use("/api/teams/create", createTeamRoute);
@@ -114,26 +106,12 @@ app.use("/api/team/remove-user-from-team", removeUserFromTeamRoute);
 app.use("/api/polls/create", createPollRoute);
 app.use("/api/polls", updatePollRoute);
 app.use("/api/polls", getPollRoute);
-app.use("/api/document/", getMeetingMinuteRoute);
-app.use("/api/document/", mergeMeetingMinutes);
-app.use("/api/document/", updateCommentsRoute);
-app.use("/api/document/", removeCommentsRoute);
-app.use("/api/taskFlow", getTaskFlowHandler);
-app.use("/api/taskFlow", updateTaskFlowHandler);
 
 app.use(express.static(path.join(__dirname, "../booky/dist")));
 
 app.get("*", (req: any, res: any) => {
   res.sendFile(path.join(__dirname, "../booky/dist/index.html"));
 });
-
-async function findOrCreateMeetingMinute(id: any) {
-  if (id === null) return;
-
-  const meetingMinute = await MeetingMinute.findById(id);
-  if (meetingMinute) return meetingMinute;
-  return await MeetingMinute.create({ _id: id, data: "" });
-}
 
 // MongoDB connection
 mongoose
@@ -154,35 +132,4 @@ mongoose
 
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-});
-
-io.on("connection", (socket: any) => {
-  console.log("Socket Connected");
-  socket.on("get-document", async (meeting: any) => {
-    const meetingMinute = await findOrCreateMeetingMinute(meeting);
-    if (meetingMinute === undefined) {
-      console.log("meeting minute is undefined");
-      return;
-    }
-    socket.join(meeting);
-    // socket.emit("load-document", meetingMinute.data);
-    socket.emit("load-document", {
-      data: meetingMinute.data,
-      title: meetingMinute.title, // Send title
-    });
-
-    socket.on("send-changes", (delta: any) => {
-      socket.broadcast.to(meeting).emit("receive-changes", delta);
-    });
-
-    socket.on("save-document", async (data: any) => {
-      await MeetingMinute.findByIdAndUpdate(meeting, { data });
-    });
-
-    // Handle title changes
-    socket.on("send-title-change", async (title: any) => {
-      await MeetingMinute.findByIdAndUpdate(meeting, { title });
-      socket.broadcast.to(meeting).emit("receive-title-change", title);
-    });
-  });
 });

@@ -1,55 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { GoogleAuthProvider, signInWithPopup } from "@firebase/auth";
 import NavigationBar from "@/features/NavigationBar/NavigationBar";
-// import {
-//   GoogleAuthProvider,
-//   GithubAuthProvider,
-//   signInWithPopup,
-// } from "@firebase/auth";
-// import { auth } from "@/../firebase";
-// import { IoLogoGithub } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
-// import { toast } from "sonner";
 import { useHook } from "@/hooks";
 import { motion } from "framer-motion";
 import { CalendarCheck, LayoutPanelLeft, Waypoints } from "lucide-react";
+import { toast } from "sonner";
+import { auth } from "../../firebase";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { loggedInUser } = useHook();
+  const { loggedInUser, setLoggedInUser, setUserName } = useHook();
 
-  // async function handleGoogleLogin() {
-  //   try {
-  //     const provider = new GoogleAuthProvider();
-  //     const response = await signInWithPopup(auth, provider);
-  //     toast("Sign-In Successful");
-  //     setLoggedInUser(true);
-  //     setUserName(response.user.displayName);
-  //   } catch (error) {
-  //     if (error.code === "auth/invalid-credential") {
-  //       toast("Invalid email or password");
-  //     } else {
-  //       toast("Unable to log in due to an error");
-  //     }
-  //   }
-  // }
-
-  // async function handleGithubLogin() {
-  //   try {
-  //     const provider = new GithubAuthProvider();
-  //     const response = await signInWithPopup(auth, provider);
-  //     toast("Sign-In Successful");
-  //     setLoggedInUser(true);
-  //     setUserName(response.user.displayName);
-  //   } catch (error) {
-  //     if (error.code === "auth/invalid-credential") {
-  //       toast("Invalid email or password");
-  //     } else {
-  //       toast("Unable to log in due to an error");
-  //     }
-  //   }
-  // }
+  async function handleGoogleLogin() {
+    try {
+      const provider = new GoogleAuthProvider();
+      const response = await signInWithPopup(auth, provider);
+      toast("Sign-In Successful");
+      setLoggedInUser(true);
+      setUserName(response.user.displayName);
+    } catch (error) {
+      if (error.code === "auth/invalid-credential") {
+        toast("Invalid email or password");
+      } else {
+        toast("Unable to log in due to an error");
+      }
+    }
+  }
 
   return (
     <section className="h-screen w-screen bg-white font-outfit">
@@ -85,26 +64,6 @@ export default function Home() {
               </>
             ) : (
               <>
-                {/* <div className="flex flex-col mt-10 lg:mt-0 w-full gap-2">
-                  <Button
-                    className="w-full h-12 text-lg flex items-center gap-3"
-                    onClick={handleGoogleLogin}
-                  >
-                    <img src="/google_logo.png" className="w-5 h-5" />
-                    Sign Up with Google
-                  </Button>
-                </div>
-                <div className="w-full border border-t-1 border-black rounded-full"></div>
-                <div className="w-full text-center">
-                  <Button
-                    variant="ghost"
-                    className="hover:bg-inherit hover:text-red-700"
-                    onClick={() => navigate("/register")}
-                  >
-                    <HiOutlineMail />
-                    <Label className="text-xs">Sign Up with Email</Label>
-                  </Button>
-                </div> */}
                 <div className="flex flex-col mt-10 lg:mt-0 w-full gap-2">
                   <Button
                     className="w-full h-12 text-lg flex items-center gap-3"
@@ -112,6 +71,13 @@ export default function Home() {
                   >
                     <HiOutlineMail />
                     Sign Up with McGill Email
+                  </Button>
+                  <Button
+                    className="w-full h-12 text-lg flex items-center gap-3"
+                    onClick={handleGoogleLogin}
+                  >
+                    <img src="/google_logo.png" className="w-5 h-5" />
+                    Sign Up with Google
                   </Button>
                 </div>
               </>

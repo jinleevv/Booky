@@ -60,7 +60,7 @@ export default function ParticipatePoll() {
   useEffect(() => {
     async function fetchPollDetails() {
       try {
-        const response = await fetch(`/api/polls/${urlPath}`, {
+        const response = await fetch(`http://localhost:10000/api/polls/${urlPath}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -99,7 +99,7 @@ export default function ParticipatePoll() {
 
   async function getAvailability(email: string) {
     try {
-      const response = await fetch(`/api/polls/${urlPath}/availability`, {
+      const response = await fetch(`http://localhost:10000/api/polls/${urlPath}/availability`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

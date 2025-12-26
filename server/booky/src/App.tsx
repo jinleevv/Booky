@@ -6,22 +6,18 @@ import { AuthContext } from "./features/AuthContext.tsx";
 import { useHook } from "./hooks.ts";
 import { Appointment } from "./pages/Appointment.tsx";
 import CreateMeetingPage from "./pages/CreateMeetingPage.tsx";
-import CreatePoll from "./pages/CreatePoll.tsx";
 import CreateTeam from "./pages/CreateTeam.tsx";
 import DashBoard from "./pages/DashBoard.tsx";
 import DashBoardSchedule from "./pages/DashBoardSchedule.tsx";
 import DashBoardTeams from "./pages/DashBoardTeams.tsx";
 import EditMeetingTeamPage from "./pages/EditMeetingTeamPage.tsx";
 import Home from "./pages/Home.tsx";
-import MeetingDetails from "./pages/MeetingDetails.tsx";
-import MeetingMinutePage from "./pages/MeetingMinutePage.tsx";
-import ParticipatePoll from "./pages/ParticipatePoll.tsx";
 import Schedule from "./pages/Schedule.tsx";
 import SignIn from "./pages/SignIn.tsx";
 import SignUp from "./pages/SignUp.tsx";
 import TeamSettings from "./pages/TeamSettings.tsx";
-import AttendancePage from "./pages/AttendancePage.tsx";
-import TaskFlowPage from "./pages/TaskFlowPage.tsx";
+import CreatePoll from "./pages/CreatePoll.tsx";
+import ParticipatePoll from "./pages/ParticipatePoll.tsx";
 
 function App() {
   const { loading } = useContext(AuthContext);
@@ -44,19 +40,17 @@ function App() {
 
   return (
     <HeroUIProvider>
-      
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<SignIn />} />
         <Route path="/register" element={<SignUp />} />
-        <Route path="/attendance/:teamId" element={<AttendancePage />} />
         <Route path="/poll" element={<CreatePoll />} />
         <Route path="/poll/:id" element={<ParticipatePoll />} />
-        <Route path="/taskFlow/:taskFlowId" element={<TaskFlowPage />} />
-        {/* <Route path="/search/:searchCode" element={<Search />} /> */}
         <Route path="/schedule/:code" element={<Schedule />} />
-        {/* <Route path="/team/:teamId" element={<RegisterTeam />} />  */}
-        <Route path="/:teamId/:meetingTeamId/:meetingId/:code" element={<Appointment />} />
+        <Route
+          path="/:teamId/:meetingTeamId/:meetingId/:code"
+          element={<Appointment />}
+        />
         <Route
           path="/dashboard"
           element={
@@ -106,26 +100,10 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/:teamId/:meetingTeamId/:meetingTeamName/:meetingId"
-          element={
-            <ProtectedRoute>
-              <MeetingDetails />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/dashboard/:teamId/settings"
           element={
             <ProtectedRoute>
               <TeamSettings />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/document/:teamId/:date/:time/:meetingId"
-          element={
-            <ProtectedRoute>
-              <MeetingMinutePage />
             </ProtectedRoute>
           }
         />

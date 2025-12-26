@@ -75,7 +75,7 @@ export default function ScheduleForm({
     };
 
     try {
-      const response = await fetch(`/api/teams/${teamId}/appointments`, {
+      const response = await fetch(`http://localhost:10000/api/teams/${teamId}/appointments`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -17,25 +17,29 @@ import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { TbCalendar } from "react-icons/tb";
+import { BsCalendar4Range } from "react-icons/bs";
 import { useEffect, useState } from "react";
 import { useHook } from "@/hooks";
 import { toast } from "sonner";
 import MobileDashboardNavBar from "@/features/NavigationBar/MobileDashboardNavBar";
+import CalendarView from "../features/CalendarView";
 
 export default function DashBoard() {
   const { userEmail } = useHook();
 
+  const [userTeam, setUserTeam] = useState<any[]>([]);
   const [upcomingMeetings, setUpcomingMeetings] = useState<any[]>([]);
   const [pastMeetings, setPastMeetings] = useState<any[]>([]);
   const [showUpcoming, setShowUpcoming] = useState(true); // Toggle between views
   const [cancelledMeetings, setCancelledMeetings] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<number>(7);
+  const [calView, setCalView] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchOfficeHours = async () => {
       try {
         const response = await fetch(
-          `/api/teams/by-user?userEmail=${userEmail}`
+          `http://localhost:10000/api/teams/by-user?userEmail=${userEmail}`
         );
 
         if (!response.ok) {
@@ -53,6 +57,8 @@ export default function DashBoard() {
         const upcoming = [];
         const past = [];
         const cancelled = [];
+
+        setUserTeam(teams)
 
         teams.forEach((team) => {
           team.meetingTeam.forEach((meetingTeam) => {
@@ -139,7 +145,7 @@ export default function DashBoard() {
   ) {
     try {
       const response = await fetch(
-        `/api/teams/cancel/${teamId}/${meetingTeamId}/${meetingId}`,
+        `http://localhost:10000/api/teams/cancel/${teamId}/${meetingTeamId}/${meetingId}`,
         {
           method: "PATCH",
           headers: {
@@ -269,14 +275,14 @@ export default function DashBoard() {
               >
                 Past
               </Button>
-              <div className="ml-auto">
+              <div className="flex w-full h-full justify-end gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     asChild
                     className="hover:bg-slate-100 p-1 rounded-lg"
                   >
                     <div className="flex gap-1">
-                      <TbCalendar size={15} />
+                      <BsCalendar4Range size={15} className="m-auto" />
                       <Label className="m-auto">
                         Date Range: {numberToString(dateRange)}
                       </Label>
@@ -297,190 +303,199 @@ export default function DashBoard() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <Button variant="ghost" onClick={() => setCalView(!calView)}>
+                  <TbCalendar size={15} />
+                  Cal View
+                </Button>
               </div>
             </div>
-            <div className="border border-dashed rounded-md p-4">
-              <Accordion
-                type="single"
-                collapsible
-                className="w-full border-b-0"
-              >
-                {showUpcoming ? (
-                  <>
-                    {upcomingMeetings.length === 0 ? (
-                      <>
-                        <div className="flex w-full h-14 justify-center items-center text-sm">
-                          <h1>No Meetings</h1>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {upcomingMeetings.map((meeting, index) => (
-                          <AccordionItem key={index} value={`item-${index}`}>
-                            <AccordionTrigger>
-                              <div className="flex w-full justify-between">
-                                <Label className="flex gap-1">
-                                  {cancelledMeetings.some(
-                                    (cancelled) =>
-                                      cancelled === meeting.meetingId
-                                  ) ? (
-                                    <BanIcon
-                                      className="text-red-700"
-                                      size={15}
-                                    />
-                                  ) : (
-                                    <></>
-                                  )}
-                                  <Label className="w-36 font-normal">
-                                    {`${formatDateWithOrdinal(meeting.date)}`}:
+            {calView && <CalendarView userTeam={userTeam}/>}
+            {!calView && (
+              <div className="border border-dashed rounded-md p-4">
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="w-full border-b-0"
+                >
+                  {showUpcoming ? (
+                    <>
+                      {upcomingMeetings.length === 0 ? (
+                        <>
+                          <div className="flex w-full h-14 justify-center items-center text-sm">
+                            <h1>No Meetings</h1>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {upcomingMeetings.map((meeting, index) => (
+                            <AccordionItem key={index} value={`item-${index}`}>
+                              <AccordionTrigger>
+                                <div className="flex w-full justify-between">
+                                  <Label className="flex gap-1">
+                                    {cancelledMeetings.some(
+                                      (cancelled) =>
+                                        cancelled === meeting.meetingId
+                                    ) ? (
+                                      <BanIcon
+                                        className="text-red-700"
+                                        size={15}
+                                      />
+                                    ) : (
+                                      <></>
+                                    )}
+                                    <Label className="w-36 font-normal">
+                                      {`${formatDateWithOrdinal(meeting.date)}`}
+                                      :
+                                    </Label>
+                                    <Label className="-ml-3 font-medium">{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+                                    <Label className="text-xs text-gray-500">
+                                      Total Participants:{" "}
+                                      {meeting.attendees.length}
+                                    </Label>
                                   </Label>
-                                  <Label className="-ml-3 font-medium">{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
-                                  <Label className="text-xs text-gray-500">
-                                    Total Participants:{" "}
-                                    {meeting.attendees.length}
+                                  <Label className="mr-2">
+                                    {meeting.time.start} - {meeting.time.end}
                                   </Label>
-                                </Label>
-                                <Label className="mr-2">
-                                  {meeting.time.start} - {meeting.time.end}
-                                </Label>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <div className="flex w-full justify-between items-center mb-3">
-                                <div className="w-full space-y-2 max-h-[calc(3.5*1.7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-                                  {meeting.attendees.map(
-                                    (attendee, subIndex) => (
-                                      <div className="flex w-full justify-between text-sm h-5">
-                                        <div>
-                                          <Label className="font-bold text-black">
-                                            Email:{" "}
-                                          </Label>{" "}
-                                          <Label className="text-gray-600">
-                                            {attendee.participantEmail}
-                                          </Label>
-                                        </div>
-                                        <div>
-                                          <Label className="text-black font-bold">
-                                            Time:{" "}
-                                          </Label>
-                                          <Label className="text-gray-600">
-                                            {attendee.time}
-                                          </Label>
-                                        </div>
-                                      </div>
-                                    )
-                                  )}
                                 </div>
-                              </div>
-                              {meeting.meetingHostEmail === userEmail ? (
-                                <div className="flex w-full justify-end mt-2">
-                                  {!cancelledMeetings.some(
-                                    (cancelled) =>
-                                      cancelled === meeting.meetingId
-                                  ) && (
-                                    <Button
-                                      variant="outline"
-                                      className="ml-4"
-                                      onClick={() =>
-                                        handleCancel(
-                                          meeting.teamId,
-                                          meeting.meetingTeamId,
-                                          meeting.meetingId,
-                                          meeting.date,
-                                          meeting.time.start,
-                                          meeting.time.end
-                                        )
-                                      }
-                                    >
-                                      Cancel the Meeting
-                                    </Button>
-                                  )}
-                                </div>
-                              ) : (
-                                <></>
-                              )}
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {pastMeetings.length === 0 ? (
-                      <>
-                        <div className="w-full text-center">
-                          <Label>No Meetings</Label>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {pastMeetings.map((meeting, index) => (
-                          <AccordionItem key={index} value={`item-${index}`}>
-                            <AccordionTrigger>
-                              <div className="flex w-full justify-between">
-                                <Label className="flex gap-2">
-                                  {cancelledMeetings.some(
-                                    (cancelled) =>
-                                      cancelled === meeting.meetingId
-                                  ) ? (
-                                    <BanIcon
-                                      className="text-red-700"
-                                      size={15}
-                                    />
-                                  ) : (
-                                    <></>
-                                  )}
-                                  <Label className="w-36 font-normal">
-                                    {`${formatDateWithOrdinal(meeting.date)}`}:
-                                  </Label>
-                                  <Label className="-ml-3 font-medium">{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
-                                  <Label className="text-xs text-gray-500">
-                                    Total Participants:{" "}
-                                    {meeting.attendees.length}
-                                  </Label>
-                                </Label>
-                                <Label className="mr-2">
-                                  {meeting.time.start} - {meeting.time.end}
-                                </Label>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <div className="flex w-full justify-between items-center mb-3">
-                                <div className="w-full space-y-2 max-h-[calc(3.5*1.7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-                                  {meeting.attendees.map(
-                                    (attendee, subIndex) => (
-                                      <div className="flex w-full justify-between text-sm h-5">
-                                        <div>
-                                          <Label className="font-bold text-black">
-                                            Email:{" "}
-                                          </Label>{" "}
-                                          <Label className="text-gray-600">
-                                            {attendee.participantEmail}
-                                          </Label>
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="flex w-full justify-between items-center mb-3">
+                                  <div className="w-full space-y-2 max-h-[calc(3.5*1.7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+                                    {meeting.attendees.map(
+                                      (attendee, subIndex) => (
+                                        <div className="flex w-full justify-between text-sm h-5">
+                                          <div>
+                                            <Label className="font-bold text-black">
+                                              Email:{" "}
+                                            </Label>{" "}
+                                            <Label className="text-gray-600">
+                                              {attendee.participantEmail}
+                                            </Label>
+                                          </div>
+                                          <div>
+                                            <Label className="text-black font-bold">
+                                              Time:{" "}
+                                            </Label>
+                                            <Label className="text-gray-600">
+                                              {attendee.time}
+                                            </Label>
+                                          </div>
                                         </div>
-                                        <div>
-                                          <Label className="text-black font-bold">
-                                            Time:{" "}
-                                          </Label>
-                                          <Label className="text-gray-600">
-                                            {attendee.time}
-                                          </Label>
-                                        </div>
-                                      </div>
-                                    )
-                                  )}
+                                      )
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </>
-                    )}
-                  </>
-                )}
-              </Accordion>
-            </div>
+                                {meeting.meetingHostEmail === userEmail ? (
+                                  <div className="flex w-full justify-end mt-2">
+                                    {!cancelledMeetings.some(
+                                      (cancelled) =>
+                                        cancelled === meeting.meetingId
+                                    ) && (
+                                      <Button
+                                        variant="outline"
+                                        className="ml-4"
+                                        onClick={() =>
+                                          handleCancel(
+                                            meeting.teamId,
+                                            meeting.meetingTeamId,
+                                            meeting.meetingId,
+                                            meeting.date,
+                                            meeting.time.start,
+                                            meeting.time.end
+                                          )
+                                        }
+                                      >
+                                        Cancel the Meeting
+                                      </Button>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <></>
+                                )}
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {pastMeetings.length === 0 ? (
+                        <>
+                          <div className="w-full text-center">
+                            <Label>No Meetings</Label>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {pastMeetings.map((meeting, index) => (
+                            <AccordionItem key={index} value={`item-${index}`}>
+                              <AccordionTrigger>
+                                <div className="flex w-full justify-between">
+                                  <Label className="flex gap-2">
+                                    {cancelledMeetings.some(
+                                      (cancelled) =>
+                                        cancelled === meeting.meetingId
+                                    ) ? (
+                                      <BanIcon
+                                        className="text-red-700"
+                                        size={15}
+                                      />
+                                    ) : (
+                                      <></>
+                                    )}
+                                    <Label className="w-36 font-normal">
+                                      {`${formatDateWithOrdinal(meeting.date)}`}
+                                      :
+                                    </Label>
+                                    <Label className="-ml-3 font-medium">{`${meeting.teamName}: ${meeting.meetingTeamName}`}</Label>
+                                    <Label className="text-xs text-gray-500">
+                                      Total Participants:{" "}
+                                      {meeting.attendees.length}
+                                    </Label>
+                                  </Label>
+                                  <Label className="mr-2">
+                                    {meeting.time.start} - {meeting.time.end}
+                                  </Label>
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="flex w-full justify-between items-center mb-3">
+                                  <div className="w-full space-y-2 max-h-[calc(3.5*1.7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+                                    {meeting.attendees.map(
+                                      (attendee, subIndex) => (
+                                        <div className="flex w-full justify-between text-sm h-5">
+                                          <div>
+                                            <Label className="font-bold text-black">
+                                              Email:{" "}
+                                            </Label>{" "}
+                                            <Label className="text-gray-600">
+                                              {attendee.participantEmail}
+                                            </Label>
+                                          </div>
+                                          <div>
+                                            <Label className="text-black font-bold">
+                                              Time:{" "}
+                                            </Label>
+                                            <Label className="text-gray-600">
+                                              {attendee.time}
+                                            </Label>
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))}
+                        </>
+                      )}
+                    </>
+                  )}
+                </Accordion>
+              </div>
+            )}
           </div>
         </div>
       </div>

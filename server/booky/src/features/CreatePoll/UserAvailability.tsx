@@ -72,7 +72,7 @@ export default function UserAvailability({
 
   async function updateAvailability(selectedSlots: Set<string>) {
     try {
-      const response = await fetch(`/api/polls/${urlPath}/availability`, {
+      const response = await fetch(`http://localhost:10000/api/polls/${urlPath}/availability`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

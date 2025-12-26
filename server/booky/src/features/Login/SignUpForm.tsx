@@ -110,7 +110,7 @@ export default function SignUpForm() {
   }
 
   async function saveUserToDatabase(uid: string, email: string, name: string) {
-    const response = await fetch(`/api/users/register`, {
+    const response = await fetch(`http://localhost:10000/api/users/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

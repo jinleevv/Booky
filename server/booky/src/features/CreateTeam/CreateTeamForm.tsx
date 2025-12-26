@@ -52,7 +52,7 @@ export default function CreateTeamForm() {
       return;
     }
 
-    const response = await fetch(`/api/teams/create`, {
+    const response = await fetch(`http://localhost:10000/api/teams/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

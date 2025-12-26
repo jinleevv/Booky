@@ -40,7 +40,7 @@ export default function ParticipatePollForm({
 
   async function onSubmit(values: FormValues) {
     let passwordVerified: boolean = true;
-    const response = await fetch(`/api/polls/${urlPath}`, {
+    const response = await fetch(`http://localhost:10000/api/polls/${urlPath}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

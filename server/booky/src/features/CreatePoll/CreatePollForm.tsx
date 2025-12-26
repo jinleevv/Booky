@@ -96,7 +96,7 @@ export default function CreatePollForm() {
 
     const urlPath = uuid();
 
-    const response = await fetch(`/api/polls/create`, {
+    const response = await fetch(`http://localhost:10000/api/polls/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

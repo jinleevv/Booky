@@ -26,7 +26,7 @@ export default function UpdateDescription({ teamId, onSuccess }) {
   });
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (teamId) {
-      const response = await fetch(`/api/teams/${teamId}/teamDescription`, {
+      const response = await fetch(`http://localhost:10000/api/teams/${teamId}/teamDescription`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -95,7 +95,7 @@ export default function EditMeetingTeamPage() {
       if (!meetingTeamId) return;
       try {
         const response = await fetch(
-          `/api/teams/${teamId}/meetingTeams/${meetingTeamId}`
+          `http://localhost:10000/api/teams/${teamId}/meetingTeams/${meetingTeamId}`
         );
         const data = await response.json();
         setMeetingData(data);
@@ -203,7 +203,7 @@ export default function EditMeetingTeamPage() {
     }
 
     const response = await fetch(
-      `/api/teams/${teamId}/meetingTeams/${meetingTeamId}`,
+      `http://localhost:10000/api/teams/${teamId}/meetingTeams/${meetingTeamId}`,
       {
         method: "PATCH",
         headers: {

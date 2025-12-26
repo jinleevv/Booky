@@ -233,7 +233,7 @@ export default function JoinAMeeting({
 
   async function handleJoinTeam() {
     try {
-      const response = await fetch(`/api/teams/${teamId}/members`, {
+      const response = await fetch(`http://localhost:10000/api/teams/${teamId}/members`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -257,7 +257,7 @@ export default function JoinAMeeting({
   async function handleRemoveMeetingTeam(meetingTeamId: string) {
     try {
       const response = await fetch(
-        `/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
+        `http://localhost:10000/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
         {
           method: "PATCH",
           headers: {

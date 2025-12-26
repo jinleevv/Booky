@@ -114,10 +114,6 @@ export default function NavigationBar() {
                     <LayoutPanelLeft /> <span>Dashboard</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/poll")}>
-                    <Vote /> <span>Poll</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => {
                       signOut(auth);
@@ -133,21 +129,6 @@ export default function NavigationBar() {
           <>
             <div className="flex w-full gap-2">
               <div className="hidden lg:flex w-full gap-2">
-                {/* <Button
-                  variant="outline"
-                  className="bg-white hover:text-red-700 rounded-xl"
-                  onClick={() => navigate(`/taskFlow/${urlPath}`)}
-                  disabled={true}
-                >
-                  Task Flow
-                </Button> */}
-                <Button
-                  variant="outline"
-                  className="bg-white hover:text-red-700 rounded-xl"
-                  onClick={() => navigate("/poll")}
-                >
-                  Availability Poll
-                </Button>
                 <Button
                   variant="outline"
                   className="bg-white hover:text-red-700 rounded-xl"
@@ -176,7 +157,6 @@ export default function NavigationBar() {
                     <MobileNavMenu />
                   </motion.div>
 
-                  {/* ✅ Ensure `MenuToggle` is properly positioned */}
                   <div className="relative z-50">
                     <MenuToggle toggle={() => toggleOpen()} />
                   </div>

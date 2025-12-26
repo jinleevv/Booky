@@ -28,7 +28,7 @@ export default function TeamSettings() {
   // Fetch team name on load
   useEffect(() => {
     const fetchTeam = async () => {
-      const response = await fetch(`/api/teams/${teamId}`);
+      const response = await fetch(`http://localhost:10000/api/teams/${teamId}`);
       const data = await response.json();
       if (response.ok) {
         const dataTeamMembers: [string, string][] = [

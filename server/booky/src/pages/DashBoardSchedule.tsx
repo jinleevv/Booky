@@ -1,10 +1,8 @@
 import { Label } from "@/components/ui/label";
 import DashboardNavBar from "@/features/DashboardNavBar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import JoinAMeeting from "@/features/DashboardSchedule/JoinAMeeting";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import ViewDetails from "@/features/DashboardSchedule/ViewDetails/ViewDetails";
 import MobileDashboardNavBar from "@/features/NavigationBar/MobileDashboardNavBar";
 
 export default function DashBoardSchedule() {
@@ -17,25 +15,15 @@ export default function DashBoardSchedule() {
   const [meetingTeam, setMeetingTeam] = useState<any[]>([]);
   const [selectedHost, setSelectedHost] = useState<string | null>(null);
 
-  const [displayTabs, setDisplayTabs] = useState<string>("join");
-
   useEffect(() => {
     fetchTeamDetails();
   }, [teamId]);
 
-  useEffect(() => {
-    const tab = localStorage.getItem("DisplayDashboardSchedule");
-    if (tab === "view") {
-      setDisplayTabs("view");
-    } else {
-      setDisplayTabs("join");
-    }
-    localStorage.removeItem("DisplayDashboardSchedule");
-  }, []);
-
   async function fetchTeamDetails() {
     try {
-      const response = await fetch(`/api/teams/${teamId}`);
+      const response = await fetch(
+        `http://localhost:10000/api/teams/${teamId}`
+      );
       const data = await response.json();
 
       if (response.ok) {
@@ -75,45 +63,19 @@ export default function DashBoardSchedule() {
               </div>
             </div>
             <div>
-              <Tabs
-                value={displayTabs}
-                onValueChange={(value) => setDisplayTabs(value)}
-              >
-                <TabsList>
-                  <TabsTrigger value="join">Join a Meeting</TabsTrigger>
-                  <TabsTrigger value="view">Meeting Minutes</TabsTrigger>
-                </TabsList>
-                <TabsContent value="join">
-                  <JoinAMeeting
-                    teamId={teamId}
-                    teamName={teamName}
-                    teamDescription={teamDescription}
-                    adminEmail={adminEmail}
-                    teamCoAdmin={teamCoAdmin}
-                    teamMembers={teamMembers}
-                    setTeamMembers={setTeamMembers}
-                    meetingTeam={meetingTeam}
-                    setMeetingTeam={setMeetingTeam}
-                    selectedHost={selectedHost}
-                    setSelectedHost={setSelectedHost}
-                  />
-                </TabsContent>
-                <TabsContent value="view">
-                  <ViewDetails
-                    teamId={teamId}
-                    teamName={teamName}
-                    teamDescription={teamDescription}
-                    adminEmail={adminEmail}
-                    teamCoAdmin={teamCoAdmin}
-                    teamMembers={teamMembers}
-                    setTeamMembers={setTeamMembers}
-                    meetingTeam={meetingTeam}
-                    setMeetingTeam={setMeetingTeam}
-                    selectedHost={selectedHost}
-                    setSelectedHost={setSelectedHost}
-                  />
-                </TabsContent>
-              </Tabs>
+              <JoinAMeeting
+                teamId={teamId}
+                teamName={teamName}
+                teamDescription={teamDescription}
+                adminEmail={adminEmail}
+                teamCoAdmin={teamCoAdmin}
+                teamMembers={teamMembers}
+                setTeamMembers={setTeamMembers}
+                meetingTeam={meetingTeam}
+                setMeetingTeam={setMeetingTeam}
+                selectedHost={selectedHost}
+                setSelectedHost={setSelectedHost}
+              />
             </div>
           </div>
         </div>

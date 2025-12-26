@@ -33,7 +33,7 @@ export default function InviteCoAdmin({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (teamId !== "CreateTeam") {
-      const response = await fetch(`/api/teams/${teamId}/coadmins`, {
+      const response = await fetch(`http://localhost:10000/api/teams/${teamId}/coadmins`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

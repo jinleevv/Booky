@@ -36,7 +36,7 @@ export const columns: ColumnDef<TeamMembers>[] = [
     cell: ({ row }) => {
       const member = row.original;
       async function handleCoAdminToMember() {
-        const response = await fetch(`/api/teams/${member.teamId}/permission`, {
+        const response = await fetch(`http://localhost:10000/api/teams/${member.teamId}/permission`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -55,7 +55,7 @@ export const columns: ColumnDef<TeamMembers>[] = [
       }
 
       async function handleMemberToCoAdmin() {
-        const response = await fetch(`/api/teams/${member.teamId}/permission`, {
+        const response = await fetch(`http://localhost:10000/api/teams/${member.teamId}/permission`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",

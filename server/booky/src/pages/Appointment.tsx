@@ -45,7 +45,7 @@ export function Appointment() {
     try {
       // Send GET request to backend API
       const response = await fetch(
-        `/api/appointment/get-appointment?teamId=${teamId}&meetingTeamId=${meetingTeamId}&meetingId=${meetingId}&appointmentToken=${appointmentToken}`
+        `http://localhost:10000/api/appointment/get-appointment?teamId=${teamId}&meetingTeamId=${meetingTeamId}&meetingId=${meetingId}&appointmentToken=${appointmentToken}`
       );
 
       if (response.ok) {
@@ -65,7 +65,7 @@ export function Appointment() {
   async function handleCancel() {
     try {
       const response = await fetch(
-        `/api/appointment/delete-appointment?teamId=${teamId}&meetingTeamId=${meetingTeamId}&meetingId=${meetingId}&appointmentToken=${appointmentToken}`,
+        `http://localhost:10000/api/appointment/delete-appointment?teamId=${teamId}&meetingTeamId=${meetingTeamId}&meetingId=${meetingId}&appointmentToken=${appointmentToken}`,
         {
           method: "PATCH",
           headers: {

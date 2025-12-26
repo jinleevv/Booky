@@ -89,7 +89,7 @@ export default function ViewDetails({
   async function handleRemoveMeetingTeam(meetingTeamId: string) {
     try {
       const response = await fetch(
-        `/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
+        `http://localhost:10000/api/teams/${teamId}/team-meetings/${meetingTeamId}`,
         {
           method: "PATCH",
           headers: {
@@ -121,7 +121,7 @@ export default function ViewDetails({
 
     try {
       const response = await fetch(
-        `/api/teams/${teamId}/${selectedMeeting._id}/merge-meetings`,
+        `http://localhost:10000/api/teams/${teamId}/${selectedMeeting._id}/merge-meetings`,
         {
           method: "PATCH",
           headers: {
@@ -137,7 +137,7 @@ export default function ViewDetails({
 
       // Merge meeting minutes
       const mergeMinutesResponse = await fetch(
-        `/api/document/${teamId}/${selectedMeeting._id}/merge-meeting-minutes`,
+        `http://localhost:10000/api/document/${teamId}/${selectedMeeting._id}/merge-meeting-minutes`,
         {
           method: "PATCH",
           headers: {

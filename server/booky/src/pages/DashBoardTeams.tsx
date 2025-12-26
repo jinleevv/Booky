@@ -26,7 +26,7 @@ export default function DashBoardTeams() {
       const fetchTeams = async () => {
         try {
           const response = await fetch(
-            `/api/teams/by-user?userEmail=${userEmail}`
+            `http://localhost:10000/api/teams/by-user?userEmail=${userEmail}`
           );
           const data = await response.json();
 
@@ -49,7 +49,7 @@ export default function DashBoardTeams() {
 
   async function handleRemoveTeam(teamId: string) {
     const response = await fetch(
-      `/api/team/remove-user-from-team?teamId=${teamId}&userEmail=${userEmail}`,
+      `http://localhost:10000/api/team/remove-user-from-team?teamId=${teamId}&userEmail=${userEmail}`,
       {
         method: "PATCH",
         headers: {
