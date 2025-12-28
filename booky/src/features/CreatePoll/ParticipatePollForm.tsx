@@ -19,9 +19,7 @@ type ParticipatePollFormProps = {
 };
 
 const formSchema = z.object({
-  email: z.string().email("Please enter a valid email").min(2, {
-    message: "Email is required",
-  }),
+  email: z.string(),
   password: z.string().optional(),
 });
 
@@ -40,17 +38,20 @@ export default function ParticipatePollForm({
 
   async function onSubmit(values: FormValues) {
     let passwordVerified: boolean = true;
-    const response = await fetch(`http://localhost:10000/api/polls/${urlPath}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userEmail: values.email,
-        password: values.password,
-        selectedSlots: [],
-      }),
-    });
+    const response = await fetch(
+      `http://localhost:10000/api/polls/${urlPath}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userEmail: values.email,
+          password: values.password,
+          selectedSlots: [],
+        }),
+      }
+    );
 
     const data = await response.json();
     if (!response.ok) {
@@ -72,7 +73,7 @@ export default function ParticipatePollForm({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="bg-white py-6 px-10 lg:px-20 space-y-4 border rounded-2xl"
+          className="bg-white py-6 px-10 lg:px-20 space-y-4 border rounded-lg"
         >
           <FormField
             control={form.control}
@@ -80,14 +81,9 @@ export default function ParticipatePollForm({
             render={({ field }) => (
               <FormItem className="w-full">
                 <div className="flex w-full gap-2">
-                  <FormLabel className="w-32 m-auto">Email:</FormLabel>
+                  <FormLabel className="w-32 m-auto">Name:</FormLabel>
                   <FormControl>
-                    <Input
-                      type="email"
-                      className="w-full"
-                      placeholder="booky@mail.mcgill.ca"
-                      {...field}
-                    />
+                    <Input className="w-full" placeholder="Booky" {...field} />
                   </FormControl>
                 </div>
                 <FormMessage />

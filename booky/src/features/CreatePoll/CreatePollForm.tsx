@@ -125,7 +125,7 @@ export default function CreatePollForm() {
     <div className="w-full max-w-lg p-6">
       {/* Left Side - Event Creation Form */}
       <Form {...form}>
-        <Card>
+        <Card className="rounded-lg">
           <CardContent className="p-6">
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <h2 className="text-2xl font-bold mb-6">Create New Poll</h2>

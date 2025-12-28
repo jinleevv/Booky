@@ -382,7 +382,7 @@ export default function UserAvailability({
             </div>
           </div>
         ) : (
-          <Card className="w-full h-full shadow-none">
+          <Card className="w-full h-full shadow-none rounded-lg">
             <CardContent className="p-6">
               <Card
                 className="border-none shadow-none"
@@ -422,7 +422,7 @@ export default function UserAvailability({
             </CardContent>
           </Card>
         )}
-        <Card className="w-full h-full shadow-none">
+        <Card className="w-full h-full shadow-none rounded-lg">
           <CardContent className="p-6">
             <Card className="border-none shadow-none">
               <div className="flex w-full justify-between">
@@ -458,21 +458,6 @@ export default function UserAvailability({
           </CardContent>
         </Card>
       </div>
-      {/*Available Time list*/}
-      {/* <Card className="mt-6 shadow-none">
-        <CardContent className="p-6">
-          <div className="flex justify-between text-center px-4">
-            <Label className="text-lg font-semibold">Available Times</Label>
-            <Button disabled={!loggedInUser} size="sm">
-              Manually Create Meeting
-            </Button>
-          </div>
-          <DataTable
-            columns={columns}
-            data={transferData.map((item) => ({ ...item, loggedInUser }))}
-          />
-        </CardContent>
-      </Card> */}
     </div>
   );
 }
